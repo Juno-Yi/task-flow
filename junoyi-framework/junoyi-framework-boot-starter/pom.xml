@@ -95,10 +95,10 @@
         </dependency>
 
         <!--    企业微信支持    -->
-<!--        <dependency>-->
-<!--            <groupId>com.junoyi</groupId>-->
-<!--            <artifactId>junoyi-framework-wework</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-wework</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
