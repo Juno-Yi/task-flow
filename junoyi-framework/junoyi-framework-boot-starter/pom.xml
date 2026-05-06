@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.junoyi</groupId>
+        <artifactId>junoyi-framework</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>junoyi-framework-boot-starter</artifactId>
+    <description>
+        框架启动核心封装模块
+    </description>
+
+    <dependencies>
+        <!-- Spring Boot Web Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- 核心模块 (包含日志模块) -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-core</artifactId>
+        </dependency>
+
+        <!-- 数据源模块 -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-datasource</artifactId>
+        </dependency>
+
+        <!--   事件模块     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-event</artifactId>
+        </dependency>
+
+        <!--   Excel 处理模块     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-excel</artifactId>
+        </dependency>
+
+        <!-- JSON 工具模块 -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-json</artifactId>
+        </dependency>
+
+        <!--      权限模块          -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-permission</artifactId>
+        </dependency>
+
+        <!-- Redis 模块 -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-redis</artifactId>
+        </dependency>
+
+        <!--   认证安全模块     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-security</artifactId>
+        </dependency>
+
+        <!--   人机验证（验证码）模块     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-captcha</artifactId>
+        </dependency>
+
+        <!--   web模块     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-web</artifactId>
+        </dependency>
+
+        <!--   API 文档模块     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-api-doc</artifactId>
+        </dependency>
+
+        <!--   文件管理     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-file</artifactId>
+        </dependency>
+
+        <!--    企业微信支持    -->
+<!--        <dependency>-->
+<!--            <groupId>com.junoyi</groupId>-->
+<!--            <artifactId>junoyi-framework-wework</artifactId>-->
+<!--        </dependency>-->
+    </dependencies>
+
+</project>

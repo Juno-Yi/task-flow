@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+    <!-- 引入Spring Boot属性 -->
+    <springProperty scope="context" name="COLOR_ENABLED" source="junoyi.log.console.color-enabled" defaultValue="true"/>
+    <springProperty scope="context" name="SHOW_THREAD_NAME" source="junoyi.log.console.show-thread-name" defaultValue="true"/>
+    <springProperty scope="context" name="SHOW_MDC" source="junoyi.log.console.show-mdc" defaultValue="true"/>
+    <springProperty scope="context" name="SHOW_CLASS_NAME" source="junoyi.log.console.show-class-name" defaultValue="true"/>
+    <springProperty scope="context" name="MAX_CLASS_NAME_LENGTH" source="junoyi.log.console.max-class-name-length" defaultValue="25"/>
+    
+    <!-- 引入日志级别配置 -->
+    <springProperty scope="context" name="ROOT_LEVEL" source="junoyi.log.level.root" defaultValue="WARN"/>
+    <springProperty scope="context" name="JUNOYI_LEVEL" source="junoyi.log.level.junoyi" defaultValue="INFO"/>
+    <springProperty scope="context" name="SPRING_LEVEL" source="junoyi.log.level.spring" defaultValue="WARN"/>
+    <springProperty scope="context" name="MYBATIS_LEVEL" source="junoyi.log.level.mybatis" defaultValue="WARN"/>
+    <springProperty scope="context" name="SQL_LEVEL" source="junoyi.log.level.sql" defaultValue="DEBUG"/>
+    <springProperty scope="context" name="CUSTOM_LEVEL" source="junoyi.log.level.custom" defaultValue=""/>
+    
+    <!-- 定义控制台输出 - 使用JunoYi自定义编码器 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="com.junoyi.framework.log.JunoYiLogbackEncoder">
+            <showThreadName>${SHOW_THREAD_NAME}</showThreadName>
+            <showMDC>${SHOW_MDC}</showMDC>
+            <showClassName>${SHOW_CLASS_NAME}</showClassName>
+            <maxClassNameLength>${MAX_CLASS_NAME_LENGTH}</maxClassNameLength>
+            <colorEnabled>${COLOR_ENABLED}</colorEnabled>
+        </encoder>
+    </appender>
+    
+    <!-- 根日志配置 -->
+    <root level="${ROOT_LEVEL}">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+    
+    <!-- JunoYi框架日志 -->
+    <logger name="JUNOYI" level="${JUNOYI_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+    <logger name="com.junoyi" level="${JUNOYI_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+    <!-- Spring日志 -->
+    <logger name="org.springframework" level="${SPRING_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+    <!-- MyBatis日志 -->
+    <logger name="com.baomidou" level="${MYBATIS_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+    <!-- SQL日志 -->
+    <logger name="com.junoyi.**.mapper" level="${SQL_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+    <logger name="com.junoyi.**.dao" level="${SQL_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+</included>

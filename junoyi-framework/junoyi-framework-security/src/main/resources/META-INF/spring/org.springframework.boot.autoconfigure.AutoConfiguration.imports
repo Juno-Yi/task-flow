@@ -1,0 +1,2 @@
+com.junoyi.framework.security.config.SecurityConfiguration
+com.junoyi.framework.security.config.SecurityWebMvcConfiguration

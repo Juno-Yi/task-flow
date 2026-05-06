@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.junoyi</groupId>
+        <artifactId>JunoYI</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>junoyi-server</artifactId>
+
+    <!--  依赖  -->
+    <dependencies>
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-boot-starter</artifactId>
+        </dependency>
+        <!-- 系统模块 -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-module-system</artifactId>
+        </dependency>
+
+
+        <!-- ==================== 开发工具依赖 ==================== -->
+        <!-- 
+            Spring Boot DevTools - 开发热部署工具
+            功能：
+            1. 自动重启：代码修改后自动重启应用
+            2. LiveReload：浏览器自动刷新
+            3. 配置属性默认值：开发环境优化配置
+            
+            重要提示：生产环境部署时必须注释掉此依赖！
+            原因：
+            1. 安全风险：DevTools 会暴露应用内部信息
+            2. 性能影响：会占用额外的内存和CPU资源
+            3. 功能冲突：热部署功能在生产环境无意义且可能导致问题
+            
+            生产环境部署前，请将下面的依赖整体注释掉：
+        -->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-devtools</artifactId>-->
+<!--            <scope>runtime</scope>-->
+<!--            <optional>true</optional>-->
+<!--        </dependency>-->
+        <!-- ==================== 开发工具依赖结束 ==================== -->
+
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,2 @@
+com.junoyi.framework.captcha.config.CaptchaConfiguration
+com.junoyi.framework.captcha.config.NoCaptchaConfiguration

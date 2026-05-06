@@ -1,0 +1,40 @@
+{
+  "groups": [
+    {
+      "name": "junoyi.datasource",
+      "type": "com.junoyi.framework.datasource.properties.DataSourceProperties",
+      "sourceType": "com.junoyi.framework.datasource.properties.DataSourceProperties",
+      "description": "JunoYi 数据源配置属性"
+    }
+  ],
+  "properties": [
+    {
+      "name": "junoyi.datasource.sql-beautify-enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.junoyi.framework.datasource.properties.DataSourceProperties",
+      "description": "是否启用 SQL 美化输出，格式化 SQL 语句便于调试",
+      "defaultValue": true
+    },
+    {
+      "name": "junoyi.datasource.slow-sql-enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.junoyi.framework.datasource.properties.DataSourceProperties",
+      "description": "是否启用慢 SQL 监控，记录执行时间超过阈值的 SQL",
+      "defaultValue": true
+    },
+    {
+      "name": "junoyi.datasource.slow-sql-threshold",
+      "type": "java.lang.Long",
+      "sourceType": "com.junoyi.framework.datasource.properties.DataSourceProperties",
+      "description": "慢 SQL 阈值（毫秒），超过此时间的 SQL 会被记录",
+      "defaultValue": 3000
+    },
+    {
+      "name": "junoyi.datasource.sql-log-enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.junoyi.framework.datasource.properties.DataSourceProperties",
+      "description": "是否启用 SQL 日志输出",
+      "defaultValue": true
+    }
+  ]
+}

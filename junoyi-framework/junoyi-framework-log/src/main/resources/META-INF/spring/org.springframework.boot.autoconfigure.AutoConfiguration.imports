@@ -1,0 +1,3 @@
+com.junoyi.framework.log.config.JunoYiLoggingAutoConfig
+com.junoyi.framework.log.config.JunoYiLogbackConfig
+com.junoyi.framework.log.config.JunoYiAsyncLogConfig

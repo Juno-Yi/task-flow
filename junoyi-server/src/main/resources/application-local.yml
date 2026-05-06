@@ -1,0 +1,72 @@
+# ==================== Spring 配置 ====================
+spring:
+  # ==================== 数据源配置 ====================
+  datasource:
+    # 动态数据源配置
+    dynamic:
+      primary: master
+      strict: true
+      # 数据源列表
+      datasource:
+        # 主库配置
+        master:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/junoyi?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+          username: root
+          password: 123456
+
+      # Druid 连接池配置
+      druid:
+        # 基础连接池配置
+        initial-size: 10
+        min-idle: 10
+        max-active: 50           
+        max-wait: 5000           
+        connect-timeout: 10000   
+        socket-timeout: 30000    
+        # 连接检测配置
+        time-between-eviction-runs-millis: 30000
+        min-evictable-idle-time-millis: 300000
+        max-evictable-idle-time-millis: 600000  
+        validation-query: SELECT 1
+        test-while-idle: true
+        test-on-borrow: true    
+        test-on-return: false
+        # 监控统计（简化配置）
+        filters: wall
+        remove-abandoned: false
+        remove-abandoned-timeout: 180
+        log-abandoned: true
+
+  # ==================== Redis 配置 ====================
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 1
+      timeout: 10s
+      # password: 123456
+
+# ==================== Redisson 配置 ====================
+redisson:
+  keyPrefix: junoyi
+  threads: 4
+  nettyThreads: 8
+  singleServerConfig:
+    clientName: junoyi-local
+    connectionMinimumIdleSize: 16
+    connectionPoolSize: 64
+    idleConnectionTimeout: 10000
+    timeout: 2000
+    subscriptionConnectionPoolSize: 50
+
+# ==================== MyBatis Plus 配置 ====================
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  
+  global-config:
+    db-config:
+      id-type: auto
+

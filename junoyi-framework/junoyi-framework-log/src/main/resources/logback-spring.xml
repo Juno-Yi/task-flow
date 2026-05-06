@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty scope="context" name="COLOR_ENABLED" source="junoyi.log.console.color-enabled" defaultValue="true"/>
+    <springProperty scope="context" name="SHOW_THREAD_NAME" source="junoyi.log.console.show-thread-name" defaultValue="true"/>
+    <springProperty scope="context" name="SHOW_MDC" source="junoyi.log.console.show-mdc" defaultValue="true"/>
+    <springProperty scope="context" name="SHOW_CLASS_NAME" source="junoyi.log.console.show-class-name" defaultValue="true"/>
+    <springProperty scope="context" name="MAX_CLASS_NAME_LENGTH" source="junoyi.log.console.max-class-name-length" defaultValue="25"/>
+    
+    <springProperty scope="context" name="ROOT_LEVEL" source="junoyi.log.level.root" defaultValue="WARN"/>
+    <springProperty scope="context" name="JUNOYI_LEVEL" source="junoyi.log.level.junoyi" defaultValue="INFO"/>
+    <springProperty scope="context" name="SPRING_LEVEL" source="junoyi.log.level.spring" defaultValue="WARN"/>
+    <springProperty scope="context" name="MYBATIS_LEVEL" source="junoyi.log.level.mybatis" defaultValue="WARN"/>
+    <springProperty scope="context" name="SQL_LEVEL" source="junoyi.log.level.sql" defaultValue="DEBUG"/>
+    <springProperty scope="context" name="DATE_TIME_PATTERN" source="junoyi.log.format.date-time-pattern" defaultValue="yyyy-MM-dd HH:mm:ss"/>
+    <springProperty scope="context" name="MAX_STACK_TRACE_LINES" source="junoyi.log.format.max-stack-trace-lines" defaultValue="8"/>
+    <springProperty scope="context" name="MAX_MDC_PROPERTIES" source="junoyi.log.format.max-mdc-properties" defaultValue="3"/>
+    <springProperty scope="context" name="SIMPLIFY_PACKAGE_NAMES" source="junoyi.log.format.simplify-package-names" defaultValue="true"/>
+    <springProperty scope="context" name="PACKAGE_SIMPLIFICATIONS" source="junoyi.log.format.package-simplifications" defaultValue=""/>
+    <springProperty scope="context" name="THREAD_NAME_MAX_LENGTH" source="junoyi.log.format.max-thread-name-length" defaultValue="15"/>
+    
+    <springProperty scope="context" name="FILE_ENABLED" source="junoyi.log.file.enabled" defaultValue="false"/>
+    <springProperty scope="context" name="FILE_PATH" source="junoyi.log.file.path" defaultValue="./logs"/>
+    <springProperty scope="context" name="FILE_MAX_SIZE" source="junoyi.log.file.max-size" defaultValue="100MB"/>
+    <springProperty scope="context" name="FILE_MAX_HISTORY" source="junoyi.log.file.max-history" defaultValue="30"/>
+    <springProperty scope="context" name="FILE_TOTAL_SIZE_CAP" source="junoyi.log.file.total-size-cap" defaultValue="1GB"/>
+    <springProperty scope="context" name="FILE_ENCODING" source="junoyi.log.file.encoding" defaultValue="UTF-8"/>
+    
+    <!-- 定义控制台输出 - 使用JunoYi自定义编码器 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="com.junoyi.framework.log.encoder.JunoYiLogbackEncoder">
+            <showThreadName>${SHOW_THREAD_NAME}</showThreadName>
+            <showMDC>${SHOW_MDC}</showMDC>
+            <showClassName>${SHOW_CLASS_NAME}</showClassName>
+            <maxClassNameLength>${MAX_CLASS_NAME_LENGTH}</maxClassNameLength>
+            <colorEnabled>${COLOR_ENABLED}</colorEnabled>
+            <dateTimePattern>${DATE_TIME_PATTERN}</dateTimePattern>
+            <maxStackTraceLines>${MAX_STACK_TRACE_LINES}</maxStackTraceLines>
+            <maxMdcProperties>${MAX_MDC_PROPERTIES}</maxMdcProperties>
+            <simplifyPackageNames>${SIMPLIFY_PACKAGE_NAMES}</simplifyPackageNames>
+            <packageSimplifications>${PACKAGE_SIMPLIFICATIONS}</packageSimplifications>
+            <maxThreadNameLength>${THREAD_NAME_MAX_LENGTH}</maxThreadNameLength>
+        </encoder>
+    </appender>
+    
+    <!-- 定义文件输出 - 使用JunoYi自定义编码器（无颜色版本） -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前日志文件：使用固定名称 -->
+        <file>${FILE_PATH}/junoyi.log</file>
+        <encoder class="com.junoyi.framework.log.encoder.JunoYiLogbackEncoder">
+            <showThreadName>${SHOW_THREAD_NAME}</showThreadName>
+            <showMDC>${SHOW_MDC}</showMDC>
+            <showClassName>${SHOW_CLASS_NAME}</showClassName>
+            <maxClassNameLength>${MAX_CLASS_NAME_LENGTH}</maxClassNameLength>
+            <colorEnabled>false</colorEnabled> <!-- 文件输出不使用颜色 -->
+            <dateTimePattern>${DATE_TIME_PATTERN}</dateTimePattern>
+            <maxStackTraceLines>${MAX_STACK_TRACE_LINES}</maxStackTraceLines>
+            <maxMdcProperties>${MAX_MDC_PROPERTIES}</maxMdcProperties>
+            <simplifyPackageNames>${SIMPLIFY_PACKAGE_NAMES}</simplifyPackageNames>
+            <packageSimplifications>${PACKAGE_SIMPLIFICATIONS}</packageSimplifications>
+            <maxThreadNameLength>${THREAD_NAME_MAX_LENGTH}</maxThreadNameLength>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 历史文件命名：每分钟滚动 -->
+            <fileNamePattern>${FILE_PATH}/%d{yyyy-MM-dd_HH-mm}.log</fileNamePattern>
+            <maxHistory>${FILE_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${FILE_TOTAL_SIZE_CAP}</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+    </appender>
+    
+    <!-- 根日志配置 -->
+    <root level="${ROOT_LEVEL}">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+    
+    <!-- JunoYi框架日志 -->
+    <logger name="JUNOYI" level="${JUNOYI_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+    
+    <logger name="com.junoyi" level="${JUNOYI_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+    
+    <!-- Spring日志 -->
+    <logger name="org.springframework" level="${SPRING_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+    
+    <!-- MyBatis日志 -->
+    <logger name="com.baomidou" level="${MYBATIS_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+    
+    <!-- SQL日志 -->
+    <logger name="com.junoyi.**.mapper" level="${SQL_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+    
+    <logger name="com.junoyi.**.dao" level="${SQL_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+</configuration>
