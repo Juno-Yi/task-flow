@@ -9,11 +9,7 @@
       <h1 class="title">{{ systemName }}</h1>
     </div>
 
-    <div class="right-img" v-if="!backgroundImage">
-      <ThemeSvg :src="loginIcon" size="100%" />
-    </div>
-
-    <div class="text-wrap" v-if="!backgroundImage">
+    <div class="text-wrap">
       <h1> {{ $t('login.leftView.title') }} </h1>
       <p> {{ $t('login.leftView.subTitle') }} </p>
     </div>
@@ -49,7 +45,6 @@
 
 <script setup lang="ts">
   import AppConfig from '@/config'
-  import loginIcon from '@imgs/svg/login_icon.svg'
   import { useSettingStore } from '@/store/modules/setting'
 
   defineOptions({ name: 'LoginRightView' })
@@ -116,7 +111,7 @@
     .right-img {
       position: absolute;
       inset: 0 0 10.5%;
-      z-index: 10;
+      z-index: 20;
       width: 40%;
       margin: auto;
       animation: slideInRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
@@ -127,6 +122,7 @@
       bottom: 80px;
       width: 100%;
       text-align: center;
+      z-index: 20;
       animation: slideInRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 
       h1 {
