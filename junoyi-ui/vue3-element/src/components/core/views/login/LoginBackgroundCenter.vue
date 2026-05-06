@@ -1,8 +1,11 @@
 <!-- 登录背景 - 居中布局（全屏装饰背景，隐藏文字和图片） -->
 <template>
   <div class="login-center-bg">
+    <!-- 背景图片层 -->
+    <div class="bg-image-layer" v-if="backgroundImage"></div>
+
     <!-- 几何装饰元素 -->
-    <div class="geometric-decorations">
+    <div class="geometric-decorations" v-if="!backgroundImage">
       <!-- 基础几何形状 -->
       <div class="geo-element circle-outline animate-fade-in-up" style="animation-delay: 0s"></div>
       <div class="geo-element square-rotated animate-fade-in-left" style="animation-delay: 0s"></div>
@@ -37,6 +40,9 @@
 
 <script setup lang="ts">
   defineOptions({ name: 'LoginBackgroundCenter' })
+
+  // 使用背景图片
+  const backgroundImage = true
 </script>
 
 <style lang="scss" scoped>
@@ -59,7 +65,23 @@
     background-color: $bg-mix-light-9;
   }
 
+  // 背景图片层
+  .bg-image-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('@/assets/images/login/bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 1;
+  }
+
   .geometric-decorations {
+    position: relative;
+    z-index: 2;
+
     .geo-element {
       position: absolute;
       opacity: 0;

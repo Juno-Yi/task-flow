@@ -1,22 +1,25 @@
 <!-- 登录、注册、忘记密码右侧背景（右左布局用，镜像版本） -->
 <template>
   <div class="login-right-view">
+    <!-- 背景图片层 -->
+    <div class="bg-image-layer" v-if="backgroundImage"></div>
+
     <div class="logo">
       <ArtLogo class="icon" size="46" />
       <h1 class="title">{{ systemName }}</h1>
     </div>
 
-    <div class="right-img">
+    <div class="right-img" v-if="!backgroundImage">
       <ThemeSvg :src="loginIcon" size="100%" />
     </div>
 
-    <div class="text-wrap">
+    <div class="text-wrap" v-if="!backgroundImage">
       <h1> {{ $t('login.leftView.title') }} </h1>
       <p> {{ $t('login.leftView.subTitle') }} </p>
     </div>
 
     <!-- 几何装饰元素（镜像） -->
-    <div class="geometric-decorations">
+    <div class="geometric-decorations" v-if="!backgroundImage">
       <!-- 基础几何形状 -->
       <div class="geo-element circle-outline animate-fade-in-up" style="animation-delay: 0s"></div>
       <div class="geo-element square-rotated animate-fade-in-right" style="animation-delay: 0s"></div>
@@ -53,9 +56,11 @@
 
   const settingStore = useSettingStore()
   const { systemInfo } = storeToRefs(settingStore)
-  
-  // 优先使用接口返回的系统名称，如果没有则使用配置文件的
+
   const systemName = computed(() => systemInfo.value?.name || AppConfig.systemInfo.name)
+
+  // 使用背景图片
+  const backgroundImage = true
 </script>
 
 <style lang="scss" scoped>
@@ -79,6 +84,19 @@
     padding: 15px;
     overflow: hidden;
     background-color: $bg-mix-light-9;
+
+    // 背景图片层
+    .bg-image-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('@/assets/images/login/bg.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: 1;
+    }
 
     .logo {
       position: absolute;
