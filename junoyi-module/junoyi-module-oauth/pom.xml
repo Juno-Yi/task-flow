@@ -10,9 +10,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>junoyi-module-task</artifactId>
-
-    <description> 任务模块 </description>
+    <artifactId>junoyi-module-oauth</artifactId>
+    <description> 第三方登录认证模块 </description>
 
     <dependencies>
         <dependency>
@@ -20,4 +19,5 @@
             <artifactId>junoyi-module-system</artifactId>
         </dependency>
     </dependencies>
+
 </project>

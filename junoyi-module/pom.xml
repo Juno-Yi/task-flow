@@ -15,6 +15,7 @@
     <modules>
         <module>junoyi-module-system</module>
         <module>junoyi-module-task</module>
+        <module>junoyi-module-oauth</module>
     </modules>
 
     <dependencies>
