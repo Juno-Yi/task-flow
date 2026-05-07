@@ -1,97 +1,13 @@
 <!-- 注册页面 -->
 <template>
-  <!-- 居中布局 -->
-  <div v-if="authLayout === 'center'" class="login-center-layout">
-    <LoginBackgroundCenter />
-    <AuthTopBar />
-    
-    <div class="center-form-wrapper">
-      <div class="center-form-card">
-        <div class="form">
-          <h3 class="title">{{ $t('register.title') }}</h3>
-          <p class="sub-title">{{ $t('register.subTitle') }}</p>
-          <ElForm
-            class="mt-5"
-            ref="formRef"
-            :model="formData"
-            :rules="rules"
-            label-position="top"
-            :key="formKey"
-          >
-            <ElFormItem prop="username">
-              <ElInput
-                class="custom-height"
-                v-model.trim="formData.username"
-                :placeholder="$t('register.placeholder.username')"
-              />
-            </ElFormItem>
-
-            <ElFormItem prop="password">
-              <ElInput
-                class="custom-height"
-                v-model.trim="formData.password"
-                :placeholder="$t('register.placeholder.password')"
-                type="password"
-                autocomplete="off"
-                show-password
-              />
-            </ElFormItem>
-
-            <ElFormItem prop="confirmPassword">
-              <ElInput
-                class="custom-height"
-                v-model.trim="formData.confirmPassword"
-                :placeholder="$t('register.placeholder.confirmPassword')"
-                type="password"
-                autocomplete="off"
-                @keyup.enter="register"
-                show-password
-              />
-            </ElFormItem>
-
-            <ElFormItem prop="agreement">
-              <ElCheckbox v-model="formData.agreement">
-                {{ $t('register.agreeText') }}
-                <RouterLink
-                  style="color: var(--theme-color); text-decoration: none"
-                  to="/privacy-policy"
-                  >{{ $t('register.privacyPolicy') }}</RouterLink
-                >
-              </ElCheckbox>
-            </ElFormItem>
-
-            <div style="margin-top: 15px">
-              <ElButton
-                class="w-full custom-height"
-                type="primary"
-                @click="register"
-                :loading="loading"
-                v-ripple
-              >
-                {{ $t('register.submitBtnText') }}
-              </ElButton>
-            </div>
-
-            <div class="mt-5 text-sm text-g-600">
-              <span>{{ $t('register.hasAccount') }}</span>
-              <RouterLink class="text-theme" :to="{ name: 'Login' }">{{
-                $t('register.toLogin')
-              }}</RouterLink>
-            </div>
-          </ElForm>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 左右/右左布局 -->
-  <div v-else class="flex w-full h-screen" :class="{ 'flex-row-reverse': authLayout === 'right-left' }">
+  <!-- 左右布局 -->
+  <div class="flex w-full h-screen">
     <LoginBackground />
 
     <div class="relative flex-1">
       <AuthTopBar />
 
-      <div class="auth-right-wrap" :class="{ 'animate-left': authLayout === 'right-left' }">
+      <div class="auth-right-wrap">
         <div class="form">
           <h3 class="title">{{ $t('register.title') }}</h3>
           <p class="sub-title">{{ $t('register.subTitle') }}</p>
@@ -193,7 +109,6 @@
   const router = useRouter()
   const formRef = ref<FormInstance>()
   const settingStore = useSettingStore()
-  const { authLayout } = storeToRefs(settingStore)
 
   const loading = ref(false)
   const formKey = ref(0)
