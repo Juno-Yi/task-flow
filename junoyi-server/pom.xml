@@ -24,6 +24,12 @@
             <artifactId>junoyi-module-system</artifactId>
         </dependency>
 
+        <!--   第三方登录认证模块     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-module-oauth</artifactId>
+        </dependency>
+
         <!--   任务模块     -->
         <dependency>
             <groupId>com.junoyi</groupId>
