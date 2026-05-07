@@ -566,4 +566,10 @@
       transform: translateY(0);
     }
   }
+
+  .third-party-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
 </style>
