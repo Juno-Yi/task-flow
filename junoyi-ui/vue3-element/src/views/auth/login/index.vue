@@ -106,27 +106,52 @@
               <div class="flex justify-center gap-4">
                 <ElTooltip :content="$t('login.thirdParty.github')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('github')">
-                    <img :src="thirdPartyIcons.github" alt="GitHub" class="third-party-icon" />
+                    <img
+                      :src="thirdPartyIcons.github"
+                      alt="GitHub"
+                      class="third-party-icon"
+                      @error="handleImageError"
+                    />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.gitee')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('gitee')">
-                    <img :src="thirdPartyIcons.gitee" alt="Gitee" class="third-party-icon" />
+                    <img
+                      :src="thirdPartyIcons.gitee"
+                      alt="Gitee"
+                      class="third-party-icon"
+                      @error="handleImageError"
+                    />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.wework')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('wework')">
-                    <img :src="thirdPartyIcons.wework" alt="企业微信" class="third-party-icon" />
+                    <img
+                      :src="thirdPartyIcons.wework"
+                      alt="企业微信"
+                      class="third-party-icon"
+                      @error="handleImageError"
+                    />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.feishu')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('feishu')">
-                    <img :src="thirdPartyIcons.feishu" alt="飞书" class="third-party-icon" />
+                    <img
+                      :src="thirdPartyIcons.feishu"
+                      alt="飞书"
+                      class="third-party-icon"
+                      @error="handleImageError"
+                    />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.dingtalk')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('dingtalk')">
-                    <img :src="thirdPartyIcons.dingtalk" alt="钉钉" class="third-party-icon" />
+                    <img
+                      :src="thirdPartyIcons.dingtalk"
+                      alt="钉钉"
+                      class="third-party-icon"
+                      @error="handleImageError"
+                    />
                   </div>
                 </ElTooltip>
               </div>
@@ -250,27 +275,52 @@
               <div class="flex justify-center gap-4">
                 <ElTooltip :content="$t('login.thirdParty.github')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('github')">
-                    <img :src="thirdPartyIcons.github" alt="GitHub" class="third-party-icon" />
+                    <img
+                      :src="thirdPartyIcons.github"
+                      alt="GitHub"
+                      class="third-party-icon"
+                      @error="handleImageError"
+                    />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.gitee')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('gitee')">
-                    <img :src="thirdPartyIcons.gitee" alt="Gitee" class="third-party-icon" />
+                    <img
+                      :src="thirdPartyIcons.gitee"
+                      alt="Gitee"
+                      class="third-party-icon"
+                      @error="handleImageError"
+                    />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.wework')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('wework')">
-                    <img :src="thirdPartyIcons.wework" alt="企业微信" class="third-party-icon" />
+                    <img
+                      :src="thirdPartyIcons.wework"
+                      alt="企业微信"
+                      class="third-party-icon"
+                      @error="handleImageError"
+                    />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.feishu')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('feishu')">
-                    <img :src="thirdPartyIcons.feishu" alt="飞书" class="third-party-icon" />
+                    <img
+                      :src="thirdPartyIcons.feishu"
+                      alt="飞书"
+                      class="third-party-icon"
+                      @error="handleImageError"
+                    />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.dingtalk')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('dingtalk')">
-                    <img :src="thirdPartyIcons.dingtalk" alt="钉钉" class="third-party-icon" />
+                    <img
+                      :src="thirdPartyIcons.dingtalk"
+                      alt="钉钉"
+                      class="third-party-icon"
+                      @error="handleImageError"
+                    />
                   </div>
                 </ElTooltip>
               </div>
@@ -508,6 +558,14 @@
     // TODO: 实现第三方登录逻辑
     // 根据 provider 跳转到对应的第三方登录页面
     console.log('第三方登录:', provider)
+  }
+
+  // 图片加载错误处理
+  const handleImageError = (e: Event) => {
+    const img = e.target as HTMLImageElement
+    // 图片加载失败时隐藏图片，避免显示破损图标
+    img.style.display = 'none'
+    console.warn('第三方登录图标加载失败:', img.src)
   }
 </script>
 
