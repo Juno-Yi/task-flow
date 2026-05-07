@@ -106,27 +106,27 @@
               <div class="flex justify-center gap-4">
                 <ElTooltip :content="$t('login.thirdParty.github')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('github')">
-                    <ArtSvgIcon icon="ri:github-fill" class="text-xl" />
+                    <img :src="thirdPartyIcons.github" alt="GitHub" class="third-party-icon" />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.gitee')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('gitee')">
-                    <ArtSvgIcon icon="simple-icons:gitee" class="text-xl" />
+                    <img :src="thirdPartyIcons.gitee" alt="Gitee" class="third-party-icon" />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.wework')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('wework')">
-                    <ArtSvgIcon icon="ri:wechat-work-fill" class="text-xl" />
+                    <img :src="thirdPartyIcons.wework" alt="企业微信" class="third-party-icon" />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.feishu')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('feishu')">
-                    <ArtSvgIcon icon="simple-icons:lark" class="text-xl" />
+                    <img :src="thirdPartyIcons.feishu" alt="飞书" class="third-party-icon" />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.dingtalk')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('dingtalk')">
-                    <ArtSvgIcon icon="ri:dingding-fill" class="text-xl" />
+                    <img :src="thirdPartyIcons.dingtalk" alt="钉钉" class="third-party-icon" />
                   </div>
                 </ElTooltip>
               </div>
@@ -250,27 +250,27 @@
               <div class="flex justify-center gap-4">
                 <ElTooltip :content="$t('login.thirdParty.github')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('github')">
-                    <ArtSvgIcon icon="ri:github-fill" class="text-xl" />
+                    <img :src="thirdPartyIcons.github" alt="GitHub" class="third-party-icon" />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.gitee')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('gitee')">
-                    <ArtSvgIcon icon="simple-icons:gitee" class="text-xl" />
+                    <img :src="thirdPartyIcons.gitee" alt="Gitee" class="third-party-icon" />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.wework')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('wework')">
-                    <ArtSvgIcon icon="ri:wechat-work-fill" class="text-xl" />
+                    <img :src="thirdPartyIcons.wework" alt="企业微信" class="third-party-icon" />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.feishu')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('feishu')">
-                    <ArtSvgIcon icon="simple-icons:lark" class="text-xl" />
+                    <img :src="thirdPartyIcons.feishu" alt="飞书" class="third-party-icon" />
                   </div>
                 </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.dingtalk')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('dingtalk')">
-                    <ArtSvgIcon icon="ri:dingding-fill" class="text-xl" />
+                    <img :src="thirdPartyIcons.dingtalk" alt="钉钉" class="third-party-icon" />
                   </div>
                 </ElTooltip>
               </div>
@@ -303,6 +303,15 @@
   import { fetchGetSystemInfo, type SystemInfo } from '@/api/system/info'
   import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
 
+  // 引入第三方登录图标（占位图片，后续替换为实际图片）
+  // 将你的图片放到 src/assets/images/login/third-party/ 目录下
+  // 图片命名：github.png, gitee.png, wework.png, feishu.png, dingtalk.png
+  import githubIcon from '@/assets/images/login/third-party/github.png'
+  import giteeIcon from '@/assets/images/login/third-party/gitee.png'
+  import weworkIcon from '@/assets/images/login/third-party/wework.png'
+  import feishuIcon from '@/assets/images/login/third-party/feishu.png'
+  import dingtalkIcon from '@/assets/images/login/third-party/dingtalk.png'
+
   defineOptions({ name: 'Login' })
 
   const { t, locale } = useI18n()
@@ -318,6 +327,15 @@
   const { authLayout, systemInfo: storeSystemInfo } = storeToRefs(settingStore)
 
   const systemName = computed(() => storeSystemInfo.value?.name || AppConfig.systemInfo.name)
+
+  // 第三方登录图标配置
+  const thirdPartyIcons = {
+    github: githubIcon,
+    gitee: giteeIcon,
+    wework: weworkIcon,
+    feishu: feishuIcon,
+    dingtalk: dingtalkIcon
+  }
   const formRef = ref<FormInstance>()
 
   const router = useRouter()
