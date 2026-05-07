@@ -29,7 +29,7 @@ public class GithubOauthController extends BaseController {
         // 生成随机 state 用于防止 CSRF 攻击
         String state = IdUtil.fastSimpleUUID();
         String authorizeUrl = githubOauthService.getAuthorizeUrl(state);
-        return R.ok(authorizeUrl);
+        return R.ok("获取授权链接成功", authorizeUrl);
     }
 
     /**
