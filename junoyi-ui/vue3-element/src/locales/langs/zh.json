@@ -145,6 +145,14 @@
     "btnText": "登录",
     "noAccount": "还没有账号？",
     "register": "注册",
+    "thirdParty": {
+      "title": "第三方登录",
+      "github": "GitHub 登录",
+      "gitee": "Gitee 登录",
+      "wework": "企业微信登录",
+      "feishu": "飞书登录",
+      "dingtalk": "钉钉登录"
+    },
     "success": {
       "title": "登录成功",
       "message": "欢迎回来"
