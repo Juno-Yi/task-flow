@@ -63,3 +63,26 @@ export function fetchGetUserInfo() {
     url: '/auth/info'
   })
 }
+
+/**
+ * 获取 GitHub 授权 URL
+ * @returns GitHub 授权 URL
+ */
+export function fetchGithubAuthorizeUrl() {
+  return request.get<string>({
+    url: '/auth/github/authorize'
+  })
+}
+
+/**
+ * GitHub OAuth 回调
+ * @param code 授权码
+ * @param state 状态码
+ * @returns 登录响应
+ */
+export function fetchGithubCallback(code: string, state: string) {
+  return request.get<Api.Auth.LoginResponse>({
+    url: '/auth/github/callback',
+    params: { code, state }
+  })
+}

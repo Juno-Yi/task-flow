@@ -177,7 +177,13 @@
   import { useSettingStore } from '@/store/modules/setting'
   import { useI18n } from 'vue-i18n'
   import { HttpError } from '@/utils/http/error'
-  import { fetchLogin, fetchGetCaptcha, fetchGetUserInfo, fetchGetCaptchaConfig } from '@/api/auth'
+  import {
+    fetchLogin,
+    fetchGetCaptcha,
+    fetchGetUserInfo,
+    fetchGetCaptchaConfig,
+    fetchGithubAuthorizeUrl
+  } from '@/api/auth'
   import { fetchGetSystemInfo, type SystemInfo } from '@/api/system/info'
   import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
 
@@ -373,16 +379,40 @@
   }
 
   // 第三方登录
-  const handleThirdPartyLogin = (provider: string) => {
-    ElNotification({
-      title: '提示',
-      message: `${provider} 登录功能开发中...`,
-      type: 'info',
-      duration: 2000
-    })
-    // TODO: 实现第三方登录逻辑
-    // 根据 provider 跳转到对应的第三方登录页面
-    console.log('第三方登录:', provider)
+  const handleThirdPartyLogin = async (provider: string) => {
+    if (provider === 'github') {
+      try {
+        // 获取 GitHub 授权 URL
+        const authorizeUrl = await fetchGithubAuthorizeUrl()
+
+        if (authorizeUrl) {
+          // 跳转到 GitHub 授权页面
+          window.location.href = authorizeUrl
+        } else {
+          ElNotification({
+            title: '错误',
+            message: '获取 GitHub 授权链接失败',
+            type: 'error',
+            duration: 2000
+          })
+        }
+      } catch (error) {
+        console.error('GitHub 登录失败:', error)
+        ElNotification({
+          title: '错误',
+          message: 'GitHub 登录失败，请稍后重试',
+          type: 'error',
+          duration: 2000
+        })
+      }
+    } else {
+      ElNotification({
+        title: '提示',
+        message: `${provider} 登录功能开发中...`,
+        type: 'info',
+        duration: 2000
+      })
+    }
   }
 
   // 图片加载错误处理
