@@ -95,6 +95,42 @@
                 $t('login.register')
               }}</RouterLink>
             </div>
+
+            <!-- 第三方登录 -->
+            <div class="mt-6">
+              <div class="flex items-center mb-4">
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="px-3 text-xs text-gray-400">{{ $t('login.thirdParty.title') }}</span>
+                <div class="flex-1 h-px bg-gray-200"></div>
+              </div>
+              <div class="flex justify-center gap-4">
+                <ElTooltip :content="$t('login.thirdParty.github')" placement="top">
+                  <div class="third-party-btn" @click="handleThirdPartyLogin('github')">
+                    <ArtSvgIcon icon="ri:github-fill" class="text-xl" />
+                  </div>
+                </ElTooltip>
+                <ElTooltip :content="$t('login.thirdParty.gitee')" placement="top">
+                  <div class="third-party-btn" @click="handleThirdPartyLogin('gitee')">
+                    <ArtSvgIcon icon="simple-icons:gitee" class="text-xl" />
+                  </div>
+                </ElTooltip>
+                <ElTooltip :content="$t('login.thirdParty.wework')" placement="top">
+                  <div class="third-party-btn" @click="handleThirdPartyLogin('wework')">
+                    <ArtSvgIcon icon="ri:wechat-work-fill" class="text-xl" />
+                  </div>
+                </ElTooltip>
+                <ElTooltip :content="$t('login.thirdParty.feishu')" placement="top">
+                  <div class="third-party-btn" @click="handleThirdPartyLogin('feishu')">
+                    <ArtSvgIcon icon="simple-icons:lark" class="text-xl" />
+                  </div>
+                </ElTooltip>
+                <ElTooltip :content="$t('login.thirdParty.dingtalk')" placement="top">
+                  <div class="third-party-btn" @click="handleThirdPartyLogin('dingtalk')">
+                    <ArtSvgIcon icon="ri:dingding-fill" class="text-xl" />
+                  </div>
+                </ElTooltip>
+              </div>
+            </div>
           </ElForm>
         </div>
       </div>
@@ -202,6 +238,42 @@
               <RouterLink class="text-theme" :to="{ name: 'Register' }">{{
                 $t('login.register')
               }}</RouterLink>
+            </div>
+
+            <!-- 第三方登录 -->
+            <div class="mt-6">
+              <div class="flex items-center mb-4">
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="px-3 text-xs text-gray-400">{{ $t('login.thirdParty.title') }}</span>
+                <div class="flex-1 h-px bg-gray-200"></div>
+              </div>
+              <div class="flex justify-center gap-4">
+                <ElTooltip :content="$t('login.thirdParty.github')" placement="top">
+                  <div class="third-party-btn" @click="handleThirdPartyLogin('github')">
+                    <ArtSvgIcon icon="ri:github-fill" class="text-xl" />
+                  </div>
+                </ElTooltip>
+                <ElTooltip :content="$t('login.thirdParty.gitee')" placement="top">
+                  <div class="third-party-btn" @click="handleThirdPartyLogin('gitee')">
+                    <ArtSvgIcon icon="simple-icons:gitee" class="text-xl" />
+                  </div>
+                </ElTooltip>
+                <ElTooltip :content="$t('login.thirdParty.wework')" placement="top">
+                  <div class="third-party-btn" @click="handleThirdPartyLogin('wework')">
+                    <ArtSvgIcon icon="ri:wechat-work-fill" class="text-xl" />
+                  </div>
+                </ElTooltip>
+                <ElTooltip :content="$t('login.thirdParty.feishu')" placement="top">
+                  <div class="third-party-btn" @click="handleThirdPartyLogin('feishu')">
+                    <ArtSvgIcon icon="simple-icons:lark" class="text-xl" />
+                  </div>
+                </ElTooltip>
+                <ElTooltip :content="$t('login.thirdParty.dingtalk')" placement="top">
+                  <div class="third-party-btn" @click="handleThirdPartyLogin('dingtalk')">
+                    <ArtSvgIcon icon="ri:dingding-fill" class="text-xl" />
+                  </div>
+                </ElTooltip>
+              </div>
             </div>
           </ElForm>
         </div>
@@ -406,6 +478,19 @@
       })
     }, 1000)
   }
+
+  // 第三方登录
+  const handleThirdPartyLogin = (provider: string) => {
+    ElNotification({
+      title: '提示',
+      message: `${provider} 登录功能开发中...`,
+      type: 'info',
+      duration: 2000
+    })
+    // TODO: 实现第三方登录逻辑
+    // 根据 provider 跳转到对应的第三方登录页面
+    console.log('第三方登录:', provider)
+  }
 </script>
 
 <style scoped>
@@ -437,6 +522,30 @@
 
     .registration {
       color: var(--el-text-color-placeholder);
+    }
+  }
+
+  .third-party-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--art-border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: var(--el-text-color-regular);
+
+    &:hover {
+      border-color: var(--el-color-primary);
+      color: var(--el-color-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
   }
 </style>
