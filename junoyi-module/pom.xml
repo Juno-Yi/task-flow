@@ -14,6 +14,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>junoyi-module-system</module>
+        <module>junoyi-module-task</module>
     </modules>
 
     <dependencies>

@@ -154,6 +154,14 @@
                 <artifactId>junoyi-module-system</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.junoyi</groupId>
+                <artifactId>junoyi-module-task</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <!--    Module API 解耦模块       -->
+
 
             <!-- ========== 第三方依赖版本管理 ========== -->
             <!-- 七牛云 (可选) -->
