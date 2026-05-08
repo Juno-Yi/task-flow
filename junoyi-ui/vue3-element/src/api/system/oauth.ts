@@ -40,7 +40,7 @@ export function fetchUpdateOauthConfig(data: Api.Oauth.OauthConfigForm) {
  * @param id 配置ID
  */
 export function fetchDeleteOauthConfig(id: number) {
-  return request.delete({
+  return request.del({
     url: `/oauth/config/${id}`
   })
 }
@@ -50,7 +50,7 @@ export function fetchDeleteOauthConfig(id: number) {
  * @param ids 配置ID数组
  */
 export function fetchDeleteOauthConfigBatch(ids: number[]) {
-  return request.delete({
+  return request.del({
     url: '/oauth/config/batch',
     data: ids
   })

@@ -56,7 +56,7 @@ public class OauthConfigController extends BaseController {
      */
     @PutMapping
     @PlatformScope(PlatformType.ADMIN_WEB)
-    @Permission(value = "oauth.ui.config.button.edit")
+    @Permission(value = "oauth.ui.config.button.update")
     public R<Void> updateOauthConfig(@Valid @RequestBody OauthConfigDTO configDTO) {
         oauthConfigService.updateOauthConfig(configDTO);
         return R.ok();
