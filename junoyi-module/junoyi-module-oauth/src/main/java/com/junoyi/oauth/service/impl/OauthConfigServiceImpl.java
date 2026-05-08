@@ -101,4 +101,5 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
 
         return vo;
     }
+
 }
