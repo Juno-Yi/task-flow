@@ -188,11 +188,36 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
 
         oauthPlatformMapper.updateById(platform);
 
-        // 3. 获取平台标签用于日志
+        // 3. 更新 OAuth 配置记录
+        LambdaQueryWrapper<OauthConfig> configWrapper = new LambdaQueryWrapper<>();
+        configWrapper.eq(OauthConfig::getPlatform, dto.getPlatform());
+        OauthConfig existingConfig = oauthConfigMapper.selectOne(configWrapper);
+
+        if (existingConfig != null) {
+            // 如果配置存在，更新
+            OauthConfig oauthConfig = new OauthConfig();
+            oauthConfig.setId(existingConfig.getId());
+            oauthConfig.setConfigKey(dto.getConfigKey());
+            oauthConfig.setConfigValue(dto.getConfigValue());
+            oauthConfig.setUpdateBy(SecurityUtils.getUserName());
+            oauthConfig.setUpdateTime(DateUtils.getNowDate());
+            oauthConfigMapper.updateById(oauthConfig);
+        } else {
+            // 如果配置不存在，创建新的
+            OauthConfig oauthConfig = new OauthConfig();
+            oauthConfig.setPlatform(dto.getPlatform());
+            oauthConfig.setConfigKey(dto.getConfigKey());
+            oauthConfig.setConfigValue(dto.getConfigValue());
+            oauthConfig.setCreateBy(SecurityUtils.getUserName());
+            oauthConfig.setCreateTime(DateUtils.getNowDate());
+            oauthConfigMapper.insert(oauthConfig);
+        }
+
+        // 4. 获取平台标签用于日志
         String platformLabel = sysDictApi.getDictLabel("oauth_platform", dto.getPlatform());
         String displayName = platformLabel != null ? platformLabel : dto.getPlatform();
 
-        // 4. 发布操作日志事件
+        // 5. 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.withRawData(
                 "update",
                 "oauth_config",
