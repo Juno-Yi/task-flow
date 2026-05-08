@@ -178,8 +178,8 @@
           id: newData.id,
           platform: newData.platform,
           status: newData.status,
-          configKey: '',
-          configValue: '',
+          configKey: newData.configKey || '',
+          configValue: newData.configValue || '',
           redirectUrl: newData.redirectUrl,
           remark: newData.remark || ''
         }

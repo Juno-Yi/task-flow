@@ -107,6 +107,16 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
             vo.setStatusType(platform.getStatus() == 1 ? "success" : "danger");
         }
 
+        // 查询并填充 configKey 和 configValue
+        LambdaQueryWrapper<OauthConfig> configWrapper = new LambdaQueryWrapper<>();
+        configWrapper.eq(OauthConfig::getPlatform, platform.getPlatform())
+                     .last("LIMIT 1");
+        OauthConfig oauthConfig = oauthConfigMapper.selectOne(configWrapper);
+        if (oauthConfig != null) {
+            vo.setConfigKey(oauthConfig.getConfigKey());
+            vo.setConfigValue(oauthConfig.getConfigValue());
+        }
+
         return vo;
     }
 

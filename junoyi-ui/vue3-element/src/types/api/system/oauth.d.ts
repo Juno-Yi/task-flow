@@ -26,6 +26,8 @@ declare namespace Api.Oauth {
         statusLabel: string
         statusType: string
         redirectUrl: string
+        configKey: string
+        configValue: string
         isSystem: boolean
         createTime: string
         updateTime: string

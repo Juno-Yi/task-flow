@@ -42,6 +42,16 @@ public class OauthConfigVO {
     public String redirectUrl;
 
     /**
+     * 配置Key
+     */
+    private String configKey;
+
+    /**
+     * 配置Value
+     */
+    private String configValue;
+
+    /**
      * 是否系统内置
      */
     private Boolean isSystem;
