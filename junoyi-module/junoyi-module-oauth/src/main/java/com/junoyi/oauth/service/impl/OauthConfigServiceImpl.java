@@ -3,7 +3,6 @@ package com.junoyi.oauth.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
-import com.junoyi.oauth.convert.OauthConfigConverter;
 import com.junoyi.oauth.domain.dto.OauthConfigDTO;
 import com.junoyi.oauth.domain.dto.OauthConfigQueryDTO;
 import com.junoyi.oauth.domain.po.OauthConfig;
@@ -15,10 +14,12 @@ import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.vo.SysDictDataVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,7 +33,6 @@ import java.util.List;
 public class OauthConfigServiceImpl implements IOauthConfigService {
 
     private final OauthConfigMapper oauthConfigMapper;
-    private final OauthConfigConverter oauthConfigConverter;
     private final SysDictApi sysDictApi;
 
     /**
@@ -60,10 +60,13 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
 
         // 分页查询
         Page<OauthConfig> resultPage = oauthConfigMapper.selectPage(page, wrapper);
-        List<OauthConfigVO> voList = oauthConfigConverter.toVoList(resultPage.getRecords());
 
-        // 使用字典API翻译平台和状态标签
-        for (OauthConfigVO vo : voList) {
+        // 手动转换PO到VO
+        List<OauthConfigVO> voList = new ArrayList<>();
+        for (OauthConfig config : resultPage.getRecords()) {
+            OauthConfigVO vo = convertToVO(config);
+
+            // 使用字典API翻译平台和状态标签
             if (StringUtils.hasText(vo.getPlatform())) {
                 SysDictDataVO platformDict = sysDictApi.getDictItem(DICT_TYPE_OAUTH_PLATFORM, vo.getPlatform());
                 if (platformDict != null) {
@@ -77,6 +80,8 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
                     vo.setStatusType(statusDict.getListClass());
                 }
             }
+
+            voList.add(vo);
         }
 
         return PageResult.of(voList, resultPage.getTotal(), (int) resultPage.getCurrent(), (int) resultPage.getSize());
@@ -100,7 +105,7 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
         }
 
         // DTO转PO
-        OauthConfig config = oauthConfigConverter.toEntity(dto);
+        OauthConfig config = convertToEntity(dto);
         config.setIsSystem(false); // 新增的配置默认非系统内置
 
         // 插入数据库
@@ -145,8 +150,8 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
             throw new OauthException("该平台配置已存在");
         }
 
-        // 更新配置
-        oauthConfigConverter.updateEntity(dto, existConfig);
+        // 更新配置 - 手动复制属性
+        updateEntityFromDTO(dto, existConfig);
         int rows = oauthConfigMapper.updateById(existConfig);
         if (rows <= 0) {
             throw new OauthException("更新OAuth配置失败");
@@ -211,11 +216,74 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
         }
 
         // 批量删除
-        int rows = oauthConfigMapper.deleteBatchIds(ids);
+        int rows = oauthConfigMapper.delete(new LambdaQueryWrapper<OauthConfig>()
+                .in(OauthConfig::getId, ids));
         if (rows <= 0) {
             throw new OauthException("批量删除OAuth配置失败");
         }
 
         log.info("批量删除OAuth配置成功, 删除数量: {}", rows);
+    }
+
+    /**
+     * PO转VO
+     * @param entity PO对象
+     * @return VO对象
+     */
+    private OauthConfigVO convertToVO(OauthConfig entity) {
+        if (entity == null) {
+            return null;
+        }
+        OauthConfigVO vo = new OauthConfigVO();
+        BeanUtils.copyProperties(entity, vo);
+        // redirectUri -> redirectUrl
+        vo.setRedirectUrl(entity.getRedirectUri());
+        return vo;
+    }
+
+    /**
+     * DTO转PO
+     * @param dto DTO对象
+     * @return PO对象
+     */
+    private OauthConfig convertToEntity(OauthConfigDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        OauthConfig entity = new OauthConfig();
+        BeanUtils.copyProperties(dto, entity);
+        // redirectUrl -> redirectUri
+        entity.setRedirectUri(dto.getRedirectUrl());
+        return entity;
+    }
+
+    /**
+     * 用DTO更新PO
+     * @param dto DTO对象
+     * @param entity PO对象
+     */
+    private void updateEntityFromDTO(OauthConfigDTO dto, OauthConfig entity) {
+        if (dto == null || entity == null) {
+            return;
+        }
+        // 只更新非空字段
+        if (dto.getPlatform() != null) {
+            entity.setPlatform(dto.getPlatform());
+        }
+        if (dto.getStatus() != null) {
+            entity.setStatus(dto.getStatus());
+        }
+        if (dto.getConfigKey() != null) {
+            entity.setConfigKey(dto.getConfigKey());
+        }
+        if (dto.getConfigValue() != null) {
+            entity.setConfigValue(dto.getConfigValue());
+        }
+        if (dto.getRedirectUrl() != null) {
+            entity.setRedirectUri(dto.getRedirectUrl());
+        }
+        if (dto.getRemark() != null) {
+            entity.setRemark(dto.getRemark());
+        }
     }
 }
