@@ -8,7 +8,6 @@ import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.json.utils.JsonUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
-import com.junoyi.oauth.convert.OauthConfigConverter;
 import com.junoyi.oauth.domain.dto.OauthConfigDTO;
 import com.junoyi.oauth.domain.dto.OauthConfigQueryDTO;
 import com.junoyi.oauth.domain.po.OauthConfig;
@@ -89,7 +88,17 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
      * 转换PO为VO并填充额外信息
      */
     private OauthConfigVO convertToVO(OauthPlatform platform) {
-        OauthConfigVO vo = OauthConfigConverter.INSTANCE.toVO(platform);
+        OauthConfigVO vo = new OauthConfigVO();
+
+        // 基本字段映射
+        vo.setId(platform.getId());
+        vo.setPlatform(platform.getPlatform());
+        vo.setStatus(platform.getStatus());
+        vo.setRedirectUrl(platform.getRedirectUri());
+        vo.setIsSystem(platform.getIsSystem());
+        vo.setCreateTime(platform.getCreateTime());
+        vo.setUpdateTime(platform.getUpdateTime());
+        vo.setRemark(platform.getRemark());
 
         // 从字典获取平台标签
         String platformLabel = sysDictApi.getDictLabel("oauth_platform", platform.getPlatform());
