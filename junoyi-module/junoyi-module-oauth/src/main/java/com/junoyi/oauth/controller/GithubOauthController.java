@@ -1,4 +1,4 @@
-package com.junoyi.oauth;
+package com.junoyi.oauth.controller;
 
 import cn.hutool.core.util.IdUtil;
 import com.junoyi.framework.core.domain.module.R;
