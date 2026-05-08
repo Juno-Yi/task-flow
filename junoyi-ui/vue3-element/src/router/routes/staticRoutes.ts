@@ -37,12 +37,6 @@ export const staticRoutes: AppRouteRecordRaw[] = [
     meta: { title: 'menus.forgetPassword.title', isHideTab: true }
   },
   {
-    path: '/auth/github/callback',
-    name: 'GithubCallback',
-    component: () => import('@views/auth/github/callback.vue'),
-    meta: { title: 'GitHub 登录回调', isHideTab: true }
-  },
-  {
     path: '/403',
     name: 'Exception403',
     component: () => import('@/components/core/exception/Exception403.vue'),
