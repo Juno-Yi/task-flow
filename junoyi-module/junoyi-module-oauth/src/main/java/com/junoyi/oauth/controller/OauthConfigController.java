@@ -78,7 +78,6 @@ public class OauthConfigController extends BaseController {
     /**
      * 批量删除OAuth配置
      */
-    @Operation(summary = "批量删除OAuth配置", description = "批量删除第三方登录平台配置")
     @DeleteMapping("/batch")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(value = "oauth.ui.config.button.delete")
