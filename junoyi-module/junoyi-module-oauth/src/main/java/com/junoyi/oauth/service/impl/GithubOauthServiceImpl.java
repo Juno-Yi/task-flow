@@ -15,17 +15,17 @@ import com.junoyi.framework.security.module.LoginUser;
 import com.junoyi.framework.security.module.TokenPair;
 import com.junoyi.framework.security.utils.PasswordUtils;
 import com.junoyi.oauth.domain.dto.GithubUserDTO;
-import com.junoyi.oauth.domain.po.SysUserThirdAuth;
-import com.junoyi.oauth.mapper.SysUserThirdAuthMapper;
-import com.junoyi.oauth.properties.GithubOauthProperties;
 import com.junoyi.oauth.service.IGithubOauthService;
 import com.junoyi.system.domain.po.SysUser;
+import com.junoyi.system.domain.po.SysUserThirdAuth;
 import com.junoyi.system.domain.vo.AuthVO;
 import com.junoyi.system.enums.SysUserStatus;
 import com.junoyi.system.event.UserLoginEvent;
 import com.junoyi.system.helper.LoginUserBuilder;
 import com.junoyi.system.mapper.SysUserMapper;
+import com.junoyi.system.mapper.SysUserThirdAuthMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,11 +36,28 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class GithubOauthServiceImpl implements IGithubOauthService {
 
-    private final GithubOauthProperties githubOauthProperties;
     private final SysUserThirdAuthMapper sysUserThirdAuthMapper;
     private final SysUserMapper sysUserMapper;
     private final AuthHelper authHelper;
     private final LoginUserBuilder loginUserBuilder;
+
+    @Value("${junoyi.oauth.github.client-id}")
+    private String clientId;
+
+    @Value("${junoyi.oauth.github.client-secret}")
+    private String clientSecret;
+
+    @Value("${junoyi.oauth.github.redirect-uri}")
+    private String redirectUri;
+
+    @Value("${junoyi.oauth.github.authorize-url:https://github.com/login/oauth/authorize}")
+    private String authorizeUrl;
+
+    @Value("${junoyi.oauth.github.access-token-url:https://github.com/login/oauth/access_token}")
+    private String accessTokenUrl;
+
+    @Value("${junoyi.oauth.github.user-info-url:https://api.github.com/user}")
+    private String userInfoUrl;
 
     private static final String STATE_CACHE_KEY = "oauth:github:state:";
     private static final long STATE_EXPIRE_SECONDS = 600;
@@ -48,9 +65,9 @@ public class GithubOauthServiceImpl implements IGithubOauthService {
     @Override
     public String getAuthorizeUrl(String state) {
         RedisUtils.setCacheObject(STATE_CACHE_KEY + state, state, Duration.ofSeconds(STATE_EXPIRE_SECONDS));
-        return githubOauthProperties.getAuthorizeUrl() +
-                "?client_id=" + githubOauthProperties.getClientId() +
-                "&redirect_uri=" + githubOauthProperties.getRedirectUri() +
+        return authorizeUrl +
+                "?client_id=" + clientId +
+                "&redirect_uri=" + redirectUri +
                 "&state=" + state +
                 "&scope=user:email";
     }
@@ -99,12 +116,12 @@ public class GithubOauthServiceImpl implements IGithubOauthService {
 
     private String getAccessToken(String code) {
         try {
-            HttpResponse response = HttpRequest.post(githubOauthProperties.getAccessTokenUrl())
+            HttpResponse response = HttpRequest.post(accessTokenUrl)
                     .header("Accept", "application/json")
-                    .form("client_id", githubOauthProperties.getClientId())
-                    .form("client_secret", githubOauthProperties.getClientSecret())
+                    .form("client_id", clientId)
+                    .form("client_secret", clientSecret)
                     .form("code", code)
-                    .form("redirect_uri", githubOauthProperties.getRedirectUri())
+                    .form("redirect_uri", redirectUri)
                     .execute();
 
             if (!response.isOk()) {
@@ -126,7 +143,7 @@ public class GithubOauthServiceImpl implements IGithubOauthService {
 
     private GithubUserDTO getUserInfo(String accessToken) {
         try {
-            HttpResponse response = HttpRequest.get(githubOauthProperties.getUserInfoUrl())
+            HttpResponse response = HttpRequest.get(userInfoUrl)
                     .header("Authorization", "token " + accessToken)
                     .header("Accept", "application/json")
                     .execute();

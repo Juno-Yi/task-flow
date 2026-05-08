@@ -1,4 +1,4 @@
-package com.junoyi.oauth.domain.po;
+package com.junoyi.system.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -10,6 +10,7 @@ import java.util.Date;
 /**
  * 用户第三方登录绑定表
  *
+ * @author JunoYi
  */
 @Data
 @TableName("sys_user_third_auth")
