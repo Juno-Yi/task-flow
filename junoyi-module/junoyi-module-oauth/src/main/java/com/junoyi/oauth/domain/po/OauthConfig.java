@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * Oauth 配置 PO 数据对象
+ * Oauth配置 PO 数据对象
  *
  * @author Fan
  */
@@ -23,18 +23,32 @@ public class OauthConfig extends BaseEntity {
     private Long id;
 
     /**
-     * 平台
+     * 平台（github、gitee、wework、feishu、dingtalk、wechat）
      */
-    private String platform;
+    public String platform;
 
     /**
-     * 配置 key
+     * 状态( 1启用， 2禁用）
+     */
+    private Integer status;
+
+    /**
+     * 配置 Key
      */
     private String configKey;
 
     /**
-     * 配置 value
+     * 配置 Value
      */
     private String configValue;
 
+    /**
+     * 回调URL地址
+     */
+    public String redirectUri;
+
+    /**
+     * 是否系统内置
+     */
+    private Boolean isSystem;
 }

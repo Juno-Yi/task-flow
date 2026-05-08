@@ -5,10 +5,11 @@ import com.junoyi.oauth.domain.po.OauthConfig;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * Oauth 配置 Mapper
+ * Oauth平台配置 Mapper 接口
  *
  * @author Fan
  */
 @Mapper
 public interface OauthConfigMapper extends BaseMapper<OauthConfig> {
 }
+
