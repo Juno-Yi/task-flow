@@ -55,7 +55,6 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
         LambdaQueryWrapper<OauthConfig> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(StringUtils.hasText(queryDTO.getPlatform()), OauthConfig::getPlatform, queryDTO.getPlatform())
                 .eq(queryDTO.getStatus() != null, OauthConfig::getStatus, queryDTO.getStatus())
-                .like(StringUtils.hasText(queryDTO.getPlatformName()), OauthConfig::getPlatform, queryDTO.getPlatformName())
                 .orderByDesc(OauthConfig::getCreateTime);
 
         // 分页查询

@@ -23,9 +23,5 @@ public class OauthConfigQueryDTO extends PageQuery {
      */
     private Integer status;
 
-    /**
-     * 平台名称（模糊查询）
-     */
-    private String platformName;
 }
 

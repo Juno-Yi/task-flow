@@ -84,15 +84,6 @@
         clearable: true,
         options: statusOptions.value
       }
-    },
-    {
-      label: '平台名称',
-      key: 'platformName',
-      type: 'input',
-      props: {
-        placeholder: '请输入平台名称',
-        clearable: true
-      }
     }
   ])
 
