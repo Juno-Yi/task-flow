@@ -1,0 +1,47 @@
+/**
+ * Oauth第三方认证登录
+ */
+declare namespace Api.Oauth {
+
+    /**
+     * Oauth配置查询参数
+     */
+    interface OauthConfigQueryParams extends Api.Common.CommonSearchParams {
+        /** 平台 */
+        platform?: string
+        /** 状态 */
+        status?: number
+    }
+
+    /**
+     * Oauth配置VO
+     */
+    interface OauthConfigVO {
+        id: number
+        platform: string
+        platformLabel: string
+        status: number
+        statusLabel: string
+        statusType: string
+        redirectUrl: string
+        configKey: string
+        configValue: string
+        isSystem: boolean
+        createTime: string
+        updateTime: string
+        remark: string
+    }
+
+    /**
+     * Oauth配置表单
+     */
+    interface OauthConfigForm {
+        id?: number
+        platform: string
+        status: number
+        configKey?: string
+        configValue?: string
+        redirectUrl: string
+        remark?: string
+    }
+}

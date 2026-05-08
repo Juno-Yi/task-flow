@@ -129,8 +129,8 @@
   },
   "login": {
     "leftView": {
-      "title": "JunoYi enterprise-level Java backend management system",
-      "subTitle": "Quickly build information security, develop efficient, beautiful, elegant, and scalable enterprise-level applications"
+      "title": "JunoYi R&D Collaboration Management Platform",
+      "subTitle": "An integrated platform for task collaboration, project management, and requirement flow, built specifically for software teams"
     },
     "title": "Welcome back",
     "subTitle": "Please enter your account and password to login",
@@ -145,6 +145,14 @@
     "btnText": "Login",
     "noAccount": "No account yet?",
     "register": "Register",
+    "thirdParty": {
+      "title": "Third-party Login",
+      "github": "GitHub Login",
+      "gitee": "Gitee Login",
+      "wework": "WeWork Login",
+      "feishu": "Feishu Login",
+      "dingtalk": "DingTalk Login"
+    },
     "success": {
       "title": "Login successful",
       "message": "Welcome back"

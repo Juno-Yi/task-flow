@@ -129,8 +129,8 @@
   },
   "login": {
     "leftView": {
-      "title": "JunoYi 企业级 Java 后台管理系统",
-      "subTitle": "快速构建信息安全、开发高效、美观优雅、可拓展的企业级应用"
+      "title": "钧逸研发协作管理平台",
+      "subTitle": "专为软件团队打造的任务协作、项目管理与需求流转一体化平台"
     },
     "title": "欢迎回来",
     "subTitle": "输入您的账号和密码登录",
@@ -145,6 +145,14 @@
     "btnText": "登录",
     "noAccount": "还没有账号？",
     "register": "注册",
+    "thirdParty": {
+      "title": "第三方登录",
+      "github": "GitHub 登录",
+      "gitee": "Gitee 登录",
+      "wework": "企业微信登录",
+      "feishu": "飞书登录",
+      "dingtalk": "钉钉登录"
+    },
     "success": {
       "title": "登录成功",
       "message": "欢迎回来"
