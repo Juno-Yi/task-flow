@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
   import { computed, ref } from 'vue'
-  import { fetchGetDictData } from '@/api/system/dict'
+  import { fetchGetDictDataByType } from '@/api/system/dict'
 
   interface Props {
     modelValue: Record<string, any>
@@ -43,14 +43,14 @@
   const loadDictData = async () => {
     try {
       // 加载平台字典
-      const platformDict = await fetchGetDictData('oauth_platform')
+      const platformDict = await fetchGetDictDataByType('oauth_platform')
       platformOptions.value = platformDict.map((item) => ({
         label: item.dictLabel,
         value: item.dictValue
       }))
 
       // 加载状态字典
-      const statusDict = await fetchGetDictData('oauth_status')
+      const statusDict = await fetchGetDictDataByType('oauth_status')
       statusOptions.value = statusDict.map((item) => ({
         label: item.dictLabel,
         value: parseInt(item.dictValue)
