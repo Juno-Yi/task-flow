@@ -23,6 +23,7 @@ import java.util.List;
  *
  * @author Fan
  */
+@Tag(name = "OAuth配置管理", description = "OAuth第三方登录配置管理接口")
 @RestController
 @RequestMapping("/oauth/config")
 @RequiredArgsConstructor
@@ -31,12 +32,14 @@ public class OauthConfigController extends BaseController {
     private final IOauthConfigService oauthConfigService;
 
     /**
-     * 获取Oauth配置列表
+     * 分页查询Oauth配置列表
      */
+    @Operation(summary = "分页查询OAuth配置列表", description = "分页查询所有第三方登录平台的配置信息")
     @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(value = "oauth.ui.config.view")
     public R<PageResult<OauthConfigVO>> getOauthConfigList(OauthConfigQueryDTO queryDTO) {
-        return R.ok(oauthConfigService.getOauthConfigList(queryDTO,buildPage()));
+        PageResult<OauthConfigVO> pageResult = oauthConfigService.getOauthConfigList(queryDTO, buildPage());
+        return R.ok(pageResult);
     }
 }

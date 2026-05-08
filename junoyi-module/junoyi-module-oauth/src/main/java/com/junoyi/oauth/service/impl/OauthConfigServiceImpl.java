@@ -32,35 +32,34 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
 
     /**
      * 分页查询Oauth平台配置
+     *
      * @param queryDTO 查询条件
+     * @param page 分页对象
      * @return Oauth平台配置分页结果
      */
     @Override
-    public PageResult<OauthConfigVO> getOauthConfigList(OauthConfigQueryDTO queryDTO) {
+    public PageResult<OauthConfigVO> getOauthConfigList(OauthConfigQueryDTO queryDTO, Page<OauthPlatform> page) {
         // 构建查询条件
         LambdaQueryWrapper<OauthPlatform> wrapper = new LambdaQueryWrapper<>();
 
         // 平台精确查询
         wrapper.eq(StringUtils.isNotBlank(queryDTO.getPlatform()),
-                   OauthPlatform::getPlatform, queryDTO.getPlatform());
-
-        // 状态查询
-        wrapper.eq(queryDTO.getStatus() != null,
-                   OauthPlatform::getStatus, queryDTO.getStatus());
-
-        // 排序
-        wrapper.orderByAsc(OauthPlatform::getId);
+                   OauthPlatform::getPlatform, queryDTO.getPlatform())
+               // 状态查询
+               .eq(queryDTO.getStatus() != null,
+                   OauthPlatform::getStatus, queryDTO.getStatus())
+               // 排序
+               .orderByAsc(OauthPlatform::getId);
 
         // 分页查询
-        Page<OauthPlatform> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
-        Page<OauthPlatform> pageResult = oauthPlatformMapper.selectPage(page, wrapper);
+        Page<OauthPlatform> resultPage = oauthPlatformMapper.selectPage(page, wrapper);
 
         // 转换为VO并填充额外信息
-        List<OauthConfigVO> voList = pageResult.getRecords().stream()
+        List<OauthConfigVO> voList = resultPage.getRecords().stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
 
-        // 如果有平台名称模糊查询，需要在内存中过滤
+        // 如果有平台名称模糊查询，需要在内存中过滤（因为platformLabel是字典翻译后的值）
         if (StringUtils.isNotBlank(queryDTO.getPlatformName())) {
             voList = voList.stream()
                     .filter(vo -> vo.getPlatformLabel() != null &&
@@ -68,7 +67,12 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
                     .collect(Collectors.toList());
         }
 
-        return new PageResult<>(voList, pageResult.getTotal());
+        return PageResult.of(
+                voList,
+                resultPage.getTotal(),
+                (int) resultPage.getCurrent(),
+                (int) resultPage.getSize()
+        );
     }
 
     /**

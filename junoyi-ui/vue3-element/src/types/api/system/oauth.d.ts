@@ -4,6 +4,18 @@
 declare namespace Api.Oauth {
 
     /**
+     * Oauth配置查询参数
+     */
+    interface OauthConfigQueryParams extends Api.Common.PageParams {
+        /** 平台 */
+        platform?: string
+        /** 状态 */
+        status?: number
+        /** 平台名称（模糊查询） */
+        platformName?: string
+    }
+
+    /**
      * Oauth配置VO
      */
     interface OauthConfigVO {
