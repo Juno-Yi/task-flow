@@ -41,8 +41,6 @@
         :data="data"
         :columns="columns"
         :pagination="pagination"
-        :empty-text="'暂无OAuth配置数据'"
-        empty-height="50vh"
         @selection-change="handleSelectionChange"
         @pagination:size-change="handleSizeChange"
         @pagination:current-change="handleCurrentChange"
@@ -321,27 +319,5 @@
     }
   }
 </script>
-
-<style scoped lang="scss">
-  .art-full-height {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .art-table-card {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-
-    :deep(.el-card__body) {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-  }
-</style>
 
 

@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@TableName("oauth_config")
+@TableName("oauth_platform")
 public class OauthPlatform extends BaseEntity {
 
     /**
