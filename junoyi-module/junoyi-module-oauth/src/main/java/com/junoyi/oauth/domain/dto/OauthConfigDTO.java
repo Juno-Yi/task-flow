@@ -31,6 +31,16 @@ public class OauthConfigDTO {
     private Integer status;
 
     /**
+     * 配置 Key
+     */
+    private String configKey;
+
+    /**
+     * 配置 Value
+     */
+    private String configValue;
+
+    /**
      * 回调URL地址
      */
     @NotBlank(message = "回调地址不能为空")

@@ -9,6 +9,7 @@ import com.junoyi.oauth.domain.dto.OauthConfigDTO;
 import com.junoyi.oauth.domain.dto.OauthConfigQueryDTO;
 import com.junoyi.oauth.domain.po.OauthPlatform;
 import com.junoyi.oauth.domain.vo.OauthConfigVO;
+import com.junoyi.oauth.mapper.OauthConfigMapper;
 import com.junoyi.oauth.mapper.OauthPlatformMapper;
 import com.junoyi.oauth.service.IOauthConfigService;
 import com.junoyi.system.api.SysDictApi;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 public class OauthConfigServiceImpl implements IOauthConfigService {
 
     private final OauthPlatformMapper oauthPlatformMapper;
+    private final OauthConfigMapper oauthConfigMapper;
     private final SysDictApi sysDictApi;
 
     /**
@@ -102,4 +104,16 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
         return vo;
     }
 
+    /**
+     * 添加 Oauth 配置
+     * @param dto 传输对象
+     */
+    @Override
+    public void addOauthConfig(OauthConfigDTO dto) {
+        // 添加Oauth平台
+
+        // 添加该平台对应的配置key-value
+
+        // 发布操作日志
+    }
 }

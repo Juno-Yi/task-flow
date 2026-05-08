@@ -35,7 +35,6 @@ public class OauthConfigController extends BaseController {
     /**
      * 分页查询Oauth配置列表
      */
-    @Operation(summary = "分页查询OAuth配置列表", description = "分页查询所有第三方登录平台的配置信息")
     @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(value = "oauth.ui.config.view")
@@ -47,7 +46,6 @@ public class OauthConfigController extends BaseController {
     /**
      * 新增OAuth配置
      */
-    @Operation(summary = "新增OAuth配置", description = "新增第三方登录平台配置")
     @PostMapping
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(value = "oauth.ui.config.button.add")
