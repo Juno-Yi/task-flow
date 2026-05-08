@@ -6,6 +6,7 @@ import com.junoyi.oauth.domain.dto.OauthConfigQueryDTO;
 import com.junoyi.oauth.domain.po.OauthPlatform;
 import com.junoyi.oauth.domain.vo.OauthConfigVO;
 
+
 /**
  * Oauth配置业务接口
  *
@@ -20,4 +21,5 @@ public interface IOauthConfigService {
      * @return Oauth平台配置分页结果
      */
     PageResult<OauthConfigVO> getOauthConfigList(OauthConfigQueryDTO queryDTO, Page<OauthPlatform> page);
+
 }

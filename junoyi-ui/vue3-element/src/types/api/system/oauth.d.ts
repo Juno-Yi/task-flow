@@ -31,4 +31,15 @@ declare namespace Api.Oauth {
         updateTime: string
         remark: string
     }
+
+    /**
+     * Oauth配置表单
+     */
+    interface OauthConfigForm {
+        id?: number
+        platform: string
+        status: number
+        redirectUrl: string
+        remark?: string
+    }
 }

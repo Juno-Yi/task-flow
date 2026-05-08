@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.oauth.convert.OauthConfigConverter;
+import com.junoyi.oauth.domain.dto.OauthConfigDTO;
 import com.junoyi.oauth.domain.dto.OauthConfigQueryDTO;
 import com.junoyi.oauth.domain.po.OauthPlatform;
 import com.junoyi.oauth.domain.vo.OauthConfigVO;
@@ -14,6 +15,7 @@ import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.vo.SysDictDataVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
