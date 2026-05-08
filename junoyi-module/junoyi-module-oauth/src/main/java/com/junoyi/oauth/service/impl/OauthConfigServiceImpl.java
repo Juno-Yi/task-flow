@@ -3,6 +3,8 @@ package com.junoyi.oauth.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.framework.core.utils.DateUtils;
+import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.oauth.domain.dto.OauthConfigDTO;
 import com.junoyi.oauth.domain.dto.OauthConfigQueryDTO;
 import com.junoyi.oauth.domain.po.OauthConfig;
@@ -106,6 +108,8 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
         // DTO转PO
         OauthConfig config = convertToEntity(dto);
         config.setIsSystem(false); // 新增的配置默认非系统内置
+        config.setCreateBy(SecurityUtils.getUserName());
+        config.setCreateTime(DateUtils.getNowDate());
 
         // 插入数据库
         int rows = oauthConfigMapper.insert(config);
@@ -151,6 +155,10 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
 
         // 更新配置 - 手动复制属性
         updateEntityFromDTO(dto, existConfig);
+
+        existConfig.setUpdateBy(SecurityUtils.getUserName());
+        existConfig.setUpdateTime(DateUtils.getNowDate());
+
         int rows = oauthConfigMapper.updateById(existConfig);
         if (rows <= 0) {
             throw new OauthException("更新OAuth配置失败");
