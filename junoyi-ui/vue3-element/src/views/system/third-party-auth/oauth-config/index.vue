@@ -132,6 +132,7 @@
         {
           prop: 'platformLabel',
           label: '平台',
+          align: 'center',
           headerAlign: 'center',
           minWidth: 120
         },
@@ -155,6 +156,7 @@
         {
           prop: 'redirectUrl',
           label: '回调地址',
+          align: 'center',
           headerAlign: 'center',
           minWidth: 200,
           showOverflowTooltip: true
