@@ -39,6 +39,8 @@ declare namespace Api.Oauth {
         id?: number
         platform: string
         status: number
+        configKey?: string
+        configValue?: string
         redirectUrl: string
         remark?: string
     }

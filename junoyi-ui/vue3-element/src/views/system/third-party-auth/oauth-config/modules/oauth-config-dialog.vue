@@ -40,6 +40,22 @@
         </ElRadioGroup>
       </ElFormItem>
 
+      <ElFormItem label="配置Key" prop="configKey">
+        <ElInput
+          v-model="formData.configKey"
+          placeholder="请输入配置Key（如：client_id）"
+        />
+      </ElFormItem>
+
+      <ElFormItem label="配置Value" prop="configValue">
+        <ElInput
+          v-model="formData.configValue"
+          placeholder="请输入配置Value"
+          type="textarea"
+          :rows="2"
+        />
+      </ElFormItem>
+
       <ElFormItem label="回调地址" prop="redirectUrl">
         <ElInput
           v-model="formData.redirectUrl"
@@ -109,6 +125,8 @@
     id: undefined as number | undefined,
     platform: '',
     status: 1,
+    configKey: '',
+    configValue: '',
     redirectUrl: '',
     remark: ''
   })
@@ -160,6 +178,8 @@
           id: newData.id,
           platform: newData.platform,
           status: newData.status,
+          configKey: '',
+          configValue: '',
           redirectUrl: newData.redirectUrl,
           remark: newData.remark || ''
         }
@@ -169,6 +189,8 @@
           id: undefined,
           platform: '',
           status: 1,
+          configKey: '',
+          configValue: '',
           redirectUrl: '',
           remark: ''
         }
