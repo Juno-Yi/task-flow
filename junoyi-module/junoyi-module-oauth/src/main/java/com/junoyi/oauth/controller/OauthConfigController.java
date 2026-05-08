@@ -10,8 +10,6 @@ import com.junoyi.oauth.domain.dto.OauthConfigDTO;
 import com.junoyi.oauth.domain.dto.OauthConfigQueryDTO;
 import com.junoyi.oauth.domain.vo.OauthConfigVO;
 import com.junoyi.oauth.service.IOauthConfigService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +22,6 @@ import java.util.List;
  *
  * @author Fan
  */
-@Tag(name = "OAuth配置管理", description = "OAuth第三方登录配置管理接口")
 @RestController
 @RequestMapping("/oauth/config")
 @RequiredArgsConstructor
@@ -50,6 +47,7 @@ public class OauthConfigController extends BaseController {
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(value = "oauth.ui.config.button.add")
     public R<Void> addOauthConfig(@Valid @RequestBody OauthConfigDTO configDTO) {
+        oauthConfigService.addOauthConfig(configDTO);
         return R.ok();
     }
 
@@ -60,6 +58,7 @@ public class OauthConfigController extends BaseController {
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(value = "oauth.ui.config.button.edit")
     public R<Void> updateOauthConfig(@Valid @RequestBody OauthConfigDTO configDTO) {
+        oauthConfigService.updateOauthConfig(configDTO);
         return R.ok();
     }
 
@@ -70,6 +69,7 @@ public class OauthConfigController extends BaseController {
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(value = "oauth.ui.config.button.delete")
     public R<Void> deleteOauthConfig(@PathVariable Long id) {
+        oauthConfigService.deleteOauthConfig(id);
         return R.ok();
     }
 
@@ -80,6 +80,7 @@ public class OauthConfigController extends BaseController {
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(value = "oauth.ui.config.button.delete")
     public R<Void> deleteOauthConfigBatch(@RequestBody List<Long> ids) {
+        oauthConfigService.deleteOauthConfigBatch(ids);
         return R.ok();
     }
 }

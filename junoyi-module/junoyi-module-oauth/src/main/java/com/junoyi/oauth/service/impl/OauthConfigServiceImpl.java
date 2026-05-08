@@ -11,6 +11,7 @@ import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.oauth.convert.OauthConfigConverter;
 import com.junoyi.oauth.domain.dto.OauthConfigDTO;
 import com.junoyi.oauth.domain.dto.OauthConfigQueryDTO;
+import com.junoyi.oauth.domain.po.OauthConfig;
 import com.junoyi.oauth.domain.po.OauthPlatform;
 import com.junoyi.oauth.domain.vo.OauthConfigVO;
 import com.junoyi.oauth.mapper.OauthConfigMapper;
@@ -116,7 +117,7 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addOauthConfig(OauthConfigDTO dto) {
-        // 1. 创建 OAuth 平台记录
+        // 创建 OAuth 平台记录
         OauthPlatform platform = new OauthPlatform();
         platform.setPlatform(dto.getPlatform());
         platform.setStatus(dto.getStatus());
@@ -128,11 +129,20 @@ public class OauthConfigServiceImpl implements IOauthConfigService {
 
         oauthPlatformMapper.insert(platform);
 
-        // 2. 获取平台标签用于日志
+        // 创建 OAuth 平台对应的配置
+        OauthConfig oauthConfig = new OauthConfig();
+        oauthConfig.setPlatform(dto.getPlatform());
+        oauthConfig.setConfigKey(dto.getConfigKey());
+        oauthConfig.setConfigValue(dto.getConfigValue());
+        oauthConfig.setCreateBy(SecurityUtils.getUserName());
+        oauthConfig.setCreateTime(DateUtils.getNowDate());
+        platform.setRemark(dto.getRemark());
+
+        oauthConfigMapper.insert(oauthConfig);
+
         String platformLabel = sysDictApi.getDictLabel("oauth_platform", dto.getPlatform());
         String displayName = platformLabel != null ? platformLabel : dto.getPlatform();
 
-        // 3. 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.withRawData(
                 "create",
                 "oauth_config",
