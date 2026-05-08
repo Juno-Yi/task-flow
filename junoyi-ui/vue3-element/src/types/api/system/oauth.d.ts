@@ -6,7 +6,7 @@ declare namespace Api.Oauth {
     /**
      * Oauth配置查询参数
      */
-    interface OauthConfigQueryParams extends Api.Common.PageParams {
+    interface OauthConfigQueryParams extends Api.Common.CommonSearchParams {
         /** 平台 */
         platform?: string
         /** 状态 */

@@ -41,6 +41,8 @@
         :data="data"
         :columns="columns"
         :pagination="pagination"
+        :empty-text="'暂无OAuth配置数据'"
+        empty-height="50vh"
         @selection-change="handleSelectionChange"
         @pagination:size-change="handleSizeChange"
         @pagination:current-change="handleCurrentChange"
@@ -86,6 +88,21 @@
   const currentConfigData = ref<OauthConfigVO | undefined>(undefined)
   const selectedIds = ref<number[]>([])
 
+  /**
+   * 格式化时间
+   */
+  const formatTime = (time: string | undefined): string => {
+    if (!time) return '-'
+    const date = new Date(time)
+    if (isNaN(date.getTime())) return '-'
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    const seconds = String(date.getSeconds()).padStart(2, '0')
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+  }
   const {
     columns,
     columnChecks,
@@ -117,20 +134,36 @@
         {
           prop: 'platformLabel',
           label: '平台',
-          width: 120,
-          align: 'center',
-          headerAlign: 'center'
-        },
-        {
-          prop: 'platform',
-          label: '平台代码',
-          width: 120,
-          align: 'center',
-          headerAlign: 'center'
+          headerAlign: 'center',
+          minWidth: 120
         },
         {
           prop: 'statusLabel',
           label: '状态',
+          width: 100,
+          align: 'center',
+          headerAlign: 'center',
+          formatter: (row: OauthConfigVO) => {
+            return h(
+              ElTag,
+              {
+                type: (row.statusType || 'info') as 'success' | 'info' | 'warning' | 'danger',
+                size: 'small'
+              },
+              () => row.statusLabel || '-'
+            )
+          }
+        },
+        {
+          prop: 'redirectUrl',
+          label: '回调地址',
+          headerAlign: 'center',
+          minWidth: 200,
+          showOverflowTooltip: true
+        },
+        {
+          prop: 'isSystem',
+          label: '系统内置',
           width: 100,
           align: 'center',
           headerAlign: 'center',
@@ -148,43 +181,57 @@
         {
           prop: 'createTime',
           label: '创建时间',
+          headerAlign: 'center',
           width: 180,
-          align: 'center',
-          headerAlign: 'center'
+          formatter: (row: OauthConfigVO) => formatTime(row.createTime)
+        },
+                {
+          prop: 'updateTime',
+          label: '更新时间',
+          headerAlign: 'center',
+          width: 180,
+          formatter: (row: OauthConfigVO) => formatTime(row.updateTime)
         },
         {
           prop: 'remark',
           label: '备注',
-          minWidth: 150,
-          align: 'center',
-          headerAlign: 'center',
-          showOverflowTooltip: true
+          width: 150,
+          showOverflowTooltip: true,
+          formatter: (row: OauthConfigVO) => row.remark || '-'
         },
         {
           prop: 'action',
           label: '操作',
-          width: 180,
+          width: 80,
           align: 'center',
           headerAlign: 'center',
           fixed: 'right',
           formatter: (row: OauthConfigVO) => {
-            const items: ButtonMoreItem[] = [
-              {
+            const list: ButtonMoreItem[] = []
+
+            if (hasPermission('oauth.ui.config.button.edit')) {
+              list.push({
+                key: 'edit',
                 label: '编辑',
-                icon: 'ri:edit-line',
-                permission: 'oauth.ui.config.button.edit',
-                onClick: () => showDialog('edit', row)
-              },
-              {
+                icon: 'ri:edit-line'
+              })
+            }
+
+            if (hasPermission('oauth.ui.config.button.delete')) {
+              list.push({
+                key: 'delete',
                 label: '删除',
                 icon: 'ri:delete-bin-line',
-                type: 'danger',
-                permission: 'oauth.ui.config.button.delete',
-                onClick: () => handleDelete(row)
-              }
-            ]
+                color: '#f56c6c'
+              })
+            }
 
-            return h(ArtButtonMore, { items })
+            if (list.length === 0) return '-'
+
+            return h(ArtButtonMore, {
+              list,
+              onClick: (item: ButtonMoreItem) => handleButtonMoreClick(item, row)
+            })
           }
         }
       ]
@@ -221,6 +268,18 @@
   // 选择变化
   const handleSelectionChange = (selection: OauthConfigVO[]) => {
     selectedIds.value = selection.map((item) => item.id)
+  }
+
+  // 操作按钮点击
+  const handleButtonMoreClick = (item: ButtonMoreItem, row: OauthConfigVO) => {
+    switch (item.key) {
+      case 'edit':
+        showDialog('edit', row)
+        break
+      case 'delete':
+        handleDelete(row)
+        break
+    }
   }
 
   // 删除单个

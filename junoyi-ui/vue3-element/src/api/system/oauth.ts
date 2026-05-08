@@ -1,4 +1,5 @@
 import request from '@/utils/http'
+import { PageResult } from '@/types'
 
 /**
  * 分页查询OAuth配置列表
@@ -6,7 +7,7 @@ import request from '@/utils/http'
  * @returns OAuth配置分页结果
  */
 export function fetchGetOauthConfigList(params?: Api.Oauth.OauthConfigQueryParams) {
-  return request.get<Api.Common.PageResult<Api.Oauth.OauthConfigVO>>({
+  return request.get<PageResult<Api.Oauth.OauthConfigVO>>({
     url: '/oauth/config/list',
     params
   })
