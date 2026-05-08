@@ -1,8 +1,8 @@
 package com.junoyi.oauth.service;
 
+import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.oauth.domain.dto.OauthConfigQueryDTO;
 import com.junoyi.oauth.domain.vo.OauthConfigVO;
-
-import java.util.List;
 
 /**
  * Oauth配置业务接口
@@ -12,8 +12,9 @@ import java.util.List;
 public interface IOauthConfigService {
 
     /**
-     * 获取Oauth平台配置
-     * @return Oauth平台配置列表
+     * 分页查询Oauth平台配置
+     * @param queryDTO 查询条件
+     * @return Oauth平台配置分页结果
      */
-    List<OauthConfigVO> getOauthConfigList();
+    PageResult<OauthConfigVO> getOauthConfigList(OauthConfigQueryDTO queryDTO);
 }

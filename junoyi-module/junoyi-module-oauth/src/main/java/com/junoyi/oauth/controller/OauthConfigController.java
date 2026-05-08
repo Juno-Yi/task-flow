@@ -6,8 +6,11 @@ import com.junoyi.framework.permission.annotation.Permission;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
+import com.junoyi.oauth.domain.dto.OauthConfigQueryDTO;
 import com.junoyi.oauth.domain.vo.OauthConfigVO;
 import com.junoyi.oauth.service.IOauthConfigService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,12 +35,8 @@ public class OauthConfigController extends BaseController {
      */
     @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
-    @Permission(
-            value = "oauth.ui.config.view"
-    )
-    public R<PageResult<OauthConfigVO>> getOauthConfigList(){
-        return R.ok(oauthConfigService.getOauthConfigList());
+    @Permission(value = "oauth.ui.config.view")
+    public R<PageResult<OauthConfigVO>> getOauthConfigList(OauthConfigQueryDTO queryDTO) {
+        return R.ok(oauthConfigService.getOauthConfigList(queryDTO,buildPage()));
     }
-
-
 }
