@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  * @author Fan
  */
 @RestController
-@RequestMapping
+@RequestMapping("/auth/wework")
 @RequiredArgsConstructor
 public class WeWorkOAuthController extends BaseController {
 

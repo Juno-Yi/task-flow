@@ -265,13 +265,13 @@ junoyi:
   # 2、后续会持续更新相关的Helper工具，可以查看junoyi-framework-wework模块helper包下的类查看方法如何使用
   wework:
     # 企业ID
-    corp-id: wwxxxxxx
+    corp-id: ww62e2b85ae497924f
     # 应用AgentId
-    agent-id: 1000002
+    agent-id: 1000008
     # 应用Secret
-    secret: xxxxx
+    secret: aKK3E-vUDUpjFWNES54YQUG2HVndZ1-iT5JcmSwR8aw
     # OAuth回调地址
-    redirect-uri: https://demo.junoyi.com/#/auth/wework/callback
+    redirect-uri: https://task.junoyi.com/#/auth/wework/callback
     # token 存储方式：memory / redis
     token-store-type: redis
     # Redis 中的 key 前缀
