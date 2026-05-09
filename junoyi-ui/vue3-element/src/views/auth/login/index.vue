@@ -10,7 +10,7 @@
       <div class="auth-right-wrap">
         <div class="form">
           <h3 class="title">{{ $t('login.title') }}</h3>
-          <p class="sub-title">{{ $t('login.subTitle') }}</p>
+          <p class="sub-title">请您完成登录！</p>
 
           <!-- 账号密码登录表单 -->
           <ElForm
@@ -415,7 +415,7 @@
       console.error('获取企业微信配置失败:', error)
       ElNotification({
         title: '错误',
-        message: '无法获取企业微信登录配置',
+        message: '无法使用企业微信登录！请联系管理员开启！',
         type: 'error',
         duration: 3000
       })
