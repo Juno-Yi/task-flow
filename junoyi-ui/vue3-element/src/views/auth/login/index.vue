@@ -102,26 +102,26 @@
                 <div class="flex-1 h-px bg-gray-200"></div>
               </div>
               <div class="flex justify-center gap-4">
-                <ElTooltip :content="$t('login.thirdParty.github')" placement="top">
-                  <div class="third-party-btn" @click="handleThirdPartyLogin('github')">
-                    <img
-                      :src="thirdPartyIcons.github"
-                      alt="GitHub"
-                      class="third-party-icon"
-                      @error="handleImageError"
-                    />
-                  </div>
-                </ElTooltip>
-                <ElTooltip :content="$t('login.thirdParty.gitee')" placement="top">
-                  <div class="third-party-btn" @click="handleThirdPartyLogin('gitee')">
-                    <img
-                      :src="thirdPartyIcons.gitee"
-                      alt="Gitee"
-                      class="third-party-icon"
-                      @error="handleImageError"
-                    />
-                  </div>
-                </ElTooltip>
+<!--                <ElTooltip :content="$t('login.thirdParty.github')" placement="top">-->
+<!--                  <div class="third-party-btn" @click="handleThirdPartyLogin('github')">-->
+<!--                    <img-->
+<!--                      :src="thirdPartyIcons.github"-->
+<!--                      alt="GitHub"-->
+<!--                      class="third-party-icon"-->
+<!--                      @error="handleImageError"-->
+<!--                    />-->
+<!--                  </div>-->
+<!--                </ElTooltip>-->
+<!--                <ElTooltip :content="$t('login.thirdParty.gitee')" placement="top">-->
+<!--                  <div class="third-party-btn" @click="handleThirdPartyLogin('gitee')">-->
+<!--                    <img-->
+<!--                      :src="thirdPartyIcons.gitee"-->
+<!--                      alt="Gitee"-->
+<!--                      class="third-party-icon"-->
+<!--                      @error="handleImageError"-->
+<!--                    />-->
+<!--                  </div>-->
+<!--                </ElTooltip>-->
                 <ElTooltip :content="$t('login.thirdParty.wework')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('wework')">
                     <img
