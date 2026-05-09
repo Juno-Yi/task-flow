@@ -17,4 +17,19 @@ public class AuthVO {
      * 刷新令牌
      */
     private String refreshToken;
+
+    /**
+     * 是否需要绑定账号
+     */
+    private Boolean needBind;
+
+    /**
+     * 企业微信用户ID（用于绑定）
+     */
+    private String weWorkUserId;
+
+    /**
+     * 授权码（用于绑定）
+     */
+    private String code;
 }
