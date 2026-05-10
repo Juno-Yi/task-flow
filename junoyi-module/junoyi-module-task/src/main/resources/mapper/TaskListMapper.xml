@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.junoyi.task.mapper.TaskListMapper">
+
+    <resultMap id="TaskListVOResultMap" type="com.junoyi.task.domain.vo.TaskListVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="status" column="status"/>
+        <result property="priority" column="priority"/>
+        <result property="startTime" column="start_time"/>
+        <result property="DueTime" column="due_time"/>
+        <result property="finishTime" column="finish_time"/>
+        <result property="isOverdue" column="is_overdue"/>
+        <result property="latestSubmitTime" column="latest_submit_time"/>
+        <association property="ownerUser" javaType="com.junoyi.task.domain.vo.TaskListVO$OwnerUser">
+            <result property="userId" column="owner_user_id"/>
+            <result property="avatar" column="owner_avatar"/>
+            <result property="nickName" column="owner_nick_name"/>
+        </association>
+        <collection property="taskUserList"
+                    ofType="com.junoyi.task.domain.vo.TaskListVO$TaskUser"
+                    column="id"
+                    select="selectTaskUsersByTaskId"/>
+    </resultMap>
+
+    <select id="selectTaskListPage" resultMap="TaskListVOResultMap">
+        select
+            t.id,
+            t.title,
+            t.status,
+            t.priority,
+            t.start_time,
+            t.due_time,
+            t.finish_time,
+            case
+                when t.due_time is null then false
+                when t.finish_time is null then t.due_time &lt; now()
+                else t.finish_time &gt; t.due_time
+            end as is_overdue,
+            (
+                select max(tr.create_time)
+                from task_record tr
+                where tr.task_id = t.id
+                  and tr.action_type = 1
+            ) as latest_submit_time,
+            owner_su.user_id as owner_user_id,
+            owner_su.avatar as owner_avatar,
+            owner_su.nick_name as owner_nick_name
+        from task t
+        left join task_user owner_tu on owner_tu.task_id = t.id and owner_tu.task_role = 2
+        left join sys_user owner_su on owner_su.user_id = owner_tu.user_id and owner_su.del_flag = 0
+        <where>
+            t.del_flag = 0
+            <if test="query != null and query.title != null and query.title != ''">
+                and t.title like concat('%', #{query.title}, '%')
+            </if>
+            <if test="query != null and query.status != null">
+                and t.status = #{query.status}
+            </if>
+            <if test="query != null and query.priority != null">
+                and t.priority = #{query.priority}
+            </if>
+            <if test="query != null and query.userId != null">
+                and exists (
+                    select 1
+                    from task_user filter_tu
+                    where filter_tu.task_id = t.id
+                      and filter_tu.user_id = #{query.userId}
+                )
+            </if>
+            <if test="query != null and query.startTime != null">
+                and t.create_time &gt;= #{query.startTime}
+            </if>
+            <if test="query != null and query.endTime != null">
+                and t.due_time &lt;= #{query.endTime}
+            </if>
+        </where>
+        order by t.create_time desc
+    </select>
+    <resultMap id="TaskListDetailVOResultMap" type="com.junoyi.task.domain.vo.TaskListDetailVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="priority" column="priority"/>
+        <result property="startTime" column="start_time"/>
+        <result property="dueTime" column="due_time"/>
+        <result property="isOverdue" column="is_overdue"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <association property="ownerUser"
+                     javaType="com.junoyi.task.domain.vo.TaskListDetailVO$OwnerUser"
+                     column="id"
+                     select="selectDetailOwnerUserByTaskId"/>
+        <collection property="taskUserList"
+                    ofType="com.junoyi.task.domain.vo.TaskListDetailVO$TaskUser"
+                    column="id"
+                    select="selectDetailTaskUsersByTaskId"/>
+        <collection property="recordList"
+                    ofType="com.junoyi.task.domain.vo.TaskListDetailVO$RecordItem"
+                    column="id"
+                    select="selectTaskRecordListByTaskId"/>
+    </resultMap>
+
+    <resultMap id="TaskItemVOResultMap" type="com.junoyi.task.domain.vo.TaskItemVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="priority" column="priority"/>
+        <result property="startTime" column="start_time"/>
+        <result property="DueTime" column="due_time"/>
+        <result property="isOverdue" column="is_overdue"/>
+        <result property="remark" column="remark"/>
+        <association property="ownerUser"
+                     javaType="com.junoyi.task.domain.vo.TaskItemVO$OwnerUser"
+                     column="id"
+                     select="selectItemOwnerUserByTaskId"/>
+        <collection property="taskUserList"
+                    ofType="com.junoyi.task.domain.vo.TaskItemVO$TaskUser"
+                    column="id"
+                    select="selectItemTaskUsersByTaskId"/>
+    </resultMap>
+
+    <select id="selectTaskDetailById" resultMap="TaskListDetailVOResultMap">
+        select
+            t.id,
+            t.title,
+            t.description,
+            t.status,
+            t.priority,
+            t.start_time,
+            t.due_time,
+            case
+                when t.due_time is null then false
+                when t.finish_time is null then t.due_time &lt; now()
+                else t.finish_time &gt; t.due_time
+            end as is_overdue,
+            t.create_by,
+            t.create_time,
+            t.update_by,
+            t.update_time,
+            t.remark,
+            t.project_id
+        from task t
+        where t.id = #{taskId}
+          and t.del_flag = 0
+        limit 1
+    </select>
+
+    <select id="selectOwnerUserByTaskId" resultType="com.junoyi.task.domain.vo.TaskListVO$OwnerUser">
+        select
+            su.user_id as userId,
+            su.avatar as avatar,
+            su.nick_name as nickName
+        from task_user tu
+        inner join sys_user su on su.user_id = tu.user_id and su.del_flag = 0
+        where tu.task_id = #{taskId}
+          and tu.task_role = 2
+        limit 1
+    </select>
+
+    <select id="selectTaskUsersByTaskId" resultType="com.junoyi.task.domain.vo.TaskListVO$TaskUser">
+        select
+            su.user_id as userId,
+            su.avatar as avatar,
+            su.nick_name as nickName
+        from task_user tu
+        inner join sys_user su on su.user_id = tu.user_id and su.del_flag = 0
+        where tu.task_id = #{taskId}
+        order by case when tu.task_role = 2 then 0 else 1 end, su.user_id asc
+    </select>
+
+    <select id="selectDetailOwnerUserByTaskId" resultType="com.junoyi.task.domain.vo.TaskListDetailVO$OwnerUser">
+        select
+            su.user_id as userId,
+            su.avatar as avatar,
+            su.nick_name as nickName
+        from task_user tu
+        inner join sys_user su on su.user_id = tu.user_id and su.del_flag = 0
+        where tu.task_id = #{taskId}
+          and tu.task_role = 2
+        limit 1
+    </select>
+
+    <select id="selectDetailTaskUsersByTaskId" resultType="com.junoyi.task.domain.vo.TaskListDetailVO$TaskUser">
+        select
+            su.user_id as userId,
+            su.avatar as avatar,
+            su.nick_name as nickName
+        from task_user tu
+        inner join sys_user su on su.user_id = tu.user_id and su.del_flag = 0
+        where tu.task_id = #{taskId}
+        order by case when tu.task_role = 2 then 0 else 1 end, su.user_id asc
+    </select>
+
+    <resultMap id="TaskRecordItemResultMap" type="com.junoyi.task.domain.vo.TaskListDetailVO$RecordItem">
+        <id property="id" column="id"/>
+        <result property="taskId" column="task_id"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="operatorAvatar" column="operator_avatar"/>
+        <result property="actionType" column="action_type"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <collection property="attachments"
+                    ofType="com.junoyi.task.domain.vo.TaskListDetailVO$AttachmentItem"
+                    column="id"
+                    select="selectTaskAttachmentsByRecordId"/>
+    </resultMap>
+
+    <select id="selectTaskRecordListByTaskId" resultMap="TaskRecordItemResultMap">
+        select
+            tr.id,
+            tr.task_id,
+            tr.operator_id,
+            su.nick_name as operator_name,
+            su.avatar as operator_avatar,
+            tr.action_type,
+            tr.remark,
+            tr.create_time
+        from task_record tr
+        left join sys_user su on su.user_id = tr.operator_id and su.del_flag = 0
+        where tr.task_id = #{taskId}
+        order by tr.create_time desc, tr.id desc
+    </select>
+
+    <select id="selectTaskAttachmentsByRecordId" resultType="com.junoyi.task.domain.vo.TaskListDetailVO$AttachmentItem">
+        select
+            ta.id,
+            ta.task_id as taskId,
+            ta.record_id as recordId,
+            ta.file_name as fileName,
+            ta.file_url as fileUrl
+        from task_attachment ta
+        where ta.record_id = #{recordId}
+        order by ta.id asc
+    </select>
+
+    <select id="selectCurrentMonthTaskList" resultMap="TaskItemVOResultMap">
+        select
+            t.id,
+            t.title,
+            t.description,
+            t.status,
+            t.priority,
+            t.start_time,
+            t.due_time,
+            case
+                when t.due_time is null then false
+                when t.finish_time is null then t.due_time &lt; now()
+                else t.finish_time &gt; t.due_time
+            end as is_overdue,
+            t.remark
+        from task t
+        where t.del_flag = 0
+          and exists (
+              select 1
+              from task_user tu
+              where tu.task_id = t.id
+                and tu.user_id = #{userId}
+          )
+          and t.due_time is not null
+          and t.create_time &lt;= #{monthEnd}
+          and t.due_time &gt;= #{monthStart}
+        order by ifnull(t.create_time, t.due_time) asc, t.id desc
+    </select>
+
+    <select id="countTaskUserRelation" resultType="java.lang.Long">
+        select count(1)
+        from task_user tu
+        inner join task t on t.id = tu.task_id and t.del_flag = 0
+        where tu.task_id = #{taskId}
+          and tu.user_id = #{userId}
+    </select>
+
+    <select id="selectItemOwnerUserByTaskId" resultType="com.junoyi.task.domain.vo.TaskItemVO$OwnerUser">
+        select
+            su.user_id as userId,
+            su.avatar as avatar,
+            su.nick_name as nickName
+        from task_user tu
+        inner join sys_user su on su.user_id = tu.user_id and su.del_flag = 0
+        where tu.task_id = #{taskId}
+          and tu.task_role = 2
+        limit 1
+    </select>
+
+    <select id="selectItemTaskUsersByTaskId" resultType="com.junoyi.task.domain.vo.TaskItemVO$TaskUser">
+        select
+            su.user_id as userId,
+            su.avatar as avatar,
+            su.nick_name as nickName
+        from task_user tu
+        inner join sys_user su on su.user_id = tu.user_id and su.del_flag = 0
+        where tu.task_id = #{taskId}
+        order by case when tu.task_role = 2 then 0 else 1 end, su.user_id asc
+    </select>
+
+    <!-- 项目任务列表查询 -->
+    <resultMap id="ProjectTaskItemVOResultMap" type="com.junoyi.task.domain.vo.ProjectTaskItemVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="priority" column="priority"/>
+        <result property="startTime" column="start_time"/>
+        <result property="DueTime" column="due_time"/>
+        <result property="isOverdue" column="is_overdue"/>
+        <result property="remark" column="remark"/>
+        <association property="ownerUser"
+                     javaType="com.junoyi.task.domain.vo.ProjectTaskItemVO$OwnerUser"
+                     column="id"
+                     select="selectProjectTaskOwnerUserByTaskId"/>
+        <collection property="taskUserList"
+                    ofType="com.junoyi.task.domain.vo.ProjectTaskItemVO$TaskUser"
+                    column="id"
+                    select="selectProjectTaskUsersByTaskId"/>
+    </resultMap>
+
+    <select id="selectProjectTaskList" resultMap="ProjectTaskItemVOResultMap">
+        select
+            t.id,
+            t.title,
+            t.description,
+            t.status,
+            t.priority,
+            t.start_time,
+            t.due_time,
+            case
+                when t.due_time is null then false
+                when t.finish_time is null then t.due_time &lt; now()
+                else t.finish_time &gt; t.due_time
+            end as is_overdue,
+            t.remark
+        from task t
+        where t.del_flag = 0
+          and t.project_id = #{projectId}
+          and t.type = 1
+        order by t.create_time desc
+    </select>
+
+    <select id="selectProjectTaskOwnerUserByTaskId" resultType="com.junoyi.task.domain.vo.ProjectTaskItemVO$OwnerUser">
+        select
+            su.user_id as userId,
+            su.avatar as avatar,
+            su.nick_name as nickName
+        from task_user tu
+        inner join sys_user su on su.user_id = tu.user_id and su.del_flag = 0
+        where tu.task_id = #{taskId}
+          and tu.task_role = 2
+        limit 1
+    </select>
+
+    <select id="selectProjectTaskUsersByTaskId" resultType="com.junoyi.task.domain.vo.ProjectTaskItemVO$TaskUser">
+        select
+            su.user_id as userId,
+            su.avatar as avatar,
+            su.nick_name as nickName
+        from task_user tu
+        inner join sys_user su on su.user_id = tu.user_id and su.del_flag = 0
+        where tu.task_id = #{taskId}
+        order by case when tu.task_role = 2 then 0 else 1 end, su.user_id asc
+    </select>
+</mapper>
+

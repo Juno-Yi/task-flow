@@ -5,24 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.junoyi</groupId>
-        <artifactId>junoyi-module</artifactId>
+        <artifactId>junoyi-module-api</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>junoyi-module-task</artifactId>
 
-    <description> 任务模块 </description>
+    <artifactId>junoyi-module-task-api</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.junoyi</groupId>
-            <artifactId>junoyi-module-system</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.junoyi</groupId>
-            <artifactId>junoyi-module-task-api</artifactId>
+            <artifactId>junoyi-framework-boot-starter</artifactId>
         </dependency>
     </dependencies>
 </project>
