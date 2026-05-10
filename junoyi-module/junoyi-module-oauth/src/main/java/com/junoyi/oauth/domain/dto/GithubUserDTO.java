@@ -5,7 +5,7 @@ import lombok.Data;
 
 /**
  * GitHub 用户信息 DTO
- *
+ * @author Echo
  */
 @Data
 public class GithubUserDTO {
