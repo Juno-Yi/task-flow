@@ -8,7 +8,6 @@ import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
-
 /**
  * 任务 PO 数据对象
  *
@@ -20,7 +19,7 @@ import java.util.Date;
 public class Task extends BaseEntity {
 
     /**
-     * 任务主键ID
+     * 主键ID
      */
     @TableId
     private Long id;
@@ -43,50 +42,51 @@ public class Task extends BaseEntity {
     /**
      * 任务优先级
      */
-    private Integer priority;
+    private  Integer priority;
 
     /**
-     * 任务类型
+     * 任务类型（0普通任务，1项目任务，2审批任务）
      */
     private Integer type;
 
     /**
-     * 项目ID（关联）
+     * 项目ID（如果为空就是普通任务，不是就是项目任务）
      */
     private Long projectId;
 
     /**
-     * 任务ID（关联）
+     * 关联的业务
      */
-    private Long bizId;
+    private Long biz_id;
 
     /**
-     * 计划开始时间
+     * 开始时间
      */
-    private Date planStartTime;
+    private Date startTime;
 
     /**
-     * 计划结束时间
+     * 截止时间
      */
-    private Date planEndTime;
+    private Date dueTime;
 
     /**
-     * 实际开始时间
+     * 实际完成时间
      */
-    private Date actualStartTime;
+    private Date finishTime;
 
     /**
-     * 实际结束时间
+     * 企业微信日程ID
      */
-    private Date actualEndTime;
+    private String wecomScheduleId;
 
     /**
-     * 任务创建者Id
+     * 任务创建者ID
      */
     private Long creatorId;
 
     /**
-     * 软删除标识
+     * 软删除
      */
     private Boolean delFlag;
+
 }

@@ -7,6 +7,9 @@ import com.junoyi.framework.permission.annotation.Permission;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
+import com.junoyi.task.domain.dto.TaskListQueryDTO;
+import com.junoyi.task.domain.vo.TaskListVO;
+import com.junoyi.task.service.ITaskListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class TaskListController extends BaseController {
 
+    private final ITaskListService taskListService;
+
     /**
      * 获取任务管理列表（分页）
      */
@@ -28,8 +33,8 @@ public class TaskListController extends BaseController {
     @Permission(
             value = "task.ui.list.view"
     )
-    public R<PageResult<?>> getTaskList(){
-        return R.ok();
+    public R<PageResult<TaskListVO>> getTaskList(TaskListQueryDTO queryDTO){
+        return R.ok(taskListService.getTaskList(queryDTO,getPageQuery()));
     }
 
     /**
