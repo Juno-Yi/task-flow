@@ -5,7 +5,7 @@ import com.junoyi.system.domain.vo.AuthVO;
 
 /**
  * GitHub OAuth 服务接口
- *
+ * @author Echo
  */
 public interface IGithubOauthService {
 

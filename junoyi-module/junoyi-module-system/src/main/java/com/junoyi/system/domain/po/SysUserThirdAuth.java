@@ -38,6 +38,21 @@ public class SysUserThirdAuth {
     private String authKey;
 
     /**
+     * 第三方平台访问令牌
+     */
+    private String accessToken;
+
+    /**
+     * 第三方平台刷新令牌
+     */
+    private String refreshToken;
+
+    /**
+     * 令牌过期时间
+     */
+    private Date tokenExpireTime;
+
+    /**
      * 创建者
      */
     private String createBy;
