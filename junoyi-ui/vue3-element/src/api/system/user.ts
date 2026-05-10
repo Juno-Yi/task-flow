@@ -12,6 +12,16 @@ export function fetchGetUserList(params: Api.System.UserQueryDTO) {
 }
 
 /**
+ * 获取用户下拉列表（支持昵称模糊搜索）
+ */
+export function fetchGetUserOptions(params?: Api.System.UserOptionQueryDTO) {
+  return request.get<Api.System.SysUserVO[]>({
+    url: '/system/user/options',
+    params
+  })
+}
+
+/**
  * 添加用户
  */
 export function fetchAddUser(data: Api.System.SysUserDTO) {

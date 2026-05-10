@@ -2,6 +2,16 @@
  * 系统用户相关类型定义
  */
 declare namespace Api.System {
+
+  /**
+   * 用户下拉选项查询参数
+   */
+  interface UserOptionQueryDTO {
+    /** 昵称（模糊搜索） */
+    nickName?: string
+  }
+
+
   /**
    * 用户查询参数
    */
