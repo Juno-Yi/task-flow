@@ -10,8 +10,11 @@
       <div class="auth-right-wrap">
         <div class="form">
           <h3 class="title">{{ $t('login.title') }}</h3>
-          <p class="sub-title">{{ $t('login.subTitle') }}</p>
+          <p class="sub-title">请您完成登录！</p>
+
+          <!-- 账号密码登录表单 -->
           <ElForm
+            v-if="loginMode === 'password'"
             ref="formRef"
             :model="formData"
             :rules="rules"
@@ -102,26 +105,6 @@
                 <div class="flex-1 h-px bg-gray-200"></div>
               </div>
               <div class="flex justify-center gap-4">
-                <ElTooltip :content="$t('login.thirdParty.github')" placement="top">
-                  <div class="third-party-btn" @click="handleThirdPartyLogin('github')">
-                    <img
-                      :src="thirdPartyIcons.github"
-                      alt="GitHub"
-                      class="third-party-icon"
-                      @error="handleImageError"
-                    />
-                  </div>
-                </ElTooltip>
-                <ElTooltip :content="$t('login.thirdParty.gitee')" placement="top">
-                  <div class="third-party-btn" @click="handleThirdPartyLogin('gitee')">
-                    <img
-                      :src="thirdPartyIcons.gitee"
-                      alt="Gitee"
-                      class="third-party-icon"
-                      @error="handleImageError"
-                    />
-                  </div>
-                </ElTooltip>
                 <ElTooltip :content="$t('login.thirdParty.wework')" placement="top">
                   <div class="third-party-btn" @click="handleThirdPartyLogin('wework')">
                     <img
@@ -155,6 +138,22 @@
               </div>
             </div>
           </ElForm>
+
+          <!-- 企业微信扫码登录 -->
+          <div v-else-if="loginMode === 'wework'" class="wework-qrcode-container">
+            <div class="qrcode-wrapper">
+              <div id="wework_qrcode" class="qrcode-box"></div>
+              <div v-if="qrcodeLoading" class="qrcode-loading">
+                <ElIcon class="is-loading"><Loading /></ElIcon>
+                <p>加载中...</p>
+              </div>
+            </div>
+            <p class="qrcode-tip">请使用企业微信扫码登录</p>
+            <ElButton text type="primary" @click="switchToPasswordLogin" class="mt-4">
+              <ElIcon><ArrowLeft /></ElIcon>
+              返回账号密码登录
+            </ElButton>
+          </div>
         </div>
       </div>
 
@@ -174,18 +173,15 @@
 <script setup lang="ts">
   import { nextTick } from 'vue'
   import { useUserStore } from '@/store/modules/user'
-  import { useSettingStore } from '@/store/modules/setting'
   import { useI18n } from 'vue-i18n'
   import { HttpError } from '@/utils/http/error'
   import { fetchLogin, fetchGetCaptcha, fetchGetUserInfo, fetchGetCaptchaConfig } from '@/api/auth'
   import { fetchGetSystemInfo, type SystemInfo } from '@/api/system/info'
   import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
+  import { Loading, ArrowLeft } from '@element-plus/icons-vue'
+  import { fetchGetWeWorkLoginConfig, fetchWeWorkCallback } from '@/api/oauth/wework'
 
-  // 引入第三方登录图标（占位图片，后续替换为实际图片）
-  // 将你的图片放到 src/assets/images/login/third-party/ 目录下
-  // 图片命名：github.png, gitee.png, wework.png, feishu.png, dingtalk.png
-  import githubIcon from '@/assets/images/login/third-party/github.png'
-  import giteeIcon from '@/assets/images/login/third-party/gitee.png'
+  // 引入第三方登录图标
   import weworkIcon from '@/assets/images/login/third-party/wework.png'
   import feishuIcon from '@/assets/images/login/third-party/feishu.png'
   import dingtalkIcon from '@/assets/images/login/third-party/dingtalk.png'
@@ -201,16 +197,17 @@
   })
 
   const userStore = useUserStore()
-  const settingStore = useSettingStore()
 
   // 第三方登录图标配置
   const thirdPartyIcons = {
-    github: githubIcon,
-    gitee: giteeIcon,
     wework: weworkIcon,
     feishu: feishuIcon,
     dingtalk: dingtalkIcon
   }
+
+  // 登录模式：password - 账号密码登录，wework - 企业微信扫码登录
+  const loginMode = ref<'password' | 'wework'>('password')
+  const qrcodeLoading = ref(false)
   const formRef = ref<FormInstance>()
 
   const router = useRouter()
@@ -248,6 +245,8 @@
   onMounted(() => {
     getCaptchaConfig()
     getSystemInfo()
+    // 检查是否有企业微信回调参数
+    checkWeWorkCallback()
   })
 
   // 获取验证码配置
@@ -373,16 +372,187 @@
   }
 
   // 第三方登录
-  const handleThirdPartyLogin = (provider: string) => {
-    ElNotification({
-      title: '提示',
-      message: `${provider} 登录功能开发中...`,
-      type: 'info',
-      duration: 2000
+  const handleThirdPartyLogin = async (provider: string) => {
+    if (provider === 'wework') {
+      await switchToWeWorkLogin()
+    } else {
+      ElNotification({
+        title: '提示',
+        message: `${provider} 登录功能开发中...`,
+        type: 'info',
+        duration: 2000
+      })
+      console.log('第三方登录:', provider)
+    }
+  }
+
+  // 切换到企业微信扫码登录
+  const switchToWeWorkLogin = async () => {
+    try {
+      qrcodeLoading.value = true
+      // 获取企业微信登录配置
+      const config = await fetchGetWeWorkLoginConfig()
+
+      if (!config || !config.corpId || !config.agentId) {
+        ElNotification({
+          title: '错误',
+          message: '企业微信登录配置不完整，请联系管理员',
+          type: 'error',
+          duration: 3000
+        })
+        return
+      }
+
+      // 切换到扫码模式
+      loginMode.value = 'wework'
+
+      // 等待 DOM 更新
+      await nextTick()
+
+      // 初始化企业微信扫码登录
+      initWeWorkQRCode(config)
+    } catch (error) {
+      console.error('获取企业微信配置失败:', error)
+      ElNotification({
+        title: '错误',
+        message: '无法使用企业微信登录！请联系管理员开启！',
+        type: 'error',
+        duration: 3000
+      })
+    } finally {
+      qrcodeLoading.value = false
+    }
+  }
+
+  // 初始化企业微信二维码
+  const initWeWorkQRCode = (config: any) => {
+    try {
+      const redirectUri = encodeURIComponent(config.redirectUri)
+
+      // 动态加载企业微信 JS-SDK
+      loadWeWorkScript().then(() => {
+        // @ts-ignore
+        if (window.WwLogin) {
+          // @ts-ignore
+          new window.WwLogin({
+            id: 'wework_qrcode',
+            appid: config.corpId,
+            agentid: config.agentId,
+            redirect_uri: redirectUri,
+            state: config.state,
+            href: '', // 可以自定义样式
+            lang: 'zh'
+          })
+
+          // 监听扫码回调（通过 URL 参数）
+          checkWeWorkCallback()
+        } else {
+          throw new Error('企业微信 SDK 加载失败')
+        }
+      }).catch(error => {
+        console.error('加载企业微信 SDK 失败:', error)
+        ElNotification({
+          title: '错误',
+          message: '加载企业微信 SDK 失败',
+          type: 'error',
+          duration: 3000
+        })
+      })
+    } catch (error) {
+      console.error('初始化企业微信二维码失败:', error)
+      ElNotification({
+        title: '错误',
+        message: '初始化企业微信扫码失败',
+        type: 'error',
+        duration: 3000
+      })
+    }
+  }
+
+  // 动态加载企业微信 JS-SDK
+  const loadWeWorkScript = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      // @ts-ignore
+      if (window.WwLogin) {
+        resolve()
+        return
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://wwcdn.weixin.qq.com/node/wework/wwopen/js/wwLogin-1.2.8.js'
+      script.onload = () => resolve()
+      script.onerror = () => reject(new Error('Failed to load WeWork SDK'))
+      document.head.appendChild(script)
     })
-    // TODO: 实现第三方登录逻辑
-    // 根据 provider 跳转到对应的第三方登录页面
-    console.log('第三方登录:', provider)
+  }
+
+  // 检查企业微信回调
+  const checkWeWorkCallback = () => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const code = urlParams.get('code')
+    const state = urlParams.get('state')
+
+    if (code && state) {
+      handleWeWorkCallback(code)
+    }
+  }
+
+  // 处理企业微信回调
+  const handleWeWorkCallback = async (code: string) => {
+    try {
+      loading.value = true
+      const response = await fetchWeWorkCallback(code)
+
+      if (response.accessToken) {
+        // 直接登录成功
+        userStore.setToken(response.accessToken, response.refreshToken || '')
+        userStore.setLoginStatus(true)
+
+        // 获取用户信息
+        const userInfo = await fetchGetUserInfo()
+        userStore.setUserInfo(userInfo)
+
+        await nextTick()
+        showLoginSuccessNotice(userInfo.nickName)
+
+        // 清除 URL 参数
+        window.history.replaceState({}, '', window.location.pathname)
+
+        // 跳转
+        const redirect = route.query.redirect as string
+        router.push(redirect || '/')
+      } else if (response.needBind) {
+        // 需要绑定账号
+        ElNotification({
+          title: '提示',
+          message: '该企业微信账号未绑定，请先绑定账号',
+          type: 'warning',
+          duration: 3000
+        })
+        // TODO: 跳转到绑定页面或显示绑定表单
+        // 这里可以保存 code 和 weWorkUserId，然后切换到绑定模式
+      }
+    } catch (error) {
+      console.error('企业微信登录失败:', error)
+      ElNotification({
+        title: '登录失败',
+        message: '企业微信登录失败，请重试',
+        type: 'error',
+        duration: 3000
+      })
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 切换回账号密码登录
+  const switchToPasswordLogin = () => {
+    loginMode.value = 'password'
+    // 清除二维码容器
+    const qrcodeContainer = document.getElementById('wework_qrcode')
+    if (qrcodeContainer) {
+      qrcodeContainer.innerHTML = ''
+    }
   }
 
   // 图片加载错误处理
@@ -454,5 +624,66 @@
     width: 24px;
     height: 24px;
     object-fit: contain;
+  }
+
+  // 企业微信扫码登录样式
+  .wework-qrcode-container {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+
+    .qrcode-wrapper {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--art-border-color);
+      border-radius: 8px;
+      background: #fff;
+
+      .qrcode-box {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .qrcode-loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+
+        .el-icon {
+          font-size: 32px;
+          color: var(--el-color-primary);
+          margin-bottom: 12px;
+        }
+
+        p {
+          font-size: 14px;
+          color: var(--el-text-color-secondary);
+        }
+      }
+    }
+
+    .qrcode-tip {
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--el-text-color-regular);
+    }
   }
 </style>

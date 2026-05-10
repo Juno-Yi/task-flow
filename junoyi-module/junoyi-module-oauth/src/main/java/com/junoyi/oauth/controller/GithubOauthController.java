@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Github Oauth 控制器
- *
+ * @author Echo
  */
 @RestController
 @RequestMapping("/auth/github")
