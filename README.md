@@ -23,6 +23,12 @@ API接口文档：https://lk458yviee.apifox.cn
 
 ![login](/doc/img/view_login.png)
 
+--- 
+
+**任务管理**：系统所有员工任务列表，任务支持企业微信、飞书、钉钉同步日程与通知
+
+![view_task_list](/doc/img/view_task_list.png)
+
 ---
 
 **会话监控**：支持查看当前系统在线人数、在线会话信息、手动踢出用户会话。
