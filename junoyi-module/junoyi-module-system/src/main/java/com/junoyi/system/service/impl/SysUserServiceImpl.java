@@ -143,6 +143,25 @@ public class SysUserServiceImpl implements ISysUserService {
     }
 
     /**
+     * 获取用户下拉选项列表（支持按昵称模糊搜索）
+     *
+     * @param nickName 用户昵称
+     * @return 用户下拉选项列表
+     */
+    @Override
+    public List<SysUserVO> getUserOptions(String nickName) {
+        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StringUtils.hasText(nickName), SysUser::getNickName, nickName)
+                .eq(SysUser::isDelFlag, false)
+                .eq(SysUser::getStatus, SysUserStatus.NORMAL.getCode())
+                .ne(SysUser::getUserId, 1L)
+                .orderByAsc(SysUser::getUserId);
+
+        List<SysUser> userList = sysUserMapper.selectList(wrapper);
+        return sysUserConverter.toVoList(userList);
+    }
+
+    /**
      * 新增用户
      *
      * @param userDTO 用户数据传输对象

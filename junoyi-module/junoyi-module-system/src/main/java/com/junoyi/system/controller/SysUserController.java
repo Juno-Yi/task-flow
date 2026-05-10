@@ -49,6 +49,15 @@ public class SysUserController extends BaseController {
         return R.ok(sysUserService.getUserList(queryDTO, buildPage()));
     }
 
+    /**
+     * 获取下拉列表（支持昵称模糊搜索）
+     */
+    @GetMapping("/options")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<List<SysUserVO>> getUserOptions(@RequestParam(value = "nickName", required = false) String nickName){
+        return R.ok(sysUserService.getUserOptions(nickName));
+    }
+
 
     /**
      * 添加用户
