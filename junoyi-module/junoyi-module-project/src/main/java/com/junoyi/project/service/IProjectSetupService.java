@@ -11,7 +11,7 @@ import com.junoyi.project.domain.vo.ProjectListVO;
  *
  * @author Fan
  */
-public interface IProjectApprovalService {
+public interface IProjectSetupService {
 
     /**
      * 获取立项项目列表

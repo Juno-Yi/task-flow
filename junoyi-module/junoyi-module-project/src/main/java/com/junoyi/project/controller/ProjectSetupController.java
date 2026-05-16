@@ -7,7 +7,7 @@ import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
 import com.junoyi.project.domain.vo.ProjectListVO;
-import com.junoyi.project.service.IProjectApprovalService;
+import com.junoyi.project.service.IProjectSetupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/project/approval")
 @RequiredArgsConstructor
-public class ProjectApprovalController extends BaseController {
+public class ProjectSetupController extends BaseController {
 
-    private final IProjectApprovalService projectApprovalService;
+    private final IProjectSetupService projectApprovalService;
 
     /**
      * 获取立项项目列表（分页）

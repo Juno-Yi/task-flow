@@ -10,9 +10,9 @@ import com.junoyi.project.domain.dto.ProjectListQueryDTO;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
-import com.junoyi.project.mapper.ProjectApprovalMapper;
+import com.junoyi.project.mapper.ProjectSetupMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
-import com.junoyi.project.service.IProjectApprovalService;
+import com.junoyi.project.service.IProjectSetupService;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
@@ -34,9 +34,9 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class ProjectApprovalServiceImpl implements IProjectApprovalService {
+public class ProjectSetupServiceImpl implements IProjectSetupService {
 
-    private final ProjectApprovalMapper projectApprovalMapper;
+    private final ProjectSetupMapper projectSetupMapper;
     private final ProjectMemberMapper projectMemberMapper;
     private final SysUserMapper sysUserMapper;
     private final SysDictApi sysDictApi;
@@ -94,7 +94,7 @@ public class ProjectApprovalServiceImpl implements IProjectApprovalService {
         wrapper.orderByDesc(Project::getCreateTime);
 
         // 分页查询项目列表
-        Page<Project> resultPage = projectApprovalMapper.selectPage(page, wrapper);
+        Page<Project> resultPage = projectSetupMapper.selectPage(page, wrapper);
         List<Project> projects = resultPage.getRecords();
 
         // 如果没有数据，直接返回空结果

@@ -82,21 +82,6 @@
         </ElSelect>
       </ElFormItem>
 
-      <ElFormItem label="项目状态" prop="status" v-if="type === 'edit'">
-        <ElSelect
-          v-model="formData.status"
-          placeholder="请选择项目状态"
-          class="w-full"
-        >
-          <ElOption
-            v-for="item in projectStatusOptions"
-            :key="item.dictValue"
-            :label="item.dictLabel"
-            :value="Number(item.dictValue)"
-          />
-        </ElSelect>
-      </ElFormItem>
-
       <ElFormItem label="备注" prop="remark">
         <ElInput
           v-model="formData.remark"
@@ -160,8 +145,6 @@
   const userList = ref<Api.System.SysUserVO[]>([])
   // 项目类型字典选项
   const projectTypeOptions = ref<Api.System.DictDataVO[]>([])
-  // 项目状态字典选项
-  const projectStatusOptions = ref<Api.System.DictDataVO[]>([])
   // 项目优先级字典选项
   const projectPriorityOptions = ref<Api.System.DictDataVO[]>([])
 
@@ -202,8 +185,6 @@
     try {
       // 加载项目类型字典
       projectTypeOptions.value = await fetchGetDictDataByType('project_type')
-      // 加载项目状态字典
-      projectStatusOptions.value = await fetchGetDictDataByType('project_status')
       // 加载项目优先级字典
       projectPriorityOptions.value = await fetchGetDictDataByType('project_priority')
     } catch (error) {

@@ -10,5 +10,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @author Fan
  */
 @Mapper
-public interface ProjectApprovalMapper extends BaseMapper<Project> {
+public interface ProjectSetupMapper extends BaseMapper<Project> {
 }
