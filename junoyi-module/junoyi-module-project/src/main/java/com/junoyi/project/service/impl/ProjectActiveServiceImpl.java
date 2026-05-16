@@ -14,7 +14,9 @@ import com.junoyi.project.mapper.ProjectActiveMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.service.IProjectActiveService;
 import com.junoyi.system.api.SysDictApi;
+import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
+import com.junoyi.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ public class ProjectActiveServiceImpl implements IProjectActiveService {
 
     private final ProjectActiveMapper projectActiveMapper;
     private final ProjectMemberMapper projectMemberMapper;
+    private final SysUserMapper sysUserMapper;
     private final SysDictApi sysDictApi;
 
     /**
@@ -119,9 +122,19 @@ public class ProjectActiveServiceImpl implements IProjectActiveService {
         Map<Long, Long> memberCountMap = members.stream()
                 .collect(Collectors.groupingBy(ProjectMember::getProjectId, Collectors.counting()));
 
-        // TODO: 批量查询负责人信息（需要调用用户服务API）
-        // 暂时设置为空Map，在循环中设置为"未知"
+        // 收集负责人ID
+        List<Long> leaderIds = projects.stream()
+                .map(Project::getLeader)
+                .filter(leaderId -> leaderId != null)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 批量查询负责人信息
         Map<Long, String> leaderNameMap = new HashMap<>();
+        if (!leaderIds.isEmpty()) {
+            leaderNameMap = sysUserMapper.selectBatchIds(leaderIds).stream()
+                    .collect(Collectors.toMap(SysUser::getUserId, SysUser::getNickName));
+        }
 
         // 批量查询项目任务统计
 //        Map<Long, TaskStatistics> taskStatisticsMap = calculateTaskStatistics(projectIds);
