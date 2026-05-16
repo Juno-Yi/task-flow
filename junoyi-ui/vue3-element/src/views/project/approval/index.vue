@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <h1>项目立项</h1>
+ <h1>项目立项审批</h1>
 </template>
 
 <style scoped>

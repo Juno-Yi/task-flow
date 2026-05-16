@@ -6,6 +6,8 @@ import com.junoyi.framework.core.domain.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Date;
+
 /**
  * 项目 PO 数据对象
  *
@@ -43,4 +45,9 @@ public class Project extends BaseEntity {
 
     /** 软删除 */
     private boolean delFlag;
+
+    /**
+     * 项目开始时间
+     */
+    private Date startTime;
 }
