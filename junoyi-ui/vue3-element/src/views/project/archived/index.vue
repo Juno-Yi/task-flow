@@ -35,14 +35,6 @@
       </ElCard>
     </div>
 
-    <!-- 仓库弹窗 -->
-    <RepoDialog
-        v-model:visible="dialogVisible"
-        :type="dialogType"
-        :repo-data="currentRepoData"
-        @submit="handleDialogSubmit"
-    />
-
   </div>
 </template>
 
@@ -52,7 +44,6 @@ import ArtButtonMore, { ButtonMoreItem } from '@/components/core/forms/art-butto
 import { useTable } from '@/hooks/core/useTable'
 import { useRouter } from 'vue-router'
 import RepoSearch from './modules/repo-search.vue'
-import RepoDialog from './modules/repo-dialog.vue'
 import { ElTag, ElMessageBox, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
 import { fetchExportProjectBook } from '@/api/project/list'
@@ -273,12 +264,6 @@ const {
               key: 'view',
               label: '查看详情',
               icon: 'ri:eye-line'
-            },
-            {
-              key: 'edit',
-              label: '编辑',
-              icon: 'ri:edit-line',
-              auth: 'project.ui.list.edit.button'
             },
           ]
 
