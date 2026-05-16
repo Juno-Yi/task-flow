@@ -18,6 +18,7 @@ import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
 import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.exception.ProjectPasswordWrongException;
+import com.junoyi.project.mapper.ProjectListMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.service.IProjectListService;
 import com.junoyi.project.util.ProjectNoGenerateUtil;
