@@ -157,10 +157,10 @@ log:
 打开微信关注官方公众号「钧逸网络科技」，回复 `研发任务管理系统数据库`，即可免费获取完整数据库结构和数据。
 
 <div align="center">
-
-![gongzhonghao](/doc/img/gongzhonghao.jpg)
-
+    <img src="/doc/img/gongzhonghao.jpg" width="300" height="300"/>
 </div>
+
+后续更新计划将持续在公众号上发布更新。
 
 
 ## 商业使用说明（开源协议）
