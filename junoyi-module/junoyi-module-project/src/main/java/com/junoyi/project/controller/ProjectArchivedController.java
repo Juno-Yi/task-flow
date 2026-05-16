@@ -31,6 +31,6 @@ public class ProjectArchivedController extends BaseController {
     @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
     public R<PageResult<ProjectListVO>> getProjectArchivedList(ProjectListQueryDTO queryDTO){
-        return R.ok();
+        return R.ok(projectArchivedService.getArchivedList(queryDTO,buildPage()));
     }
 }
