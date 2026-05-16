@@ -85,7 +85,7 @@ public class ProjectArchivedServiceImpl implements IProjectArchivedService {
                 .like(StringUtils.isNotBlank(queryDTO.getName()), Project::getName, queryDTO.getName())
                 .eq(queryDTO.getType() != null, Project::getType, queryDTO.getType())
                 .eq(Project::isDelFlag, false)
-                .in(Project::getStatus, 4,5);
+                .eq(Project::getStatus, 7);
 
         // 如果没有查看所有项目的权限，添加项目ID过滤条件
         if (!hasAllDataPermission && accessibleProjectIds != null) {

@@ -53,11 +53,10 @@ import { useTable } from '@/hooks/core/useTable'
 import { useRouter } from 'vue-router'
 import RepoSearch from './modules/repo-search.vue'
 import RepoDialog from './modules/repo-dialog.vue'
-import DeleteVerifyDialog from './modules/delete-verify-dialog.vue'
 import { ElTag, ElMessageBox, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
-import { fetchDeleteRepo, fetchDeleteRepoBatch, fetchExportProjectBook } from '@/api/project/list'
-import {fetchGetProjectActiveList} from "@/api/project/active";
+import { fetchExportProjectBook } from '@/api/project/list'
+import {fetchGetProjectArchivedList} from "@/api/project/archived";
 
 
 defineOptions({ name: 'ProjectRepo' })
@@ -100,7 +99,7 @@ const {
   refreshData
 } = useTable({
   core: {
-    apiFn: fetchGetProjectActiveList,
+    apiFn: fetchGetProjectArchivedList,
     apiParams: {
       current: 1,
       size: 20,
