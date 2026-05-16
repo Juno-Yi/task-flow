@@ -1,4 +1,4 @@
-<!-- 项目协作 - 活跃项目 -->
+<!-- 项目协作 - 已归档项目 -->
 <template>
   <div class="art-full-height">
     <div class="flex flex-col h-full">
