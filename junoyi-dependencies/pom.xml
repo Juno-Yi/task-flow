@@ -164,6 +164,11 @@
                 <artifactId>junoyi-module-oauth</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.junoyi</groupId>
+                <artifactId>junoyi-module-project</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <!--    Module API 解耦模块       -->
             <dependency>
