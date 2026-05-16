@@ -3,25 +3,31 @@ package com.junoyi.project.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.core.utils.StringUtils;
+import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.permission.helper.PermissionHelper;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
+import com.junoyi.project.exception.ProjectException;
+import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.mapper.ProjectSetupMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.service.IProjectSetupService;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
+import com.junoyi.system.event.UserOperationEvent;
 import com.junoyi.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,5 +218,50 @@ public class ProjectSetupServiceImpl implements IProjectSetupService {
                 (int) resultPage.getCurrent(),
                 (int) resultPage.getSize()
         );
+    }
+
+    /**
+     * 启动项目
+     * @param projectId 项目ID
+     */
+    @Override
+    public void startProject(Long projectId) {
+        // 检查项目是否存在
+        Project project = projectSetupMapper.selectById(projectId);
+        if (project == null || project.isDelFlag()) {
+            throw new ProjectNotFoundException("不存在的项目");
+        }
+
+        // 项目状态是否未启动（状态0表示规划中/未启动）
+        if (project.getStatus() != 0) {
+            throw new ProjectException("项目状态不是未启动，无法启动");
+        }
+
+        // 获取当前用户ID
+        Long currentUserId = SecurityUtils.getUserId();
+
+        // 检查当前用户是否有权限启动项目
+        // 1. 超级管理员可以启动任何项目
+        // 2. 拥有 project.data.list.all 权限的用户可以启动任何项目
+        // 3. 项目负责人可以启动自己的项目
+        boolean hasPermission = PermissionHelper.isSuperAdmin()
+                || PermissionHelper.hasPermission("project.data.list.all")
+                || project.getLeader().equals(currentUserId);
+
+        if (!hasPermission) {
+            throw new ProjectException("无权限启动该项目，只有项目负责人或管理员可以启动项目");
+        }
+
+        // 更新项目状态为进行中（状态1）
+        project.setStatus(1);
+        project.setStartTime(DateUtils.getNowDate());
+        project.setUpdateBy(SecurityUtils.getUserName());
+        project.setUpdateTime(DateUtils.getNowDate());
+        projectSetupMapper.updateById(project);
+
+        // 发布操作日志事件
+        EventBus.get().callEvent(UserOperationEvent.of("start", "project",
+                "启动了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
+                String.valueOf(project.getId()), project.getName()));
     }
 }

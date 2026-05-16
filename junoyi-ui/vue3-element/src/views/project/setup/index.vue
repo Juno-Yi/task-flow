@@ -81,7 +81,7 @@
   import { ElTag, ElMessageBox, ElProgress } from 'element-plus'
   import { DialogType } from '@/types'
   import { fetchDeleteRepo, fetchDeleteRepoBatch, fetchExportProjectBook } from '@/api/project/list'
-  import { fetchGetProjectSetupList} from "@/api/project/setup";
+  import { fetchGetProjectSetupList, fetchStartProject } from "@/api/project/setup";
 
   defineOptions({ name: 'ProjectRepo' })
 
@@ -299,6 +299,13 @@
           formatter: (row: RepoVO) => {
             const list: ButtonMoreItem[] = [
               {
+                key: 'start',
+                label: '启动项目',
+                icon: 'ri:play-line',
+                auth: 'project.ui.setup.button.start',
+                color: '#67c23a'
+              },
+              {
                 key: 'view',
                 label: '查看详情',
                 icon: 'ri:eye-line'
@@ -317,7 +324,7 @@
                 color: '#f56c6c'
               }
             ]
-            
+
             return h(ArtButtonMore, {
               list,
               onClick: (item: ButtonMoreItem) => handleButtonMoreClick(item, row)
@@ -383,6 +390,9 @@
    */
   const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
     switch (item.key) {
+      case 'start':
+        startProject(row)
+        break
       case 'view':
         viewRepo(row)
         break
@@ -392,6 +402,32 @@
       case 'delete':
         deleteRepo(row)
         break
+    }
+  }
+
+  /**
+   * 启动项目
+   */
+  const startProject = async (row: RepoVO): Promise<void> => {
+    try {
+      await ElMessageBox.confirm(
+        `确定要启动项目 "${row.name}" 吗？启动后项目状态将变为"进行中"。`,
+        '启动项目',
+        {
+          confirmButtonText: '确定启动',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+
+      await fetchStartProject(row.id)
+      ElMessage.success(`项目 "${row.name}" 已成功启动`)
+      getData() // 刷新列表
+    } catch (error) {
+      // 用户取消或请求失败
+      if (error !== 'cancel') {
+        console.error('启动项目失败:', error)
+      }
     }
   }
 

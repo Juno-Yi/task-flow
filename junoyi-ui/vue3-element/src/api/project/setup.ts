@@ -6,8 +6,16 @@ import { PageResult } from '@/types'
  */
 export function fetchGetProjectSetupList(params: Api.Project.ProjectListQueryDTO) {
     return request.get<PageResult<Api.Project.ProjectListVO>>({
-        url: '/project/approval/list',
+        url: '/project/setup/list',
         params
     })
 }
 
+/**
+ * 启动项目
+ */
+export function fetchStartProject(projectId: number) {
+    return request.post<void>({
+        url: `/project/setup/start/${projectId}`,
+    })
+}
