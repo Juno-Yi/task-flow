@@ -7,11 +7,16 @@ import com.junoyi.framework.permission.annotation.Permission;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
+import com.junoyi.task.domain.dto.TaskListDTO;
+import com.junoyi.task.domain.dto.TaskListQueryDTO;
+import com.junoyi.task.domain.vo.TaskListDetailVO;
+import com.junoyi.task.domain.vo.TaskListVO;
+import com.junoyi.task.service.ITaskListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 任务管理控制器
+ * 任务列表控制器
  *
  * @author Fan
  */
@@ -20,16 +25,30 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class TaskListController extends BaseController {
 
+    private final ITaskListService taskListService;
+
     /**
-     * 获取任务管理列表（分页）
+     * 获取任务列表（分页查询）
      */
     @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = "task.ui.list.view"
+            value = {"task.ui.list.view"}
     )
-    public R<PageResult<?>> getTaskList(){
-        return R.ok();
+    public R<PageResult<TaskListVO>> getList(TaskListQueryDTO queryDTO) {
+        return R.ok(taskListService.getTaskList(queryDTO, getPageQuery()));
+    }
+
+    /**
+     * 获取任务详情
+     */
+    @GetMapping("/{taskId}")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = {"task.ui.list.view"}
+    )
+    public R<TaskListDetailVO> getTaskDetail(@PathVariable("taskId") Long taskId){
+        return R.ok(taskListService.getTaskDetail(taskId));
     }
 
     /**
@@ -38,9 +57,10 @@ public class TaskListController extends BaseController {
     @PostMapping
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = "task.ui.list.button.add"
+            value = {"task.ui.list.add.button"}
     )
-    public R<Void> addTask(){
+    public R<Void> addTask(@RequestBody TaskListDTO dto){
+        taskListService.addTask(dto);
         return R.ok();
     }
 
@@ -50,9 +70,23 @@ public class TaskListController extends BaseController {
     @PutMapping
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = "task.ui.list.button.edit"
+            value = {"task.ui.list.edit.button"}
     )
-    public R<Void> updateTask(){
+    public R<Void> updateTask(@RequestBody TaskListDTO dto){
+        taskListService.updateTask(dto);
+        return R.ok();
+    }
+
+    /**
+     * 催促提醒用户完成任务
+     */
+    @PostMapping("/remind/{taskId}")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = {"task.ui.list.edit.button"}
+    )
+    public R<Void> remindUserToCompleteTask(@PathVariable("taskId") Long taskId){
+        taskListService.remindUserToCompleteTask(taskId);
         return R.ok();
     }
 }

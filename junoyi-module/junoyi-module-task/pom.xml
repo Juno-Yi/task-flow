@@ -19,5 +19,10 @@
             <groupId>com.junoyi</groupId>
             <artifactId>junoyi-module-system</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-module-task-api</artifactId>
+        </dependency>
     </dependencies>
 </project>

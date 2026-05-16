@@ -29,6 +29,14 @@ public interface ISysUserService {
     PageResult<SysUserVO> getUserList(SysUserQueryDTO queryDTO, Page<SysUser> page);
 
     /**
+     * 获取用户下拉选项列表（支持按昵称模糊搜索）
+     *
+     * @param nickName 用户昵称
+     * @return 用户下拉选项列表
+     */
+    List<SysUserVO> getUserOptions(String nickName);
+
+    /**
      * 添加用户
      * @param userDTO 用户信息
      */

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.junoyi.project.mapper.ProjectActiveMapper">
+
+    <!-- 获取活跃项目列表（状态为1、3、6） -->
+    <select id="getActiveList" resultType="com.junoyi.project.domain.vo.ProjectListVO">
+        SELECT
+            p.id,
+            p.no,
+            p.name,
+            p.description,
+            p.type,
+            p.status,
+            p.priority,
+            p.leader,
+            p.create_by AS createBy,
+            p.create_time AS createTime,
+            p.update_by AS updateBy,
+            p.update_time AS updateTime,
+            p.remark,
+            u.nick_name AS leaderName
+        FROM
+            project p
+        LEFT JOIN sys_user u ON p.leader = u.user_id
+        <where>
+            p.del_flag = 0
+            <!-- 只查询活跃状态：1-进行中、3-已暂停、6-长期维护 -->
+            AND p.status IN (1, 3, 6)
+
+            <!-- 权限控制：如果传入了可访问项目ID列表，则只查询这些项目 -->
+            <if test="accessibleProjectIds != null and accessibleProjectIds.size() > 0">
+                AND p.id IN
+                <foreach collection="accessibleProjectIds" item="projectId" open="(" separator="," close=")">
+                    #{projectId}
+                </foreach>
+            </if>
+
+            <!-- 动态查询条件 -->
+            <if test="queryDTO.no != null and queryDTO.no != ''">
+                AND p.no = #{queryDTO.no}
+            </if>
+            <if test="queryDTO.name != null and queryDTO.name != ''">
+                AND p.name LIKE CONCAT('%', #{queryDTO.name}, '%')
+            </if>
+            <if test="queryDTO.type != null">
+                AND p.type = #{queryDTO.type}
+            </if>
+            <if test="queryDTO.status != null">
+                AND p.status = #{queryDTO.status}
+            </if>
+            <if test="queryDTO.priority != null">
+                AND p.priority = #{queryDTO.priority}
+            </if>
+            <if test="queryDTO.leader != null">
+                AND p.leader = #{queryDTO.leader}
+            </if>
+        </where>
+        ORDER BY p.update_time DESC
+    </select>
+
+</mapper>

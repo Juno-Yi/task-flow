@@ -36,6 +36,12 @@
             <artifactId>junoyi-module-task</artifactId>
         </dependency>
 
+        <!--    项目模块    -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-module-project</artifactId>
+        </dependency>
+
         <!-- ==================== 开发工具依赖 ==================== -->
         <!-- 
             Spring Boot DevTools - 开发热部署工具
