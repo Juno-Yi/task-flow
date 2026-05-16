@@ -1,7 +1,8 @@
 package com.junoyi.project.domain.po;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.junoyi.framework.web.domain.BaseController;
+import com.junoyi.framework.core.domain.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,5 +14,33 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("project")
-public class Project extends BaseController {
+public class Project extends BaseEntity {
+
+    /** 项目ID  */
+    @TableId
+    private Long id;
+
+    /** 项目编号 */
+    private String no;
+
+    /** 项目名称 */
+    private String name;
+
+    /** 项目描述 */
+    private String description;
+
+    /** 项目负责人 */
+    private Long leader;
+
+    /** 项目类型 */
+    private Integer type;
+
+    /** 项目状态 */
+    private Integer status;
+
+    /** 项目优先级 */
+    private Integer priority;
+
+    /** 软删除 */
+    private boolean delFlag;
 }
