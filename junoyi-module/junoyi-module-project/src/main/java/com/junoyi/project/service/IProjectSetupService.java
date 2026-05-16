@@ -19,4 +19,10 @@ public interface IProjectSetupService {
      * @return 立项项目列表
      */
     PageResult<ProjectListVO> getApprovalList(ProjectListQueryDTO queryDTO, Page<Project> page);
+
+    /**
+     * 启动项目
+     * @param projectId 项目ID
+     */
+    void startProject(Long projectId);
 }
