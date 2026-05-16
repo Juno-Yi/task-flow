@@ -11,23 +11,6 @@
           <template #left>
             <ElSpace wrap>
               <ElButton
-                  @click="showDialog('add')"
-                  v-permission="'project.ui.list.add.button'"
-                  v-ripple
-              >
-                <ArtSvgIcon icon="ri:add-line" class="mr-1" />
-                新建项目
-              </ElButton>
-              <ElButton
-                  :disabled="selectedRows.length === 0"
-                  @click="batchDeleteRepos"
-                  v-permission="'project.ui.list.delete.button'"
-                  v-ripple
-              >
-                <ArtSvgIcon icon="ri:delete-bin-line" class="mr-1" />
-                批量删除
-              </ElButton>
-              <ElButton
                   :disabled="selectedRows.length === 0"
                   @click="exportProjectBook"
                   v-permission="'project.ui.repo.button.export'"
@@ -60,13 +43,6 @@
         @submit="handleDialogSubmit"
     />
 
-    <!-- 删除验证弹窗 -->
-    <DeleteVerifyDialog
-        ref="deleteVerifyDialogRef"
-        v-model:visible="deleteVerifyDialogVisible"
-        :project-count="deleteProjectCount"
-        @confirm="handleDeleteConfirm"
-    />
   </div>
 </template>
 
@@ -98,11 +74,6 @@ const dialogType = ref<DialogType>('add')
 const dialogVisible = ref(false)
 const currentRepoData = ref<Partial<RepoVO>>({})
 
-// 删除验证弹窗
-const deleteVerifyDialogVisible = ref(false)
-const deleteVerifyDialogRef = ref()
-const deleteProjectCount = ref(0)
-const pendingDeleteIds = ref<number[]>([])
 
 // 选中行
 const selectedRows = ref<RepoVO[]>([])
@@ -310,13 +281,6 @@ const {
               icon: 'ri:edit-line',
               auth: 'project.ui.list.edit.button'
             },
-            {
-              key: 'delete',
-              label: '删除',
-              icon: 'ri:delete-bin-4-line',
-              auth: 'project.ui.list.delete.button',
-              color: '#f56c6c'
-            }
           ]
 
           return h(ArtButtonMore, {
@@ -390,9 +354,6 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
     case 'edit':
       showDialog('edit', row)
       break
-    case 'delete':
-      deleteRepo(row)
-      break
   }
 }
 
@@ -405,79 +366,6 @@ const viewRepo = (row: RepoVO) => {
     path: '/project/detail',
     query: { no: row.no }
   })
-}
-
-/**
- * 删除项目
- */
-const deleteRepo = async (row: RepoVO): Promise<void> => {
-  try {
-    await ElMessageBox.confirm(`确定要删除项目 "${row.name}" 吗？`, '删除项目', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-
-    // 设置待删除的项目
-    pendingDeleteIds.value = [row.id]
-    deleteProjectCount.value = 1
-    deleteVerifyDialogVisible.value = true
-  } catch (error) {
-    // 用户取消
-  }
-}
-
-/**
- * 批量删除项目
- */
-const batchDeleteRepos = async (): Promise<void> => {
-  if (selectedRows.value.length === 0) {
-    ElMessage.warning('请先选择要删除的项目')
-    return
-  }
-  try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${selectedRows.value.length} 个项目吗？`, '批量删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-
-    // 设置待删除的项目
-    pendingDeleteIds.value = selectedRows.value.map(row => row.id)
-    deleteProjectCount.value = selectedRows.value.length
-    deleteVerifyDialogVisible.value = true
-  } catch (error) {
-    // 用户取消
-  }
-}
-
-/**
- * 处理删除确认（密码验证通过后）
- */
-const handleDeleteConfirm = async (credentials: { password: string }) => {
-  try {
-    deleteVerifyDialogRef.value?.setLoading(true)
-
-    if (pendingDeleteIds.value.length === 1) {
-      // 单个删除
-      await fetchDeleteRepo(pendingDeleteIds.value[0], credentials)
-    } else {
-      // 批量删除
-      await fetchDeleteRepoBatch({
-        ids: pendingDeleteIds.value,
-        ...credentials
-      })
-    }
-
-    deleteVerifyDialogVisible.value = false
-    selectedRows.value = []
-    getData()
-  } catch (error: any) {
-    // 错误会由 HTTP 工具自动显示，不需要额外处理
-    // 不关闭弹窗，让用户可以重新输入密码
-  } finally {
-    deleteVerifyDialogRef.value?.setLoading(false)
-  }
 }
 
 /**
