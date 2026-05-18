@@ -274,6 +274,18 @@ const {
               label: '查看详情',
               icon: 'ri:eye-line'
             },
+            {
+              key: 'recycle',
+              label: '恢复',
+              icon: 'ri:restart-line',
+              color: '#67c23a'
+            },
+            {
+              key: 'delete',
+              label: '彻底删除',
+              icon: 'ri:delete-bin-7-line',
+              color: '#C23A3AFF'
+            }
           ]
 
           return h(ArtButtonMore, {
