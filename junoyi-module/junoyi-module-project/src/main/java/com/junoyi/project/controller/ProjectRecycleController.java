@@ -31,6 +31,6 @@ public class ProjectRecycleController extends BaseController {
     @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
     public R<PageResult<ProjectListVO>> getProjectRecycleList(ProjectListQueryDTO queryDTO){
-        return R.ok();
+        return R.ok(projectRecycleService.getRecycleList(queryDTO,buildPage()));
     }
 }
