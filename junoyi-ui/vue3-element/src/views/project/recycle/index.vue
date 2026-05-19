@@ -349,6 +349,9 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
     case 'restore':
       restoreProject(row)
       break
+    case 'delete':
+      deleteProject(row)
+      break;
   }
 }
 
@@ -377,6 +380,14 @@ const restoreProject = async (row: RepoVO) => {
     console.error(error)
     ElMessage.error('恢复失败')
   }
+}
+
+/**
+ * 彻底删除项目
+ * @param row
+ */
+const deleteProject = async (row: RepoVO) => {
+
 }
 
 /**
