@@ -142,7 +142,10 @@
           align: 'center',
           headerAlign: 'center',
           formatter: (row: RepoVO) => {
-            return h('span', { class: 'font-mono text-primary font-medium' }, row.no)
+            return h('span', {
+              class: 'font-mono text-primary font-medium',
+              onClick: () => viewRepo(row)
+            }, row.no)
           }
         },
         {
