@@ -12,6 +12,16 @@ export function fetchGetRepoList(params: Api.Project.ProjectListQueryDTO) {
 }
 
 /**
+ * 获取项目下拉列表
+ */
+export function fetchGetProjectOptions(params: Api.Project.ProjectOptionQueryDTO){
+  return request.get<Api.Project.ProjectOptionVO[]>({
+    url: '/project/list/options',
+    params
+  })
+}
+
+/**
  * 添加项目
  */
 export function fetchAddRepo(data: Api.Project.ProjectListDTO) {

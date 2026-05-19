@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.project.domain.dto.ProjectListDTO;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
+import com.junoyi.project.domain.dto.ProjectOptionQueryDTO;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.vo.ProjectListVO;
+import com.junoyi.project.domain.vo.ProjectOptionVO;
 
 import java.util.List;
 
@@ -23,6 +25,13 @@ public interface IProjectListService {
      * @return 项目分页结果
      */
     PageResult<ProjectListVO> getProjectList(ProjectListQueryDTO queryDTO, Page<Project> page);
+
+    /**
+     * 获取项目下拉列表
+     * @param queryDTO 模糊查询参数
+     * @return 项目下拉列表
+     */
+    List<ProjectOptionVO> getProjectOptionList(ProjectOptionQueryDTO queryDTO);
 
     /**
      * 添加项目

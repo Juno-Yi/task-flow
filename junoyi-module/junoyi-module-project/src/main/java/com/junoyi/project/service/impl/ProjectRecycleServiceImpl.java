@@ -14,7 +14,7 @@ import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
 import com.junoyi.project.exception.ProjectNotFoundException;
-import com.junoyi.project.mapper.ProjectListMapper;
+import com.junoyi.project.mapper.ProjectMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.service.IProjectRecycleService;
 import com.junoyi.system.api.SysDictApi;
@@ -22,7 +22,6 @@ import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
 import com.junoyi.system.event.UserOperationEvent;
 import com.junoyi.system.mapper.SysUserMapper;
-import com.qiniu.util.Json;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -42,7 +41,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProjectRecycleServiceImpl implements IProjectRecycleService {
 
-    private final ProjectListMapper projectListMapper;
+    private final ProjectMapper projectMapper;
     private final ProjectMemberMapper projectMemberMapper;
     private final SysUserMapper sysUserMapper;
     private final SysDictApi sysDictApi;
@@ -98,7 +97,7 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
         wrapper.orderByDesc(Project::getCreateTime);
 
         // 分页查询项目列表
-        Page<Project> resultPage = projectListMapper.selectPage(page, wrapper);
+        Page<Project> resultPage = projectMapper.selectPage(page, wrapper);
         List<Project> projects = resultPage.getRecords();
 
         // 如果没有数据，直接返回空结果
@@ -221,7 +220,7 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
      */
     @Override
     public void restore(Long projectId) {
-        Project project = projectListMapper.selectById(projectId);
+        Project project = projectMapper.selectById(projectId);
 
         if (project == null)
             throw new ProjectNotFoundException("项目已经彻底删除，无法恢复");
@@ -229,7 +228,7 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
         LambdaUpdateWrapper<Project> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(Project::getId, projectId)
                 .set(Project::isDelFlag, false);
-        projectListMapper.update(null,wrapper);
+        projectMapper.update(null,wrapper);
 
         EventBus.get().callEvent(UserOperationEvent.withRawData("update","project",
                 "恢复了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
@@ -243,13 +242,13 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
      */
     @Override
     public void delete(Long projectId) {
-        Project project = projectListMapper.selectById(projectId);
+        Project project = projectMapper.selectById(projectId);
 
         if (project == null)
             throw new ProjectNotFoundException("项目已经彻底删除");
 
         // 删除项目主数据
-        projectListMapper.deleteById(projectId);
+        projectMapper.deleteById(projectId);
         // TODO: 删除项目成员数据
 
 
