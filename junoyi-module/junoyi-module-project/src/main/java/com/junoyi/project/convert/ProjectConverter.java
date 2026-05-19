@@ -2,6 +2,7 @@ package com.junoyi.project.convert;
 
 import com.junoyi.project.domain.dto.ProjectListDTO;
 import com.junoyi.project.domain.po.Project;
+import com.junoyi.project.domain.vo.ProjectOptionVO;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -28,5 +29,20 @@ public final class ProjectConverter {
         Project project = new Project();
         BeanUtils.copyProperties(dto, project);
         return project;
+    }
+
+    /**
+     * 将 Project 转换成 ProjectOptionVO 实体对象
+     * @param entity Project实体
+     * @return ProjectOptionVO实体
+     */
+    public static ProjectOptionVO toOptionVO(Project entity){
+        ProjectOptionVO projectOptionVO = new ProjectOptionVO();
+        projectOptionVO.setId(entity.getId());
+        projectOptionVO.setNo(entity.getNo());
+        projectOptionVO.setName(entity.getName());
+        projectOptionVO.setStatus(entity.getStatus());
+        projectOptionVO.setPriority(entity.getPriority());
+        return projectOptionVO;
     }
 }

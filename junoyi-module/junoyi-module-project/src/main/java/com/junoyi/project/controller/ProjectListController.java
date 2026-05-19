@@ -9,11 +9,15 @@ import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.project.domain.dto.ProjectDeleteDTO;
 import com.junoyi.project.domain.dto.ProjectListDTO;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
+import com.junoyi.project.domain.dto.ProjectOptionQueryDTO;
 import com.junoyi.project.domain.vo.ProjectInfoVO;
 import com.junoyi.project.domain.vo.ProjectListVO;
+import com.junoyi.project.domain.vo.ProjectOptionVO;
 import com.junoyi.project.service.IProjectListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 项目列表控制器
@@ -34,6 +38,14 @@ public class ProjectListController extends BaseController {
     @PlatformScope(PlatformType.ADMIN_WEB)
     public R<PageResult<ProjectListVO>> getList(ProjectListQueryDTO queryDTO){
         return R.ok(projectListService.getProjectList(queryDTO,buildPage()));
+    }
+
+    /**
+     * 获取项目下拉框选项列表
+     */
+    @GetMapping("/options")
+    public R<List<ProjectOptionVO>> getOptions(ProjectOptionQueryDTO queryDTO){
+        return R.ok();
     }
 
     /**

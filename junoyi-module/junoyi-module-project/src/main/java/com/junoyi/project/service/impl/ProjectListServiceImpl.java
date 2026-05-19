@@ -13,9 +13,11 @@ import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.convert.ProjectConverter;
 import com.junoyi.project.domain.dto.ProjectListDTO;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
+import com.junoyi.project.domain.dto.ProjectOptionQueryDTO;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
+import com.junoyi.project.domain.vo.ProjectOptionVO;
 import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.exception.ProjectPasswordWrongException;
 import com.junoyi.project.mapper.ProjectMapper;
@@ -31,10 +33,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -214,6 +213,55 @@ public class ProjectListServiceImpl implements IProjectListService {
                 (int) resultPage.getCurrent(),
                 (int) resultPage.getSize()
         );
+    }
+
+    /**
+     * 获取项目下拉列表
+     * @param queryDTO 模糊查询参数
+     * @return 项目下拉列表
+     */
+    @Override
+    public List<ProjectOptionVO> getProjectOptionList(ProjectOptionQueryDTO queryDTO) {
+        // 获取当前用户ID
+        Long currentUserId = SecurityUtils.getUserId();
+
+        // 判断用户是否拥有查看所有项目数据权限
+        boolean hasAllDataPermission = PermissionHelper.hasPermission("project.data.list.all");
+        // 如果没有查看所有项目的权限，需要筛选出用户参与的项目
+        List<Long> accessibleProjectIds = null;
+        if (!hasAllDataPermission) {
+            // 查询用户作为成员的项目ID列表
+            LambdaQueryWrapper<ProjectMember> memberWrapper = new LambdaQueryWrapper<>();
+            memberWrapper.eq(ProjectMember::getUserId, currentUserId)
+                    .eq(ProjectMember::getStatus, 1); // 只查询在职成员
+            List<ProjectMember> userProjects = projectMemberMapper.selectList(memberWrapper);
+
+            if (userProjects.isEmpty()) {
+                // 用户不是任何项目的成员，返回空结果
+                return Collections.emptyList();
+            }
+
+            accessibleProjectIds = userProjects.stream()
+                    .map(ProjectMember::getProjectId)
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
+
+        // 构建查询条件
+        LambdaQueryWrapper<Project> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(accessibleProjectIds != null && !accessibleProjectIds.isEmpty(),Project::getId,accessibleProjectIds)
+                .like(StringUtils.isNotBlank(queryDTO.getNo()),Project::getNo, queryDTO.getNo())
+                .like(StringUtils.isNotBlank(queryDTO.getName()), Project::getName, queryDTO.getName())
+                .eq(Project::isDelFlag, false)
+                .orderByDesc(Project::getCreateTime);
+
+        List<Project> projects = projectMapper.selectList(wrapper);
+
+        List<ProjectOptionVO> listVo = projects.stream()
+                .map(ProjectConverter::toOptionVO)
+                .toList();
+
+        return listVo;
     }
 
     /**
