@@ -36,6 +36,9 @@ public class ProjectListController extends BaseController {
      */
     @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = "project.ui.list.view"
+    )
     public R<PageResult<ProjectListVO>> getList(ProjectListQueryDTO queryDTO){
         return R.ok(projectListService.getProjectList(queryDTO,buildPage()));
     }
