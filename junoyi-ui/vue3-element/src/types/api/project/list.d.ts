@@ -75,6 +75,25 @@ declare namespace Api.Project {
   }
 
   /**
+   * 项目下拉列表VO
+   */
+  interface ProjectOptionVO {
+    id: number
+    no: string
+    name: string
+    status: number
+    priority: number
+  }
+
+  /**
+   * 项目下拉列表查询参数 GTO
+   */
+  interface ProjectOptionQueryDTO {
+    no: string
+    name: string
+  }
+
+  /**
    * 项目详情视图对象
    */
   interface ProjectDetailVO {
