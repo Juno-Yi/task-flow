@@ -12,21 +12,21 @@
             <ElSpace wrap>
               <ElButton
                   :disabled="selectedRows.length === 0"
-                  @click="handleBatchDelete"
-                  v-permission="'project.ui.recycle.button.delete'"
-                  v-ripple
-              >
-                <ArtSvgIcon icon="ri:delete-bin-line" class="mr-1" />
-                批量删除
-              </ElButton>
-              <ElButton
-                  :disabled="selectedRows.length === 0"
                   @click="handleBatchRestore"
                   v-permission="'project.ui.recycle.button.restore'"
                   v-ripple
               >
                 <ArtSvgIcon icon="ri:refresh-line" class="mr-1" />
                 批量恢复
+              </ElButton>
+              <ElButton
+                  :disabled="selectedRows.length === 0"
+                  @click="handleBatchDelete"
+                  v-permission="'project.ui.recycle.button.delete'"
+                  v-ripple
+              >
+                <ArtSvgIcon icon="ri:delete-bin-line" class="mr-1" />
+                批量删除
               </ElButton>
             </ElSpace>
           </template>

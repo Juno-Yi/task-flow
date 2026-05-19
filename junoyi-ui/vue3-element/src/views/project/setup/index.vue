@@ -27,15 +27,6 @@
                 <ArtSvgIcon icon="ri:delete-bin-line" class="mr-1" />
                 批量删除
               </ElButton>
-              <ElButton 
-                :disabled="selectedRows.length === 0"
-                @click="exportProjectBook"
-                v-permission="'project.ui.repo.button.export'"
-                v-ripple
-              >
-                <ArtSvgIcon icon="ri:file-download-line" class="mr-1" />
-                导出项目书
-              </ElButton>
             </ElSpace>
           </template>
         </ArtTableHeader>

@@ -27,15 +27,6 @@
                 <ArtSvgIcon icon="ri:delete-bin-line" class="mr-1" />
                 批量删除
               </ElButton>
-              <ElButton 
-                :disabled="selectedRows.length === 0"
-                @click="exportProjectBook"
-                v-permission="'project.ui.repo.button.export'"
-                v-ripple
-              >
-                <ArtSvgIcon icon="ri:file-download-line" class="mr-1" />
-                导出项目书
-              </ElButton>
             </ElSpace>
           </template>
         </ArtTableHeader>
@@ -301,11 +292,6 @@
           formatter: (row: RepoVO) => {
             const list: ButtonMoreItem[] = [
               {
-                key: 'view',
-                label: '查看详情',
-                icon: 'ri:eye-line'
-              },
-              {
                 key: 'edit',
                 label: '编辑',
                 icon: 'ri:edit-line',
@@ -385,9 +371,6 @@
    */
   const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
     switch (item.key) {
-      case 'view':
-        viewRepo(row)
-        break
       case 'edit':
         showDialog('edit', row)
         break
@@ -395,17 +378,6 @@
         deleteRepo(row)
         break
     }
-  }
-
-  /**
-   * 查看项目详情
-   */
-  const viewRepo = (row: RepoVO) => {
-    // 跳转到项目详情页，使用查询参数传递项目编号
-    router.push({
-      path: '/project/detail',
-      query: { no: row.no }
-    })
   }
 
   /**
