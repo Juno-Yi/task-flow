@@ -1,22 +1,28 @@
 package com.junoyi.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.core.utils.StringUtils;
+import com.junoyi.framework.event.core.EventBus;
+import com.junoyi.framework.json.utils.JsonUtils;
 import com.junoyi.framework.permission.helper.PermissionHelper;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
+import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.mapper.ProjectListMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.service.IProjectRecycleService;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
+import com.junoyi.system.event.UserOperationEvent;
 import com.junoyi.system.mapper.SysUserMapper;
+import com.qiniu.util.Json;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -207,5 +213,27 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
                 (int) resultPage.getCurrent(),
                 (int) resultPage.getSize()
         );
+    }
+
+    /**
+     * 恢复已删除项目
+     * @param projectId 项目ID
+     */
+    @Override
+    public void restore(Long projectId) {
+        Project project = projectListMapper.selectById(projectId);
+
+        if (project == null)
+            throw new ProjectNotFoundException("项目已经彻底删除，无法恢复");
+
+        LambdaUpdateWrapper<Project> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(Project::getId, projectId)
+                .set(Project::isDelFlag, false);
+        projectListMapper.update(null,wrapper);
+
+        EventBus.get().callEvent(UserOperationEvent.withRawData("update","project",
+                "恢复了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
+                String.valueOf(project.getId()), project.getName(),
+                JsonUtils.toJsonString(projectId)));
     }
 }

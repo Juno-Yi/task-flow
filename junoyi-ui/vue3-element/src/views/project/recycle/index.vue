@@ -56,7 +56,7 @@ import RepoSearch from './modules/repo-search.vue'
 import { ElTag, ElMessageBox, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
 import { fetchExportProjectBook } from '@/api/project/list'
-import {fetchGetProjectRecycleList} from "@/api/project/recycle";
+import {fetchGetProjectRecycleList, fetchRestoreProject} from "@/api/project/recycle";
 
 
 defineOptions({ name: 'ProjectRepo' })
@@ -275,7 +275,7 @@ const {
               icon: 'ri:eye-line'
             },
             {
-              key: 'recycle',
+              key: 'restore',
               label: '恢复',
               icon: 'ri:restart-line',
               color: '#67c23a'
@@ -337,16 +337,6 @@ const resetSearchParams = () => {
   getData()
 }
 
-/**
- * 显示仓库弹窗
- */
-const showDialog = (type: DialogType, row?: RepoVO): void => {
-  dialogType.value = type
-  currentRepoData.value = row || {}
-  nextTick(() => {
-    dialogVisible.value = true
-  })
-}
 
 /**
  * 操作按钮点击
@@ -356,8 +346,8 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
     case 'view':
       viewRepo(row)
       break
-    case 'edit':
-      showDialog('edit', row)
+    case 'restore':
+      restoreProject(row)
       break
   }
 }
@@ -371,6 +361,21 @@ const viewRepo = (row: RepoVO) => {
     path: '/project/detail',
     query: { no: row.no }
   })
+}
+
+/**
+ * 恢复已删除的项目
+ * @param row
+ */
+const restoreProject = async (row: RepoVO) => {
+  // 调用接口
+  try {
+    await fetchRestoreProject(row.id);
+    ElMessage.success(`恢复项目「${row.name}」成功！`)
+  } catch (error){
+    console.error(error)
+    ElMessage.error('恢复失败')
+  }
 }
 
 /**

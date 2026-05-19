@@ -11,3 +11,12 @@ export function fetchGetProjectRecycleList(params: Api.Project.ProjectListQueryD
     })
 }
 
+/**
+ * 恢复已删除的项目
+ * @param projectId 项目ID
+ */
+export function fetchRestoreProject(projectId: number){
+    return request.post<void>({
+        url: `/project/recycle/${projectId}/restore`,
+    })
+}

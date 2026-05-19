@@ -9,9 +9,7 @@ import com.junoyi.project.domain.dto.ProjectListQueryDTO;
 import com.junoyi.project.domain.vo.ProjectListVO;
 import com.junoyi.project.service.IProjectRecycleService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 项目回收站控制器
@@ -32,5 +30,17 @@ public class ProjectRecycleController extends BaseController {
     @PlatformScope(PlatformType.ADMIN_WEB)
     public R<PageResult<ProjectListVO>> getProjectRecycleList(ProjectListQueryDTO queryDTO){
         return R.ok(projectRecycleService.getRecycleList(queryDTO,buildPage()));
+    }
+
+    /**
+     * 恢复已经删除的项目
+     */
+    @PostMapping("/{projectId}/restore")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<Void> restore(@PathVariable("projectId") Long projectId){
+        if (projectId == null || projectId == 0)
+            return R.fail("非法参数");
+        projectRecycleService.restore(projectId);
+        return R.ok();
     }
 }

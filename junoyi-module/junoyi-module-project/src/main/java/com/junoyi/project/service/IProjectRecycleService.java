@@ -19,4 +19,10 @@ public interface IProjectRecycleService {
      * @return 项目回收站列表
      */
     PageResult<ProjectListVO> getRecycleList(ProjectListQueryDTO queryDTO, Page<Project> page);
+
+    /**
+     * 恢复已删除项目
+     * @param projectId 项目ID
+     */
+    void restore(Long projectId);
 }
