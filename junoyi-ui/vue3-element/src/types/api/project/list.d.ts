@@ -290,4 +290,16 @@ declare namespace Api.Project {
     /** 备注 */
     remark?: string
   }
+
+  /**
+   * 项目恢复 DTO
+   */
+  interface ProjectRestoreDTO {
+    ids: number[]
+  }
+
+  interface ProjectDeleteDTO {
+    ids: number[]
+    password: string
+  }
 }
