@@ -37,7 +37,7 @@ export function fetchDeleteProject(projectId: number){
 export function fetchRestoreProjectBatch(ids: number[]){
     return request.post<void>({
         url: '/project/recycle/restore/batch',
-        data: ids
+        data: { ids }
     })
 }
 

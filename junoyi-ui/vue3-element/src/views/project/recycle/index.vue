@@ -11,7 +11,6 @@
           <template #left>
             <ElSpace wrap>
               <ElButton
-                  type="danger"
                   :disabled="selectedRows.length === 0"
                   @click="handleBatchDelete"
                   v-permission="'project.ui.recycle.button.delete'"
@@ -21,7 +20,6 @@
                 批量删除
               </ElButton>
               <ElButton
-                  type="success"
                   :disabled="selectedRows.length === 0"
                   @click="handleBatchRestore"
                   v-permission="'project.ui.recycle.button.restore'"
