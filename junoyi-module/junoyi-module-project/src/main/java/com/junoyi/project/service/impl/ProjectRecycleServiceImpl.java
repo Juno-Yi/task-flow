@@ -248,7 +248,10 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
         if (project == null)
             throw new ProjectNotFoundException("项目已经彻底删除");
 
+        // 删除项目主数据
         projectListMapper.deleteById(projectId);
+        // TODO: 删除项目成员数据
+
 
         EventBus.get().callEvent(UserOperationEvent.withRawData("delete","project",
                 "彻底删除了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
