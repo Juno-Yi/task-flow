@@ -45,7 +45,7 @@ public class ProjectListController extends BaseController {
      */
     @GetMapping("/options")
     public R<List<ProjectOptionVO>> getOptions(ProjectOptionQueryDTO queryDTO){
-        return R.ok();
+        return R.ok(projectListService.getProjectOptionList(queryDTO));
     }
 
     /**
