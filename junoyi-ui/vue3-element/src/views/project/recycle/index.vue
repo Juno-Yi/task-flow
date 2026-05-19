@@ -56,7 +56,7 @@ import RepoSearch from './modules/repo-search.vue'
 import { ElTag, ElMessageBox, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
 import { fetchExportProjectBook } from '@/api/project/list'
-import {fetchGetProjectRecycleList, fetchRestoreProject} from "@/api/project/recycle";
+import {fetchDeleteProject, fetchGetProjectRecycleList, fetchRestoreProject} from "@/api/project/recycle";
 
 
 defineOptions({ name: 'ProjectRepo' })
@@ -387,7 +387,20 @@ const restoreProject = async (row: RepoVO) => {
  * @param row
  */
 const deleteProject = async (row: RepoVO) => {
-
+  try {
+    await ElMessageBox.confirm(`确定要彻底删除项目「${row.name}」吗？`, '删除项目', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: "warning"
+    })
+    await fetchDeleteProject(row.id)
+    // 删除成功提示
+    ElMessage.success('项目已彻底删除')
+    getData()
+  } catch (error){
+    // 用户取消删除
+    ElMessage.error('已经取消删除')
+  }
 }
 
 /**
@@ -410,19 +423,6 @@ const exportProjectBook = async (): Promise<void> => {
   } catch (error) {
     console.error('导出失败:', error)
     ElMessage.error('导出失败')
-  }
-}
-
-/**
- * 处理弹窗提交事件
- */
-const handleDialogSubmit = async () => {
-  try {
-    dialogVisible.value = false
-    currentRepoData.value = {}
-    getData()
-  } catch (error) {
-    console.error('提交失败:', error)
   }
 }
 

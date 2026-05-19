@@ -25,4 +25,10 @@ public interface IProjectRecycleService {
      * @param projectId 项目ID
      */
     void restore(Long projectId);
+
+    /**
+     * 彻底删除项目
+     * @param projectId 项目Id
+     */
+    void delete(Long projectId);
 }

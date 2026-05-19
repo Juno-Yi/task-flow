@@ -236,4 +236,23 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
                 String.valueOf(project.getId()), project.getName(),
                 JsonUtils.toJsonString(projectId)));
     }
+
+    /**
+     * 彻底删除项目
+     * @param projectId 项目Id
+     */
+    @Override
+    public void delete(Long projectId) {
+        Project project = projectListMapper.selectById(projectId);
+
+        if (project == null)
+            throw new ProjectNotFoundException("项目已经彻底删除");
+
+        projectListMapper.deleteById(projectId);
+
+        EventBus.get().callEvent(UserOperationEvent.withRawData("delete","project",
+                "彻底删除了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
+                String.valueOf(project.getId()), project.getName(),
+                JsonUtils.toJsonString(projectId)));
+    }
 }

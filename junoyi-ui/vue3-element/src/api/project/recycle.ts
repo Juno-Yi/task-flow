@@ -20,3 +20,13 @@ export function fetchRestoreProject(projectId: number){
         url: `/project/recycle/${projectId}/restore`,
     })
 }
+
+/**
+ * 彻底删除项目
+ * @param projectId 项目ID
+ */
+export function fetchDeleteProject(projectId: number){
+    return request.post<void>({
+        url: `/project/recycle/${projectId}/delete`
+    })
+}

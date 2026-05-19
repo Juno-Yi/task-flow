@@ -43,4 +43,16 @@ public class ProjectRecycleController extends BaseController {
         projectRecycleService.restore(projectId);
         return R.ok();
     }
+
+    /**
+     * 彻底删除项目
+     */
+    @PostMapping("/{projectId}/delete")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<Void> deleteProject(@PathVariable("projectId") Long projectId){
+        if (projectId == null || projectId == 0)
+            return R.fail("非法参数");
+        projectRecycleService.delete(projectId);
+        return R.ok();
+    }
 }
