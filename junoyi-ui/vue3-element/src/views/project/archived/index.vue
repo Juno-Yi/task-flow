@@ -10,15 +10,6 @@
         <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
           <template #left>
             <ElSpace wrap>
-              <ElButton
-                  :disabled="selectedRows.length === 0"
-                  @click="exportProjectBook"
-                  v-permission="'project.ui.repo.button.export'"
-                  v-ripple
-              >
-                <ArtSvgIcon icon="ri:file-download-line" class="mr-1" />
-                导出项目书
-              </ElButton>
             </ElSpace>
           </template>
         </ArtTableHeader>
@@ -105,7 +96,10 @@ const {
         align: 'center',
         headerAlign: 'center',
         formatter: (row: RepoVO) => {
-          return h('span', { class: 'font-mono text-primary font-medium' }, row.no)
+          return h('span', {
+            class: 'font-mono text-primary font-medium',
+            onClick: () => viewRepo(row)
+          }, row.no)
         }
       },
       {

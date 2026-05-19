@@ -10,15 +10,6 @@
         <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
           <template #left>
             <ElSpace wrap>
-              <ElButton
-                  :disabled="selectedRows.length === 0"
-                  @click="exportProjectBook"
-                  v-permission="'project.ui.repo.button.export'"
-                  v-ripple
-              >
-                <ArtSvgIcon icon="ri:file-download-line" class="mr-1" />
-                导出项目书
-              </ElButton>
             </ElSpace>
           </template>
         </ArtTableHeader>
@@ -115,7 +106,10 @@ const {
         align: 'center',
         headerAlign: 'center',
         formatter: (row: RepoVO) => {
-          return h('span', { class: 'font-mono text-primary font-medium' }, row.no)
+          return h('span', {
+            class: 'font-mono text-primary font-medium',
+            onClick: () => viewRepo()
+          }, row.no)
         }
       },
       {
@@ -271,11 +265,6 @@ const {
         formatter: (row: RepoVO) => {
           const list: ButtonMoreItem[] = [
             {
-              key: 'view',
-              label: '查看详情',
-              icon: 'ri:eye-line'
-            },
-            {
               key: 'edit',
               label: '编辑',
               icon: 'ri:edit-line',
@@ -348,9 +337,6 @@ const showDialog = (type: DialogType, row?: RepoVO): void => {
  */
 const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
   switch (item.key) {
-    case 'view':
-      viewRepo(row)
-      break
     case 'edit':
       showDialog('edit', row)
       break
