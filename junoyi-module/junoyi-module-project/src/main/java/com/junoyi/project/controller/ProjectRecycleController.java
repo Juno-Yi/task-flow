@@ -2,9 +2,11 @@ package com.junoyi.project.controller;
 
 import com.junoyi.framework.core.domain.module.R;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.framework.permission.annotation.Permission;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
+import com.junoyi.project.domain.dto.ProjectDeleteDTO;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
 import com.junoyi.project.domain.vo.ProjectListVO;
 import com.junoyi.project.service.IProjectRecycleService;
@@ -53,6 +55,16 @@ public class ProjectRecycleController extends BaseController {
         if (projectId == null || projectId == 0)
             return R.fail("非法参数");
         projectRecycleService.delete(projectId);
+        return R.ok();
+    }
+
+    /**
+     * 批量删除项目（硬删除，需要密码验证）
+     */
+    @PostMapping("/delete/batch")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<Void> deleteProjectBatch(@RequestBody ProjectDeleteDTO deleteDTO){
+        projectRecycleService.deleteBatch(deleteDTO.getIds(), deleteDTO.getPassword());
         return R.ok();
     }
 }

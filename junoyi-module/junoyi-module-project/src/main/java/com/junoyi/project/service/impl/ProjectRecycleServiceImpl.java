@@ -8,12 +8,14 @@ import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.json.utils.JsonUtils;
 import com.junoyi.framework.permission.helper.PermissionHelper;
+import com.junoyi.framework.security.utils.PasswordUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
 import com.junoyi.project.exception.ProjectNotFoundException;
+import com.junoyi.project.exception.ProjectPasswordWrongException;
 import com.junoyi.project.mapper.ProjectMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.service.IProjectRecycleService;
@@ -25,6 +27,7 @@ import com.junoyi.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -241,20 +244,111 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
      * @param projectId 项目Id
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long projectId) {
         Project project = projectMapper.selectById(projectId);
 
-        if (project == null)
-            throw new ProjectNotFoundException("项目已经彻底删除");
+        if (project == null) {
+            throw new ProjectNotFoundException("项目不存在或已被彻底删除");
+        }
+
+        // 删除项目成员数据
+        LambdaQueryWrapper<ProjectMember> memberWrapper = new LambdaQueryWrapper<>();
+        memberWrapper.eq(ProjectMember::getProjectId, projectId);
+        projectMemberMapper.delete(memberWrapper);
 
         // 删除项目主数据
         projectMapper.deleteById(projectId);
-        // TODO: 删除项目成员数据
 
-
+        // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.withRawData("delete","project",
                 "彻底删除了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
                 String.valueOf(project.getId()), project.getName(),
                 JsonUtils.toJsonString(projectId)));
+    }
+
+    /**
+     * 验证当前用户密码
+     * @param password 密码
+     */
+    private void verifyCurrentUserPassword(String password) {
+        if (StringUtils.isBlank(password)) {
+            throw new ProjectPasswordWrongException("密码不能为空");
+        }
+
+        // 获取当前登录用户名
+        String currentUsername = SecurityUtils.getUserName();
+        if (StringUtils.isBlank(currentUsername)) {
+            throw new ProjectPasswordWrongException("未获取到当前登录用户信息");
+        }
+
+        // 查询当前用户
+        LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
+        userWrapper.eq(SysUser::getUserName, currentUsername);
+        SysUser user = sysUserMapper.selectOne(userWrapper);
+
+        if (user == null) {
+            throw new ProjectPasswordWrongException("用户不存在");
+        }
+
+        // 验证密码
+        if (!PasswordUtils.matches(password, user.getSalt(), user.getPassword())) {
+            throw new ProjectPasswordWrongException("密码错误");
+        }
+    }
+
+    /**
+     * 批量彻底删除项目
+     * @param ids 项目ID列表
+     * @param password 密码
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteBatch(List<Long> ids, String password) {
+        if (ids == null || ids.isEmpty()) {
+            throw new ProjectNotFoundException("项目ID列表不能为空");
+        }
+
+        // 验证当前用户密码
+        verifyCurrentUserPassword(password);
+
+        // 批量查询项目
+        List<Project> projects = projectMapper.selectBatchIds(ids);
+        if (projects.isEmpty()) {
+            throw new ProjectNotFoundException("未找到要删除的项目");
+        }
+
+        // 批量删除项目成员数据
+        LambdaQueryWrapper<ProjectMember> memberWrapper = new LambdaQueryWrapper<>();
+        memberWrapper.in(ProjectMember::getProjectId, ids);
+        projectMemberMapper.delete(memberWrapper);
+
+        // 批量删除项目主数据
+        for (Long id : ids) {
+            projectMapper.deleteById(id);
+        }
+
+        // 构建删除的项目信息列表（用于日志）
+        List<Map<String, Object>> deletedProjectsInfo = projects.stream()
+                .map(project -> {
+                    Map<String, Object> info = new HashMap<>();
+                    info.put("id", project.getId());
+                    info.put("no", project.getNo());
+                    info.put("name", project.getName());
+                    return info;
+                })
+                .collect(Collectors.toList());
+
+        // 发布操作日志事件（只发布一条）
+        String projectNames = projects.stream()
+                .map(Project::getName)
+                .collect(Collectors.joining("、"));
+
+        EventBus.get().callEvent(UserOperationEvent.withRawData("delete", "project",
+                "批量彻底删除了 " + projects.size() + " 个项目：" + projectNames,
+                ids.toString(),
+                projectNames,
+                JsonUtils.toJsonString(deletedProjectsInfo)
+        ));
     }
 }

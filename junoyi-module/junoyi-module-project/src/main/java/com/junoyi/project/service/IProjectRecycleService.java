@@ -6,6 +6,8 @@ import com.junoyi.project.domain.dto.ProjectListQueryDTO;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.vo.ProjectListVO;
 
+import java.util.List;
+
 /**
  * 项目回收站业务接口
  *
@@ -31,4 +33,11 @@ public interface IProjectRecycleService {
      * @param projectId 项目Id
      */
     void delete(Long projectId);
+
+    /**
+     * 批量彻底删除项目
+     * @param ids 项目ID列表
+     * @param password 密码
+     */
+    void deleteBatch(List<Long> ids,String password);
 }
