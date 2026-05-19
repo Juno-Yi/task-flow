@@ -240,6 +240,53 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
     }
 
     /**
+     * 批量恢复已删除项目
+     * @param ids 项目Id列表
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void restoreBatch(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            throw new ProjectNotFoundException("项目ID列表不能为空");
+        }
+
+        // 批量查询项目
+        List<Project> projects = projectMapper.selectBatchIds(ids);
+        if (projects.isEmpty()) {
+            throw new ProjectNotFoundException("未找到要恢复的项目");
+        }
+
+        // 批量恢复项目（将删除标志设置为false）
+        LambdaUpdateWrapper<Project> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.in(Project::getId, ids)
+                .set(Project::isDelFlag, false);
+        projectMapper.update(null, wrapper);
+
+        // 构建恢复的项目信息列表（用于日志）
+        List<Map<String, Object>> restoredProjectsInfo = projects.stream()
+                .map(project -> {
+                    Map<String, Object> info = new HashMap<>();
+                    info.put("id", project.getId());
+                    info.put("no", project.getNo());
+                    info.put("name", project.getName());
+                    return info;
+                })
+                .collect(Collectors.toList());
+
+        // 发布操作日志事件（只发布一条）
+        String projectNames = projects.stream()
+                .map(Project::getName)
+                .collect(Collectors.joining("、"));
+
+        EventBus.get().callEvent(UserOperationEvent.withRawData("update", "project",
+                "批量恢复了 " + projects.size() + " 个项目：" + projectNames,
+                ids.toString(),
+                projectNames,
+                JsonUtils.toJsonString(restoredProjectsInfo)
+        ));
+    }
+
+    /**
      * 彻底删除项目
      * @param projectId 项目Id
      */

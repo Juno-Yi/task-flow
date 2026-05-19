@@ -29,6 +29,12 @@ public interface IProjectRecycleService {
     void restore(Long projectId);
 
     /**
+     * 批量恢复已删除项目
+     * @param ids 项目Id列表
+     */
+    void restoreBatch(List<Long> ids);
+
+    /**
      * 彻底删除项目
      * @param projectId 项目Id
      */
