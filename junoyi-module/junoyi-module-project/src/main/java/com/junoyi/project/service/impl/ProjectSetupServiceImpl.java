@@ -14,7 +14,7 @@ import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
 import com.junoyi.project.exception.ProjectException;
 import com.junoyi.project.exception.ProjectNotFoundException;
-import com.junoyi.project.mapper.ProjectSetupMapper;
+import com.junoyi.project.mapper.ProjectMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.service.IProjectSetupService;
 import com.junoyi.system.api.SysDictApi;
@@ -27,7 +27,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProjectSetupServiceImpl implements IProjectSetupService {
 
-    private final ProjectSetupMapper projectSetupMapper;
+    private final ProjectMapper projectMapper;
     private final ProjectMemberMapper projectMemberMapper;
     private final SysUserMapper sysUserMapper;
     private final SysDictApi sysDictApi;
@@ -100,7 +99,7 @@ public class ProjectSetupServiceImpl implements IProjectSetupService {
         wrapper.orderByDesc(Project::getCreateTime);
 
         // 分页查询项目列表
-        Page<Project> resultPage = projectSetupMapper.selectPage(page, wrapper);
+        Page<Project> resultPage = projectMapper.selectPage(page, wrapper);
         List<Project> projects = resultPage.getRecords();
 
         // 如果没有数据，直接返回空结果
@@ -227,7 +226,7 @@ public class ProjectSetupServiceImpl implements IProjectSetupService {
     @Override
     public void startProject(Long projectId) {
         // 检查项目是否存在
-        Project project = projectSetupMapper.selectById(projectId);
+        Project project = projectMapper.selectById(projectId);
         if (project == null || project.isDelFlag()) {
             throw new ProjectNotFoundException("不存在的项目");
         }
@@ -257,7 +256,7 @@ public class ProjectSetupServiceImpl implements IProjectSetupService {
         project.setStartTime(DateUtils.getNowDate());
         project.setUpdateBy(SecurityUtils.getUserName());
         project.setUpdateTime(DateUtils.getNowDate());
-        projectSetupMapper.updateById(project);
+        projectMapper.updateById(project);
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.of("start", "project",

@@ -18,7 +18,7 @@ import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
 import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.exception.ProjectPasswordWrongException;
-import com.junoyi.project.mapper.ProjectListMapper;
+import com.junoyi.project.mapper.ProjectMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.service.IProjectListService;
 import com.junoyi.project.util.ProjectNoGenerateUtil;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProjectListServiceImpl implements IProjectListService {
 
-    private final ProjectListMapper projectListMapper;
+    private final ProjectMapper projectMapper;
     private final ProjectMemberMapper projectMemberMapper;
     private final SysUserMapper sysUserMapper;
     private final SysDictApi sysDictApi;
@@ -105,7 +105,7 @@ public class ProjectListServiceImpl implements IProjectListService {
         wrapper.orderByDesc(Project::getCreateTime);
 
         // 分页查询项目列表
-        Page<Project> resultPage = projectListMapper.selectPage(page, wrapper);
+        Page<Project> resultPage = projectMapper.selectPage(page, wrapper);
         List<Project> projects = resultPage.getRecords();
 
         // 如果没有数据，直接返回空结果
@@ -249,7 +249,7 @@ public class ProjectListServiceImpl implements IProjectListService {
                 project.setNo(projectNo);
 
                 // 尝试插入项目
-                projectListMapper.insert(project);
+                projectMapper.insert(project);
 
                 // 插入成功，跳出循环
                 break;
@@ -309,7 +309,7 @@ public class ProjectListServiceImpl implements IProjectListService {
         }
 
         // 查询原项目信息
-        Project existingProject = projectListMapper.selectById(dto.getId());
+        Project existingProject = projectMapper.selectById(dto.getId());
         if (existingProject == null) {
             throw new RuntimeException("项目不存在");
         }
@@ -327,7 +327,7 @@ public class ProjectListServiceImpl implements IProjectListService {
         project.setUpdateTime(DateUtils.getNowDate());
 
         // 更新项目
-        projectListMapper.updateById(project);
+        projectMapper.updateById(project);
 
         // 如果项目负责人发生变化，需要更新成员表
         if (!existingProject.getLeader().equals(project.getLeader())) {
@@ -418,7 +418,7 @@ public class ProjectListServiceImpl implements IProjectListService {
         verifyCurrentUserPassword(password);
 
         // 查询项目
-        Project project = projectListMapper.selectById(id);
+        Project project = projectMapper.selectById(id);
         if (project == null || project.isDelFlag()) {
             throw new ProjectNotFoundException("项目不存在");
         }
@@ -427,7 +427,7 @@ public class ProjectListServiceImpl implements IProjectListService {
         project.setDelFlag(true);
         project.setUpdateBy(SecurityUtils.getUserName());
         project.setUpdateTime(new Date());
-        projectListMapper.updateById(project);
+        projectMapper.updateById(project);
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.withRawData("delete", "project",
@@ -452,7 +452,7 @@ public class ProjectListServiceImpl implements IProjectListService {
         verifyCurrentUserPassword(password);
 
         // 批量查询项目
-        List<Project> projects = projectListMapper.selectBatchIds(ids);
+        List<Project> projects = projectMapper.selectBatchIds(ids);
         if (projects.isEmpty()) {
             throw new ProjectNotFoundException("未找到要删除的项目");
         }
@@ -466,7 +466,7 @@ public class ProjectListServiceImpl implements IProjectListService {
                 project.setDelFlag(true);
                 project.setUpdateBy(currentUser);
                 project.setUpdateTime(now);
-                projectListMapper.updateById(project);
+                projectMapper.updateById(project);
 
                 // 发布操作日志事件
                 EventBus.get().callEvent(UserOperationEvent.withRawData("delete", "project",
