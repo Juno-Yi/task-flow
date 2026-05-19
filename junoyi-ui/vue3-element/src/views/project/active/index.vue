@@ -271,11 +271,6 @@ const {
         formatter: (row: RepoVO) => {
           const list: ButtonMoreItem[] = [
             {
-              key: 'view',
-              label: '查看详情',
-              icon: 'ri:eye-line'
-            },
-            {
               key: 'edit',
               label: '编辑',
               icon: 'ri:edit-line',
@@ -348,9 +343,6 @@ const showDialog = (type: DialogType, row?: RepoVO): void => {
  */
 const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
   switch (item.key) {
-    case 'view':
-      viewRepo(row)
-      break
     case 'edit':
       showDialog('edit', row)
       break
