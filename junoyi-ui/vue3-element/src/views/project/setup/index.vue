@@ -306,11 +306,6 @@
                 color: '#67c23a'
               },
               {
-                key: 'view',
-                label: '查看详情',
-                icon: 'ri:eye-line'
-              },
-              {
                 key: 'edit',
                 label: '编辑',
                 icon: 'ri:edit-line',
