@@ -258,7 +258,8 @@
       emit('submit')
     } catch (error) {
       console.error('提交失败:', error)
-      ElMessage.error(props.type === 'add' ? '创建失败' : '更新失败')
+      if (props.type === 'add')
+        ElMessage.error('创建失败')
     } finally {
       submitLoading.value = false
     }

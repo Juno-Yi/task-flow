@@ -18,6 +18,7 @@ import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
 import com.junoyi.project.domain.vo.ProjectOptionVO;
+import com.junoyi.project.exception.ProjectException;
 import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.exception.ProjectPasswordWrongException;
 import com.junoyi.project.mapper.ProjectMapper;
@@ -353,13 +354,22 @@ public class ProjectListServiceImpl implements IProjectListService {
     public void updateProject(ProjectListDTO dto) {
         // 检查项目ID是否存在
         if (dto.getId() == null) {
-            throw new RuntimeException("项目ID不能为空");
+            throw new ProjectException("项目ID不能为空");
         }
 
         // 查询原项目信息
         Project existingProject = projectMapper.selectById(dto.getId());
         if (existingProject == null) {
-            throw new RuntimeException("项目不存在");
+            throw new ProjectNotFoundException("项目不存在");
+        }
+
+        // 权限校验：检查用户是否有权限修改该项目
+        Long currentUserId = SecurityUtils.getUserId();
+        boolean hasAllDataPermission = PermissionHelper.hasPermission("project.data.list.all");
+        boolean isProjectLeader = existingProject.getLeader().equals(currentUserId);
+
+        if (!hasAllDataPermission && !isProjectLeader) {
+            throw new ProjectException("无权限修改该项目，只有项目负责人或拥有全部数据权限的用户可以修改项目");
         }
 
         // 转换DTO为PO

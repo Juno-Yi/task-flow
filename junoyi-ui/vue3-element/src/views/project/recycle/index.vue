@@ -289,11 +289,6 @@ const {
         formatter: (row: RepoVO) => {
           const list: ButtonMoreItem[] = [
             {
-              key: 'view',
-              label: '查看详情',
-              icon: 'ri:eye-line'
-            },
-            {
               key: 'restore',
               label: '恢复',
               icon: 'ri:restart-line',
@@ -362,9 +357,6 @@ const resetSearchParams = () => {
  */
 const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
   switch (item.key) {
-    case 'view':
-      viewRepo(row)
-      break
     case 'restore':
       restoreProject(row)
       break
@@ -372,17 +364,6 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
       deleteProject(row)
       break;
   }
-}
-
-/**
- * 查看项目详情
- */
-const viewRepo = (row: RepoVO) => {
-  // 跳转到项目详情页，使用查询参数传递项目编号
-  router.push({
-    path: '/project/detail',
-    query: { no: row.no }
-  })
 }
 
 /**
