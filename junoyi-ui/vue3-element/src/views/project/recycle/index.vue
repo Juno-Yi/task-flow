@@ -372,6 +372,7 @@ const restoreProject = async (row: RepoVO) => {
   try {
     await fetchRestoreProject(row.id);
     ElMessage.success(`恢复项目「${row.name}」成功！`)
+    getData()
   } catch (error){
     console.error(error)
     ElMessage.error('恢复失败')
