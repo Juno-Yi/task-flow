@@ -8,6 +8,7 @@ import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.project.domain.dto.ProjectDeleteDTO;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
+import com.junoyi.project.domain.dto.ProjectRestoreDTO;
 import com.junoyi.project.domain.vo.ProjectListVO;
 import com.junoyi.project.service.IProjectRecycleService;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,16 @@ public class ProjectRecycleController extends BaseController {
         if (projectId == null || projectId == 0)
             return R.fail("非法参数");
         projectRecycleService.restore(projectId);
+        return R.ok();
+    }
+
+    /**
+     * 批量恢复已经删除的项目
+     */
+    @PostMapping("/restore/batch")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<Void> restoreBatch(@RequestBody ProjectRestoreDTO restoreDTO){
+        projectRecycleService.restoreBatch(restoreDTO.getIds());
         return R.ok();
     }
 

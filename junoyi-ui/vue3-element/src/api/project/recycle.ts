@@ -30,3 +30,23 @@ export function fetchDeleteProject(projectId: number){
         url: `/project/recycle/${projectId}/delete`
     })
 }
+
+/**
+ * 批量恢复已删除的项目
+ */
+export function fetchRestoreProjectBatch(ids: number[]){
+    return request.post<void>({
+        url: '/project/recycle/restore/batch',
+        data: { ids }
+    })
+}
+
+/**
+ * 批量彻底删除项目
+ */
+export function fetchDeleteProjectBatch(data: Api.Project.ProjectDeleteDTO){
+    return request.post<void>({
+        url: '/project/recycle/delete/batch',
+        data:data
+    })
+}

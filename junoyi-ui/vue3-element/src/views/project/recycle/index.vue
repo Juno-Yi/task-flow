@@ -12,20 +12,20 @@
             <ElSpace wrap>
               <ElButton
                   :disabled="selectedRows.length === 0"
-                  @click="exportProjectBook"
-                  v-permission="'project.ui.repo.button.export'"
+                  @click="handleBatchDelete"
+                  v-permission="'project.ui.recycle.button.delete'"
                   v-ripple
               >
-                <ArtSvgIcon icon="ri:file-download-line" class="mr-1" />
+                <ArtSvgIcon icon="ri:delete-bin-line" class="mr-1" />
                 批量删除
               </ElButton>
               <ElButton
                   :disabled="selectedRows.length === 0"
-                  @click="exportProjectBook"
-                  v-permission="'project.ui.repo.button.export'"
+                  @click="handleBatchRestore"
+                  v-permission="'project.ui.recycle.button.restore'"
                   v-ripple
               >
-                <ArtSvgIcon icon="ri:file-download-line" class="mr-1" />
+                <ArtSvgIcon icon="ri:refresh-line" class="mr-1" />
                 批量恢复
               </ElButton>
             </ElSpace>
@@ -44,6 +44,13 @@
       </ElCard>
     </div>
 
+    <!-- 删除验证对话框 -->
+    <DeleteVerifyDialog
+        ref="deleteVerifyDialogRef"
+        v-model:visible="deleteVerifyDialogVisible"
+        :project-count="selectedRows.length"
+        @confirm="handleDeleteConfirm"
+    />
   </div>
 </template>
 
@@ -53,10 +60,17 @@ import ArtButtonMore, { ButtonMoreItem } from '@/components/core/forms/art-butto
 import { useTable } from '@/hooks/core/useTable'
 import { useRouter } from 'vue-router'
 import RepoSearch from './modules/repo-search.vue'
-import { ElTag, ElMessageBox, ElProgress } from 'element-plus'
+import { ElTag, ElMessageBox, ElMessage, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
 import { fetchExportProjectBook } from '@/api/project/list'
-import {fetchDeleteProject, fetchGetProjectRecycleList, fetchRestoreProject} from "@/api/project/recycle";
+import {
+  fetchDeleteProject,
+  fetchGetProjectRecycleList,
+  fetchRestoreProject,
+  fetchRestoreProjectBatch,
+  fetchDeleteProjectBatch
+} from "@/api/project/recycle"
+import DeleteVerifyDialog from './modules/delete-verify-dialog.vue'
 
 
 defineOptions({ name: 'ProjectRepo' })
@@ -73,6 +87,8 @@ const dialogType = ref<DialogType>('add')
 const dialogVisible = ref(false)
 const currentRepoData = ref<Partial<RepoVO>>({})
 
+// 删除验证对话框
+const deleteVerifyDialogVisible = ref(false)
 
 // 选中行
 const selectedRows = ref<RepoVO[]>([])
@@ -399,7 +415,81 @@ const deleteProject = async (row: RepoVO) => {
     getData()
   } catch (error){
     // 用户取消删除
-    ElMessage.error('已经取消删除')
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+/**
+ * 批量恢复项目
+ */
+const handleBatchRestore = async (): Promise<void> => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('请先选择要恢复的项目')
+    return
+  }
+
+  try {
+    const projectNames = selectedRows.value.map(row => row.name).join('、')
+    await ElMessageBox.confirm(
+        `确定要恢复以下 ${selectedRows.value.length} 个项目吗？\n${projectNames}`,
+        '批量恢复项目',
+        {
+          confirmButtonText: '确定恢复',
+          cancelButtonText: '取消',
+          type: 'info'
+        }
+    )
+
+    const projectIds = selectedRows.value.map(row => row.id)
+    await fetchRestoreProjectBatch(projectIds)
+
+    ElMessage.success(`已成功恢复 ${selectedRows.value.length} 个项目`)
+    getData()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('批量恢复失败:', error)
+      ElMessage.error('批量恢复失败')
+    }
+  }
+}
+
+/**
+ * 批量删除项目
+ */
+const handleBatchDelete = (): void => {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('请先选择要删除的项目')
+    return
+  }
+
+  // 打开删除验证对话框
+  deleteVerifyDialogVisible.value = true
+}
+
+/**
+ * 删除确认回调
+ */
+const deleteVerifyDialogRef = ref<InstanceType<typeof DeleteVerifyDialog>>()
+const handleDeleteConfirm = async (password: string): Promise<void> => {
+  try {
+    deleteVerifyDialogRef.value?.setLoading(true)
+
+    const projectIds = selectedRows.value.map(row => row.id)
+    await fetchDeleteProjectBatch({
+      ids: projectIds,
+      password: password
+    })
+
+    ElMessage.success(`已成功删除 ${selectedRows.value.length} 个项目`)
+    deleteVerifyDialogVisible.value = false
+    getData()
+  } catch (error) {
+    console.error('批量删除失败:', error)
+    ElMessage.error('批量删除失败，请检查密码是否正确')
+  } finally {
+    deleteVerifyDialogRef.value?.setLoading(false)
   }
 }
 

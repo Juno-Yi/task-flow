@@ -56,7 +56,7 @@ export function fetchDeleteRepo(id: number, data: { password: string }) {
 /**
  * 批量删除项目（需要密码验证）
  */
-export function fetchDeleteRepoBatch(data: { ids: number[]; password: string }) {
+export function fetchDeleteRepoBatch(data: Api.Project.ProjectDeleteDTO) {
   return request.post<void>({
     url: '/project/list/delete/batch',
     data,
