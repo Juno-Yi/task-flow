@@ -39,7 +39,7 @@ public class ProjectDetailController extends BaseController {
         Long currentUserId = SecurityUtils.getUserId();
         if (currentUserId == null || currentUserId == 0L)
             return R.fail("非法请求");
-        if (projectDetailService.hasProjectViewDetailPermission(projectNo,currentUserId))
+        if (!projectDetailService.hasProjectViewDetailPermission(projectNo,currentUserId))
             return R.fail("非法请求");
 
         return R.ok(projectDetailService.getProjectDetailByNo(projectNo));
