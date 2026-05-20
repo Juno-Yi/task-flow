@@ -1,6 +1,9 @@
 package com.junoyi.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.junoyi.framework.core.utils.StringUtils;
+import com.junoyi.framework.permission.annotation.Permission;
+import com.junoyi.framework.permission.helper.PermissionHelper;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
@@ -35,6 +38,37 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
     private final SysUserMapper sysUserMapper;
     private final ProjectMemberMapper projectMemberMapper;
     private final SysDictApi sysDictApi;
+
+    /**
+     * 判断用户是否能查看项目详情的权限
+     * @param projectNo 项目编号
+     * @param userId 用户ID
+     * @return 如果有权限返回true，没有权限就返回false
+     */
+    @Override
+    public boolean hasProjectViewDetailPermission(String projectNo, Long userId) {
+        // 如果用户有 project.data.list.all权限就跳过
+        if (PermissionHelper.hasPermission("project.data.list.all"))
+            return true;
+
+        // 查询项目是否存在
+        LambdaQueryWrapper<Project> projectWrapper = new LambdaQueryWrapper<>();
+        projectWrapper.eq(projectNo != null, Project::getNo, projectNo)
+                .eq(Project::isDelFlag,false);
+        Project project = projectMapper.selectOne(projectWrapper);
+        if (project == null)
+            throw new ProjectNotFoundException("该项目不存在！");
+
+        // 去判断用户在不在项目成员中
+        // 判断是否为项目成员
+        LambdaQueryWrapper<ProjectMember> memberWrapper = new LambdaQueryWrapper<>();
+        memberWrapper.eq(ProjectMember::getProjectId, project.getId())
+                .eq(ProjectMember::getUserId, userId);
+
+        Long count = projectMemberMapper.selectCount(memberWrapper);
+
+        return count > 0;
+    }
 
     /**
      * 通过项目编号获取项目详情

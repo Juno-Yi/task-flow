@@ -4,6 +4,7 @@ import com.junoyi.framework.core.domain.module.R;
 import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
+import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.project.domain.vo.ProjectDetailVO;
 import com.junoyi.project.service.IProjectDetailService;
@@ -34,7 +35,12 @@ public class ProjectDetailController extends BaseController {
         if (StringUtils.isEmpty(projectNo))
             return R.fail("非法请求");
 
-        // TODO：在进入业务层之前，先去判断一下用户是否有该项目的查看权限，防止水平越权
+        // 在进入业务层之前，先去判断一下用户是否有该项目的查看权限，防止水平越权
+        Long currentUserId = SecurityUtils.getUserId();
+        if (currentUserId == null || currentUserId == 0L)
+            return R.fail("非法请求");
+        if (projectDetailService.hasProjectViewDetailPermission(projectNo,currentUserId))
+            return R.fail("非法请求");
 
         return R.ok(projectDetailService.getProjectDetailByNo(projectNo));
     }
