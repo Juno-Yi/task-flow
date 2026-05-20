@@ -299,6 +299,7 @@ const {
               key: 'delete',
               label: '彻底删除',
               icon: 'ri:delete-bin-7-line',
+              auth: 'project.ui.recycle.delete',
               color: '#C23A3AFF'
             }
           ]

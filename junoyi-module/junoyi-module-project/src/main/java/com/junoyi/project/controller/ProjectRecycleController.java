@@ -68,6 +68,9 @@ public class ProjectRecycleController extends BaseController {
      */
     @PostMapping("/{projectId}/delete")
     @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = "project.ui.recycle.delete"
+    )
     public R<Void> deleteProject(@PathVariable("projectId") Long projectId){
         if (projectId == null || projectId == 0)
             return R.fail("非法参数");
@@ -80,6 +83,9 @@ public class ProjectRecycleController extends BaseController {
      */
     @PostMapping("/delete/batch")
     @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = "project.ui.recycle.delete"
+    )
     public R<Void> deleteProjectBatch(@RequestBody ProjectDeleteDTO deleteDTO){
         projectRecycleService.deleteBatch(deleteDTO.getIds(), deleteDTO.getPassword());
         return R.ok();
