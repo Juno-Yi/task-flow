@@ -40,6 +40,9 @@ public class ProjectRecycleController extends BaseController {
      */
     @PostMapping("/{projectId}/restore")
     @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = "project.ui.recycle.restore"
+    )
     public R<Void> restore(@PathVariable("projectId") Long projectId){
         if (projectId == null || projectId == 0)
             return R.fail("非法参数");
@@ -52,6 +55,9 @@ public class ProjectRecycleController extends BaseController {
      */
     @PostMapping("/restore/batch")
     @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = "project.ui.recycle.restore"
+    )
     public R<Void> restoreBatch(@RequestBody ProjectRestoreDTO restoreDTO){
         projectRecycleService.restoreBatch(restoreDTO.getIds());
         return R.ok();

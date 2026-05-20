@@ -292,6 +292,7 @@ const {
               key: 'restore',
               label: '恢复',
               icon: 'ri:restart-line',
+              auth: 'project.ui.recycle.restore',
               color: '#67c23a'
             },
             {
