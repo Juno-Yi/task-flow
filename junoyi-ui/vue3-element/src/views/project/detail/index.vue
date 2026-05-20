@@ -53,6 +53,7 @@
 <script setup lang="ts">
   import OverviewTab from "@views/project/detail/tab/overview-tab.vue";
   import { useRoute, useRouter } from 'vue-router'
+  import {fetchGetProjectDetailByNo} from "@/api/project/detail";
 
 
   defineOptions({ name: 'ProjectDetail' })
@@ -111,9 +112,30 @@
   /**
    * 加载项目详情信息数据
    */
-  const loadProjectDetailData = () => {
+  const loadProjectDetailData = async () => {
     const projectNo = route.query.no as string
-    console.log("调试:",projectNo)
+    if (!projectNo) {
+      ElMessage.error('项目编号不能为空')
+      goBack()
+      return
+    }
+
+    try {
+      loading.value = true
+      const data = await fetchGetProjectDetailByNo(projectNo)
+      projectInfo.value = data
+
+      // 调试日志
+      console.log('项目详情数据:', data)
+      // console.log('当前用户角色:', data.currentUserRole)
+      // console.log('projectRole:', projectRole)
+    } catch (error) {
+      console.error('加载项目详情失败:', error)
+      ElMessage.error('加载项目详情失败')
+      goBack()
+    } finally {
+      loading.value = false
+    }
   }
 
   // 初始化时从 URL 读取 Tab
