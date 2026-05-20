@@ -33,6 +33,9 @@ public class ProjectDetailController extends BaseController {
     public R<ProjectDetailVO> getProjectDetailByNo(@PathVariable("projectNo") String projectNo){
         if (StringUtils.isEmpty(projectNo))
             return R.fail("非法请求");
+
+        // TODO：在进入业务层之前，先去判断一下用户是否有该项目的查看权限，防止水平越权
+
         return R.ok(projectDetailService.getProjectDetailByNo(projectNo));
     }
 }
