@@ -40,6 +40,16 @@
             />
           </ElTabPane>
 
+          <!-- 成员 -->
+          <ElTabPane name="members" class="h-full">
+            <template #label>
+              <span class="flex items-center">
+                <ArtSvgIcon icon="ri:team-line" class="mr-2" />
+                成员
+              </span>
+            </template>
+            <MembersTab :project-info="projectInfo" />
+          </ElTabPane>
 
         </ElTabs>
       </ElCard>
@@ -52,6 +62,7 @@
 
 <script setup lang="ts">
   import OverviewTab from "@views/project/detail/tab/overview-tab.vue";
+  import MembersTab from "@views/project/detail/tab/members-tab.vue";
   import { useRoute, useRouter } from 'vue-router'
   import {fetchGetProjectDetailByNo} from "@/api/project/detail";
 
@@ -161,8 +172,14 @@
   /**
    * 切换 Tab 页
    */
-  const handleTabChange = () => {
-
+  const handleTabChange = (tabName: string | number) => {
+    // 更新 URL 查询参数，但不刷新页面
+    router.replace({
+      query: {
+        ...route.query,
+        tab: String(tabName)
+      }
+    })
   }
 
   /**

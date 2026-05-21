@@ -9,13 +9,7 @@ import com.junoyi.project.domain.vo.ProjectDetailVO;
  */
 public interface IProjectDetailService {
 
-    /**
-     * 判断用户是否能查看项目详情的权限
-     * @param projectNo 项目编号
-     * @param userId 用户ID
-     * @return 如果有权限返回true，没有权限就返回false
-     */
-    boolean hasProjectViewDetailPermission(String projectNo, Long userId);
+
 
     /**
      * 通过项目编号获取项目详情

@@ -8,6 +8,7 @@ import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.project.domain.vo.ProjectDetailVO;
 import com.junoyi.project.service.IProjectDetailService;
+import com.junoyi.project.service.IProjectPermissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProjectDetailController extends BaseController {
 
     private final IProjectDetailService projectDetailService;
+    private final IProjectPermissionService projectPermissionService;
 
     /**
      * 获取项目详情信息（通过项目编号no)
@@ -39,7 +41,7 @@ public class ProjectDetailController extends BaseController {
         Long currentUserId = SecurityUtils.getUserId();
         if (currentUserId == null || currentUserId == 0L)
             return R.fail("非法请求");
-        if (!projectDetailService.hasProjectViewDetailPermission(projectNo,currentUserId))
+        if (!projectPermissionService.hasProjectViewPermission(projectNo,currentUserId))
             return R.fail("非法请求");
 
         return R.ok(projectDetailService.getProjectDetailByNo(projectNo));
