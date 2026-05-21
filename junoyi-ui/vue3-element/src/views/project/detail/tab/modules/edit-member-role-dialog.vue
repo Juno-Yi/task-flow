@@ -103,7 +103,7 @@
       submitting.value = true
       await fetchUpdateMemberRole({
         projectId: props.projectId,
-        memberId: props.memberInfo.id,
+        memberId: props.memberInfo.userId,
         role: formData.value.role
       })
       

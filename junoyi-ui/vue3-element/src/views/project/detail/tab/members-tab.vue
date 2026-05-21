@@ -191,7 +191,7 @@
         }
       )
       
-      await fetchRemoveMember(props.projectInfo.id, member.id)
+      await fetchRemoveMember(props.projectInfo.id, member.userId)
       ElMessage.success('移除成功')
       await loadMembers()
     } catch (error) {

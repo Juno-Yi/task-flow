@@ -40,6 +40,16 @@
             />
           </ElTabPane>
 
+          <!-- 成员 -->
+          <ElTabPane name="members" class="h-full">
+            <template #label>
+              <span class="flex items-center">
+                <ArtSvgIcon icon="ri:team-line" class="mr-2" />
+                成员
+              </span>
+            </template>
+            <MembersTab :project-info="projectInfo" />
+          </ElTabPane>
 
         </ElTabs>
       </ElCard>
@@ -52,6 +62,7 @@
 
 <script setup lang="ts">
   import OverviewTab from "@views/project/detail/tab/overview-tab.vue";
+  import MembersTab from "@views/project/detail/tab/members-tab.vue";
   import { useRoute, useRouter } from 'vue-router'
   import {fetchGetProjectDetailByNo} from "@/api/project/detail";
 
