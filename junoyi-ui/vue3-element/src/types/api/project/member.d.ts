@@ -39,6 +39,7 @@ declare namespace Api.Project {
      * 修改项目成员角色 DTO
      */
     interface ProjectMemberUpdateRoleDTO {
+        projectId: number
         memberId: number
         role: string
     }

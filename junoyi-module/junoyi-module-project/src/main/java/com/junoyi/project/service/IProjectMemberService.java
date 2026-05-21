@@ -1,6 +1,7 @@
 package com.junoyi.project.service;
 
 import com.junoyi.project.domain.dto.ProjectMemberAddDTO;
+import com.junoyi.project.domain.dto.ProjectMemberUpdateRoleDTO;
 import com.junoyi.project.domain.vo.ProjectMemberVO;
 
 import java.util.List;
@@ -26,4 +27,12 @@ public interface IProjectMemberService {
      * @param dto 添加成员DTO
      */
     void addMember(ProjectMemberAddDTO dto);
+
+    /**
+     * 更新成员角色
+     *
+     * @param dto 更新角色DTO
+     */
+    void updateMemberRole(ProjectMemberUpdateRoleDTO dto);
+
 }

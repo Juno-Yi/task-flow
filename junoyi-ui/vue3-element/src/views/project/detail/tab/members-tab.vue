@@ -102,6 +102,7 @@
     <!-- 编辑角色对话框 -->
     <EditMemberRoleDialog
       v-model:visible="editRoleDialogVisible"
+      :project-id="projectInfo.id"
       :member-info="currentEditMember"
       @success="loadMembers"
     />

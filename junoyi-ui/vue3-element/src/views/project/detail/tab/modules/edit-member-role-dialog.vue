@@ -60,6 +60,7 @@
 
   interface Props {
     memberInfo: Api.Project.ProjectMemberVO | null
+    projectId: number
   }
 
   const props = defineProps<Props>()
@@ -100,7 +101,11 @@
       }
       
       submitting.value = true
-      await fetchUpdateMemberRole({memberId: props.memberInfo.id, role: formData.value.role})
+      await fetchUpdateMemberRole({
+        projectId: props.projectId,
+        memberId: props.memberInfo.id,
+        role: formData.value.role
+      })
       
       ElMessage.success('角色更新成功')
       emit('success')
