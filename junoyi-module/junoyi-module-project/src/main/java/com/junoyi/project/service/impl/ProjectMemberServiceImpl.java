@@ -178,6 +178,6 @@ public class ProjectMemberServiceImpl implements IProjectMemberService {
         member.setStatus(0);
         member.setLeaveTime(new Date());
         member.setUpdateTime(new Date());
-        projectMemberMapper.selectById(member.getId());
+        projectMemberMapper.updateById(member);
     }
 }
