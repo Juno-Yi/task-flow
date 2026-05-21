@@ -1,7 +1,6 @@
 package com.junoyi.project.controller;
 
 import com.junoyi.framework.core.domain.module.R;
-import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.security.utils.SecurityUtils;
