@@ -35,15 +35,6 @@ export function fetchAddProjectMember(data: Api.Project.ProjectMemberAddDTO) {
 }
 
 /**
- * 移除项目成员
- */
-export function fetchRemoveMember(memberId: number) {
-    return request.del<void>({
-        url: `/project/member/${memberId}`
-    })
-}
-
-/**
  * 更新成员角色
  */
 export function fetchUpdateMemberRole(data: Api.Project.ProjectMemberUpdateRoleDTO) {
@@ -52,3 +43,14 @@ export function fetchUpdateMemberRole(data: Api.Project.ProjectMemberUpdateRoleD
         data
     })
 }
+
+
+/**
+ * 移除项目成员
+ */
+export function fetchRemoveMember(projectId: number, memberId: number) {
+    return request.del<void>({
+        url: `/project/member/${projectId}/remove/${memberId}`
+    })
+}
+

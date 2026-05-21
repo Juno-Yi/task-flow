@@ -129,7 +129,12 @@ public class ProjectMemberServiceImpl implements IProjectMemberService {
     @Override
     public void updateMemberRole(ProjectMemberUpdateRoleDTO dto) {
         // 查询成员记录
-        ProjectMember member = projectMemberMapper.selectById(dto.getMemberId());
+        LambdaQueryWrapper<ProjectMember> projectMemberWrapper = new LambdaQueryWrapper<>();
+        projectMemberWrapper.eq(ProjectMember::getUserId, dto.getMemberId())
+                .eq(ProjectMember::getProjectId, dto.getProjectId())
+                .eq(ProjectMember::getStatus, 1);
+
+        ProjectMember member = projectMemberMapper.selectOne(projectMemberWrapper);
         if (member == null)
             throw new RuntimeException("成员不存在");
 
@@ -149,5 +154,30 @@ public class ProjectMemberServiceImpl implements IProjectMemberService {
         member.setRole(dto.getRole());
         member.setUpdateTime(new Date());
         projectMemberMapper.updateById(member);
+    }
+
+    /**
+     * 移除项目成员
+     * @param projectId 项目ID
+     * @param memberId 成员ID
+     */
+    @Override
+    public void removeMember(Long projectId, Long memberId) {
+        // 查询成员记录
+        LambdaQueryWrapper<ProjectMember> projectMemberWrapper = new LambdaQueryWrapper<>();
+        projectMemberWrapper.eq(ProjectMember::getUserId, memberId)
+                .eq(ProjectMember::getProjectId, projectId)
+                .eq(ProjectMember::getStatus, 1);
+
+        ProjectMember member = projectMemberMapper.selectOne(projectMemberWrapper);
+        if (member == null)
+            throw new RuntimeException("成员不存在");
+
+
+        // 软删除：更新状态为离职
+        member.setStatus(0);
+        member.setLeaveTime(new Date());
+        member.setUpdateTime(new Date());
+        projectMemberMapper.selectById(member.getId());
     }
 }

@@ -35,4 +35,11 @@ public interface IProjectMemberService {
      */
     void updateMemberRole(ProjectMemberUpdateRoleDTO dto);
 
+    /**
+     * 移除项目成员
+     * @param projectId 项目ID
+     * @param memberId 成员ID
+     */
+    void removeMember(Long projectId,Long memberId);
+
 }
