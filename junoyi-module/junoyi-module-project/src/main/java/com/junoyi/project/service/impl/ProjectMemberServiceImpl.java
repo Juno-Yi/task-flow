@@ -2,6 +2,7 @@ package com.junoyi.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.junoyi.project.convert.ProjectMemberConverter;
+import com.junoyi.project.domain.dto.ProjectMemberAddDTO;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectMemberVO;
 import com.junoyi.project.mapper.ProjectMemberMapper;
@@ -59,5 +60,15 @@ public class ProjectMemberServiceImpl implements IProjectMemberService {
 
         // 使用转换器转换为VO并填充用户信息
         return ProjectMemberConverter.toVOListWithUserInfo(members, userMap);
+    }
+
+    /**
+     * 添加项目成员
+     *
+     * @param dto 添加成员DTO
+     */
+    @Override
+    public void addMember(ProjectMemberAddDTO dto) {
+
     }
 }

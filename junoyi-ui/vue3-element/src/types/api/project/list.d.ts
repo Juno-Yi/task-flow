@@ -179,29 +179,7 @@ declare namespace Api.Project {
     typeLabelType?: string
   }
 
-  /**
-   * 项目成员视图对象
-   */
-  interface ProjectMemberVO {
-    /** 成员ID */
-    id: number
-    /** 用户ID */
-    userId: number
-    /** 用户名 */
-    userName: string
-    /** 昵称 */
-    nickName: string
-    /** 头像 */
-    avatar?: string
-    /** 项目角色 */
-    role: string
-    /** 状态 */
-    status: number
-    /** 加入时间 */
-    joinTime: string
-    /** 离开时间 */
-    leaveTime?: string
-  }
+
 
   /**
    * 项目传输数据

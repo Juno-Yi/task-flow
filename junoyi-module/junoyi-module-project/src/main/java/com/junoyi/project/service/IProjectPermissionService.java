@@ -22,4 +22,20 @@ public interface IProjectPermissionService {
      * @return 如果有权限返回true，没有权限就返回false
      */
     boolean hasProjectViewPermission(Long projectId, Long userId);
+
+    /**
+     * 用户是否为项目负责人
+     * @param projectId 项目ID
+     * @param userId 用户ID
+     * @return 如果是就返回true，否则就返回false
+     */
+    boolean isProjectOwner(Long projectId, Long userId);
+
+    /**
+     * 用户是否为项目管理员
+     * @param projectId 项目ID
+     * @param userId 用户ID
+     * @return 如果是就返回true，否则就返回false
+     */
+    boolean isProjectAdmin(Long projectId, Long userId);
 }
