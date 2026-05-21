@@ -172,8 +172,14 @@
   /**
    * 切换 Tab 页
    */
-  const handleTabChange = () => {
-
+  const handleTabChange = (tabName: string | number) => {
+    // 更新 URL 查询参数，但不刷新页面
+    router.replace({
+      query: {
+        ...route.query,
+        tab: String(tabName)
+      }
+    })
   }
 
   /**
