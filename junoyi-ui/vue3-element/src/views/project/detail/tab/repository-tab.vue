@@ -351,7 +351,7 @@
       }
     ).then(async () => {
       try {
-        await fetchDeleteRepoRepository(repo.id)
+        await fetchDeleteRepoRepository(props.projectInfo.id,repo.id)
         ElMessage.success('删除成功')
         await loadRepositoryList()
       } catch (error) {

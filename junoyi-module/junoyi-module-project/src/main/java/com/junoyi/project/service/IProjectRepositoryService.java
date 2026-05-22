@@ -30,4 +30,10 @@ public interface IProjectRepositoryService {
      * @param dto 传输数据
      */
     void updateRepository(ProjectRepositoryDTO dto);
+
+    /**
+     * 删除项目仓库
+     * @param id 项目仓库ID
+     */
+    void deleteRepository(Long id);
 }

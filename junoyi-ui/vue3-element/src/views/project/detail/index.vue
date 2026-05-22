@@ -51,6 +51,19 @@
             <MembersTab :project-info="projectInfo" />
           </ElTabPane>
 
+          <!-- 仓库 -->
+          <ElTabPane name="repository" class="h-full">
+            <template #label>
+              <span class="flex items-center">
+                <ArtSvgIcon icon="ri:git-repository-line" class="mr-2" />
+                仓库
+                <ElBadge v-if="projectInfo.repositoryCount > 0" :value="projectInfo.repositoryCount" class="ml-2" />
+              </span>
+            </template>
+            <RepositoryTab :project-info="projectInfo" />
+          </ElTabPane>
+
+
         </ElTabs>
       </ElCard>
     </div>
@@ -63,6 +76,7 @@
 <script setup lang="ts">
   import OverviewTab from "@views/project/detail/tab/overview-tab.vue";
   import MembersTab from "@views/project/detail/tab/members-tab.vue";
+  import RepositoryTab from "@views/project/detail/tab/repository-tab.vue";
   import { useRoute, useRouter } from 'vue-router'
   import {fetchGetProjectDetailByNo} from "@/api/project/detail";
 

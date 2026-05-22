@@ -132,7 +132,6 @@ const {
         formatter: (row: RepoVO) => {
           return h('span', {
             class: 'font-mono text-primary font-medium',
-            onClick: () => viewRepo(row)
           }, row.no)
         }
       },
@@ -145,7 +144,6 @@ const {
         formatter: (row: RepoVO) => {
           return h('div', {
             class: 'flex items-center cursor-pointer hover:text-primary transition-colors',
-            onClick: () => viewRepo(row)
           }, [
             h(ArtSvgIcon, {
               icon: 'ri:git-repository-line',
@@ -351,17 +349,6 @@ const handleSearch = (params: Record<string, any>) => {
 const resetSearchParams = () => {
   _resetSearchParams()
   getData()
-}
-
-/**
- * 查看项目详情
- */
-const viewRepo = (row: RepoVO) => {
-  // 跳转到项目详情页，使用查询参数传递项目编号
-  router.push({
-    path: '/project/detail',
-    query: { no: row.no }
-  })
 }
 
 /**

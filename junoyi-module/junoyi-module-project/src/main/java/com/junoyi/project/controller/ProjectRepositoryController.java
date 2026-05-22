@@ -106,7 +106,25 @@ public class ProjectRepositoryController extends BaseController {
     @DeleteMapping("/{projectId}/remote/{id}")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(value = {"project.ui.detail.view"})
-    public R<Void> deleteRepository(@PathVariable("id") Long id) {
+    public R<Void> deleteRepository(@PathVariable("projectId") Long projectId,
+                                    @PathVariable("id") Long id) {
+        // 参数验证
+        if (projectId == null || projectId == 0)
+            return R.fail("项目ID不能为空");
+
+        // 获取当前用户ID
+        Long currentUserId = SecurityUtils.getUserId();
+        if (currentUserId == null || currentUserId == 0L)
+            return R.fail("非法请求");
+
+        // 判断当前用户角色是否有权限添加（负责人或管理员）
+        boolean isOwner = projectPermissionService.isProjectOwner(projectId, currentUserId);
+        boolean isAdmin = projectPermissionService.isProjectAdmin(projectId, currentUserId);
+
+        if (!isOwner && !isAdmin)
+            return R.fail("权限不足，只有项目负责人或管理员可以删除仓库");
+
+
 //        projectRepositoryService.(id);
         return R.ok();
     }

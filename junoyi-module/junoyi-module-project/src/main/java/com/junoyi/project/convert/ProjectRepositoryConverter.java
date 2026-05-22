@@ -1,5 +1,6 @@
 package com.junoyi.project.convert;
 
+import com.junoyi.project.domain.dto.ProjectRepositoryDTO;
 import com.junoyi.project.domain.po.ProjectRepository;
 import com.junoyi.project.domain.vo.ProjectRepositoryVO;
 
@@ -32,5 +33,14 @@ public final class ProjectRepositoryConverter {
         vo.setUpdateBy(entity.getUpdateBy());
         vo.setUpdateTime(entity.getUpdateTime().toString());
         return vo;
+    }
+
+    /**
+     * 将 ProjectRepositoryDTO 转换成 ProjectRepository
+     * @param dto
+     * @return
+     */
+    public static ProjectRepository toPO(ProjectRepositoryDTO dto){
+
     }
 }

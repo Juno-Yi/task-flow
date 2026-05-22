@@ -44,9 +44,9 @@ export function fetchUpdateRepoRepository(data: Api.Project.ProjectRepositoryDTO
 /**
  * 删除项目仓库
  */
-export function fetchDeleteRepoRepository(id: number) {
+export function fetchDeleteRepoRepository(projectId: number, id: number) {
   return request.del<void>({
-    url: `/project/repository/${id}`,
+    url: `/project/repository/${projectId}/remove/${id}`,
   })
 }
 
