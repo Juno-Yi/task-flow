@@ -142,10 +142,11 @@ API接口文档：https://lk458yviee.apifox.cn
 <tr>
 <td width="50%" align="center">
 <img src="doc/img/view_sys_op_log.png" alt="操作日志" width="100%" />
-项目详情仓库管理
+操作日志
 </td>
 <td width="50%" align="center">
-<img src="doc/img/" alt="其他" width="100%" />
+<img src="doc/img/view_sys_permission.png" alt="权限池" width="100%" />
+权限池
 </td>
 </tr>
 
