@@ -42,29 +42,29 @@ API接口文档：https://lk458yviee.apifox.cn
 
 <tr>
 <td width="50%" align="center">
-<img src="doc/img/view_task_list.png" alt="项目立项" width="100%" />
+<img src="doc/img/view_project_setup.png" alt="项目立项" width="100%" />
 项目立项
 </td>
 <td width="50%" align="center">
-<img src="doc/img/view_task_list.png" alt="进行中项目" width="100%" />
+<img src="doc/img/view_project_active.png" alt="进行中项目" width="100%" />
 进行中项目
 </td>
 </tr>
 
 <tr>
 <td width="50%" align="center">
-<img src="doc/img/view_task_list.png" alt="已归档项目" width="100%" />
+<img src="doc/img/view_project_archived.png" alt="已归档项目" width="100%" />
 已归档项目
 </td>
 <td width="50%" align="center">
-<img src="doc/img/view_task_list.png" alt="项目回收站" width="100%" />
+<img src="doc/img/view_project_recycle.png" alt="项目回收站" width="100%" />
 项目回收站
 </td>
 </tr>
 
 <tr>
 <td width="50%" align="center">
-<img src="doc/img/view_task_list.png" alt="项目管理" width="100%" />
+<img src="doc/img/view_project_list.png" alt="项目管理" width="100%" />
 项目管理
 </td>
 <td width="50%" align="center">
