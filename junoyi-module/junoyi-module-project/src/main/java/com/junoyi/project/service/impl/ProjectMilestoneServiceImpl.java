@@ -1,6 +1,10 @@
 package com.junoyi.project.service.impl;
 
+import com.junoyi.framework.core.utils.DateUtils;
+import com.junoyi.framework.security.utils.SecurityUtils;
+import com.junoyi.project.convert.ProjectMilestoneConverter;
 import com.junoyi.project.domain.dto.ProjectMilestoneDTO;
+import com.junoyi.project.domain.po.ProjectMilestone;
 import com.junoyi.project.domain.vo.ProjectMilestoneVO;
 import com.junoyi.project.mapper.ProjectMilestoneMapper;
 import com.junoyi.project.service.IProjectMilestoneService;
@@ -52,7 +56,16 @@ public class ProjectMilestoneServiceImpl implements IProjectMilestoneService {
      */
     @Override
     public void addProjectMilestone(ProjectMilestoneDTO dto) {
+        ProjectMilestone projectMilestone = ProjectMilestoneConverter.toPO(dto);
 
+        projectMilestone.setStatus(0);
+        projectMilestone.setDelFlag(false);
+        projectMilestone.setCreateBy(SecurityUtils.getUserName());
+        projectMilestone.setCreateTime(DateUtils.getNowDate());
+
+        projectMilestoneMapper.insert(projectMilestone);
+
+        // TODO: 发布项目动态
     }
 
     /**
@@ -61,6 +74,13 @@ public class ProjectMilestoneServiceImpl implements IProjectMilestoneService {
      */
     @Override
     public void updateProjectMilestone(ProjectMilestoneDTO dto) {
+        ProjectMilestone projectMilestone = ProjectMilestoneConverter.toPO(dto);
 
+        projectMilestone.setUpdateBy(SecurityUtils.getUserName());
+        projectMilestone.setUpdateTime(DateUtils.getNowDate());
+
+        projectMilestoneMapper.updateById(projectMilestone);
+
+        // TODO: 发布项目动态
     }
 }
