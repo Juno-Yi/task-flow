@@ -101,8 +101,51 @@ API接口文档：https://lk458yviee.apifox.cn
 用户管理
 </td>
 <td width="50%" align="center">
-<img src="doc/img/view_task_list.png" alt="项目详情里程碑管理" width="100%" />
-### 项目详情里程碑管理
+<img src="doc/img/view_sys_role.png" alt="角色管理" width="100%" />
+角色管理
+</td>
+</tr>
+
+<tr>
+<td width="50%" align="center">
+<img src="doc/img/view_sys_dept.png" alt="部门管理" width="100%" />
+部门管理
+</td>
+<td width="50%" align="center">
+<img src="doc/img/view_sys_group.png" alt="权限组管理" width="100%" />
+权限组管理
+</td>
+</tr>
+
+<tr>
+<td width="50%" align="center">
+<img src="doc/img/view_sys_dict.png" alt="字典管理" width="100%" />
+字典管理
+</td>
+<td width="50%" align="center">
+<img src="doc/img/view_sys_menu.png" alt="菜单管理" width="100%" />
+菜单管理
+</td>
+</tr>
+
+<tr>
+<td width="50%" align="center">
+<img src="doc/img/view_sys_config.png" alt="系统参数" width="100%" />
+系统参数
+</td>
+<td width="50%" align="center">
+<img src="doc/img/view_sys_auth_log.png" alt="登录日志" width="100%" />
+登录日志
+</td>
+</tr>
+
+<tr>
+<td width="50%" align="center">
+<img src="doc/img/view_sys_op_log.png" alt="操作日志" width="100%" />
+项目详情仓库管理
+</td>
+<td width="50%" align="center">
+<img src="doc/img/" alt="其他" width="100%" />
 </td>
 </tr>
 
