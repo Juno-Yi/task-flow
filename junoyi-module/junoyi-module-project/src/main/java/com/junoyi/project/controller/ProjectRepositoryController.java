@@ -103,7 +103,7 @@ public class ProjectRepositoryController extends BaseController {
     /**
      * 删除项目仓库
      */
-    @DeleteMapping("/{projectId}/remote/{id}")
+    @DeleteMapping("/{projectId}/remove/{id}")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(value = {"project.ui.detail.view"})
     public R<Void> deleteRepository(@PathVariable("projectId") Long projectId,
