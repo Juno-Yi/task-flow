@@ -2,6 +2,7 @@ package com.junoyi.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.junoyi.project.convert.ProjectRepositoryConverter;
+import com.junoyi.project.domain.dto.ProjectRepositoryDTO;
 import com.junoyi.project.domain.po.ProjectRepository;
 import com.junoyi.project.domain.vo.ProjectRepositoryVO;
 import com.junoyi.project.mapper.ProjectRepositoryMapper;
@@ -44,5 +45,23 @@ public class ProjectRepositoryServiceImpl implements IProjectRepositoryService {
                 .collect(Collectors.toList());
 
         return voList;
+    }
+
+    /**
+     * 添加项目仓库
+     * @param dto 传输数据
+     */
+    @Override
+    public void addRepository(ProjectRepositoryDTO dto) {
+
+    }
+
+    /**
+     * 更新项目仓库
+     * @param dto 传输数据
+     */
+    @Override
+    public void updateRepository(ProjectRepositoryDTO dto) {
+
     }
 }

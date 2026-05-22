@@ -1,5 +1,6 @@
 package com.junoyi.project.service;
 
+import com.junoyi.project.domain.dto.ProjectRepositoryDTO;
 import com.junoyi.project.domain.vo.ProjectRepositoryVO;
 
 import java.util.List;
@@ -17,4 +18,16 @@ public interface IProjectRepositoryService {
      * @return 项目仓库列表
      */
     List<ProjectRepositoryVO> getRepositoryList(Long projectId);
+
+    /**
+     * 添加项目仓库
+     * @param dto 传输数据
+     */
+    void addRepository(ProjectRepositoryDTO dto);
+
+    /**
+     * 更新项目仓库
+     * @param dto 传输数据
+     */
+    void updateRepository(ProjectRepositoryDTO dto);
 }
