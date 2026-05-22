@@ -13,34 +13,33 @@ API接口文档：https://lk458yviee.apifox.cn
 
 
 # 项目功能展示
+<div align="center">
+<table>
+<tr>
+<td align="center">
+    <img src="doc/img/view_login.png" alt="登录界面" /><br/>
+    <b>登录界面</b>
+</td>
+<td align="center">
+    <img  src="doc/img/view_cache.png" alt="邀请码注册" /><br/>
+    <b>邀请码注册</b>
+</td>
+</tr>
 
-**登录页**：支持企业微信、飞书、钉钉 Oauth登录。
+<tr>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="任务管理" /> <br/>
+    <b>任务管理</b>
+</td>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="任务审核" /> <br/>
+    <b>任务审核</b>
+</td>
+</tr>
 
-![login](/doc/img/view_login.png)
+</table>
 
---- 
-
-**任务管理**：系统所有员工任务列表，任务支持企业微信、飞书、钉钉同步日程与通知
-
-![view_task_list](/doc/img/view_task_list.png)
-
----
-
-**会话监控**：支持查看当前系统在线人数、在线会话信息、手动踢出用户会话。
-
-![session](/doc/img/view_session.png)
-
----
-
-**缓存监控**：支持管理 Redis 缓存数据库，查看所有缓存数据，基础Redis信息，操作缓存数据。
-
-![cache](/doc/img/view_cache.png)
-
----
-
-**系统信息**：支持查看系统基础信息、Java使用信息、磁盘使用情况等。
-
-![server_info](/doc/img/view_server_info.png)
+</div>
 
 # 项目启动
 
