@@ -13,94 +13,96 @@ API接口文档：https://lk458yviee.apifox.cn
 
 
 # 项目功能展示
+
 <div align="center">
-<table>
+
+<table width="100%">
+
 <tr>
-<td align="center">
-    <img src="doc/img/view_login.png" alt="登录界面" /><br/>
-    <b>登录界面</b>
+<td width="50%" align="center">
+<img src="doc/img/view_login.png" alt="登录界面" width="100%" />
+登录界面
 </td>
-<td align="center">
-    <img  src="doc/img/view_cache.png" alt="邀请码注册" /><br/>
-    <b>邀请码注册</b>
+<td width="50%" align="center">
+<img src="doc/img/view_cache.png" alt="邀请码注册" width="100%" />
+邀请码注册
 </td>
 </tr>
 
 <tr>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="任务管理" /> <br/>
-    <b>任务管理</b>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="任务管理" width="100%" />
+任务管理
 </td>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="任务审核" /> <br/>
-    <b>任务审核</b>
-</td>
-</tr>
-
-<tr>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="项目立项" /> <br/>
-    <b>项目立项</b>
-</td>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="进行中项目" /> <br/>
-    <b>进行中项目</b>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="任务审核" width="100%" />
+任务审核
 </td>
 </tr>
 
 <tr>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="已归档项目" /> <br/>
-    <b>已归档项目</b>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="项目立项" width="100%" />
+项目立项
 </td>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="项目回收站" /> <br/>
-    <b>项目回收站</b>
-</td>
-</tr>
-
-<tr>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="项目管理" /> <br/>
-    <b>项目管理</b>
-</td>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="项目详情概览" /> <br/>
-    <b>项目详情概览</b>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="进行中项目" width="100%" />
+进行中项目
 </td>
 </tr>
 
 <tr>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="项目详情成员管理" /> <br/>
-    <b>项目详情成员管理</b>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="已归档项目" width="100%" />
+已归档项目
 </td>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="项目详情需求管理" /> <br/>
-    <b>项目详情需求管理</b>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="项目回收站" width="100%" />
+项目回收站
 </td>
 </tr>
 
 <tr>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="项目详情仓库管理" /> <br/>
-    <b>项目详情仓库管理</b>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="项目管理" width="100%" />
+项目管理
 </td>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="项目详情里程碑管理" /> <br/>
-    <b>项目详情里程碑管理</b>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="项目详情概览" width="100%" />
+项目详情概览
 </td>
 </tr>
 
+<tr>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="项目详情成员管理" width="100%" />
+项目详情成员管理
+</td>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="项目详情需求管理" width="100%" />
+### 项目详情需求管理
+</td>
+</tr>
 
 <tr>
-<td align="center">
-    <img src="doc/img/view_sys_user.png" alt="用户管理" /> <br/>
-    <b>用户管理</b>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="项目详情仓库管理" width="100%" />
+项目详情仓库管理
 </td>
-<td align="center">
-    <img src="doc/img/view_task_list.png" alt="项目详情里程碑管理" /> <br/>
-    <b>项目详情里程碑管理</b>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="项目详情里程碑管理" width="100%" />
+项目详情里程碑管理
+</td>
+</tr>
+
+<tr>
+<td width="50%" align="center">
+<img src="doc/img/view_sys_user.png" alt="用户管理" width="100%" />
+用户管理
+</td>
+<td width="50%" align="center">
+<img src="doc/img/view_task_list.png" alt="项目详情里程碑管理" width="100%" />
+### 项目详情里程碑管理
 </td>
 </tr>
 
