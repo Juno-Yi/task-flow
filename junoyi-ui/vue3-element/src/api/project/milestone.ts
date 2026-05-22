@@ -32,17 +32,17 @@ export function fetchUpdateProjectMilestone(data: Api.Project.ProjectMilestoneDT
 /**
  * 删除项目里程碑
  */
-export function fetchDeleteProjectMilestone(id: number){
+export function fetchDeleteProjectMilestone(projectId: number, id: number){
     return request.del<void>({
-        url: `/project/milestone/${id}`,
+        url: `/project/milestone/${projectId}/remove/${id}`,
     })
 }
 
 /**
  * 完成项目里程碑
  */
-export function fetchCompleteProjectMilestone(id: number){
+export function fetchCompleteProjectMilestone(projectId: number, id: number){
     return request.put<void>({
-        url: `/project/milestone/${id}/complete`,
+        url: `/project/milestone/${projectId}/complete/${id}`,
     })
 }

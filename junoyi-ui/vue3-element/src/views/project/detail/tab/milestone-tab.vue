@@ -338,7 +338,7 @@ const handleDelete = async (milestone: Api.Project.ProjectMilestoneVO) => {
       }
     )
 
-    await fetchDeleteProjectMilestone(milestone.id)
+    await fetchDeleteProjectMilestone(props.projectInfo.id,milestone.id)
     ElMessage.success('删除成功')
     await loadMilestoneList()
   } catch (error) {
@@ -364,7 +364,7 @@ const handleComplete = async (milestone: Api.Project.ProjectMilestoneVO) => {
       }
     )
 
-    await fetchCompleteProjectMilestone(milestone.id)
+    await fetchCompleteProjectMilestone(props.projectInfo.id,milestone.id)
     ElMessage.success('里程碑已完成')
     await loadMilestoneList()
   } catch (error) {
