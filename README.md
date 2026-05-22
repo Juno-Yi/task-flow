@@ -1,8 +1,23 @@
-# 钧逸研发任务管理系统（开发中）
+<div align="center">
+    <h1>钧逸研发管理系统</h1>
+    <p><strong>安全内建 · 开箱即用 · 企业级应用</strong></p>
+    <p>专为软件团队打造的任务协作、项目管理与需求流转一体化平台</p>
+</div>
+
+<div align="center">
+
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.0-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![MyBatis Plus](https://img.shields.io/badge/MyBatis%20Plus-3.5.9-red)](https://baomidou.com/)
+[![Vue3](https://img.shields.io/badge/Vue-3.x-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
+[![Element Plus](https://img.shields.io/badge/Element%20Plus-latest-409EFF)](https://element-plus.org/)
+[![Version](https://img.shields.io/badge/Version-1.0.0-success)](https://github.com/Juno-Yi/JunoYi)
+
+</div>
 
 # 项目介绍
 
-钧逸研发任务管理系统是专门为像**软件开发团队**、**产品研发团队**等打造的轻量级任务协作平台，可以内嵌于**企业微信**、**飞书**、**钉钉**等作为团队内部、企业内部使用的协同系统。
+钧逸研发管理系统是专门为像**软件开发团队**、**产品研发团队**等打造的轻量级任务协作平台，可以内嵌于**企业微信**、**飞书**、**钉钉**等作为团队内部、企业内部使用的协同系统。
 致力于提升团队在任务分配、进度跟踪、协作沟通方面的效率。
 
 项目适用于中小型研发团队、外包团队以及技术创业团队。
