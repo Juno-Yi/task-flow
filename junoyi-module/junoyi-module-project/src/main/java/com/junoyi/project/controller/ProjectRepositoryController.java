@@ -125,7 +125,7 @@ public class ProjectRepositoryController extends BaseController {
             return R.fail("权限不足，只有项目负责人或管理员可以删除仓库");
 
 
-//        projectRepositoryService.(id);
+        projectRepositoryService.deleteRepository(id);
         return R.ok();
     }
 
