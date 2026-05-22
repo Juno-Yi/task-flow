@@ -37,6 +37,73 @@ API接口文档：https://lk458yviee.apifox.cn
 </td>
 </tr>
 
+<tr>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="项目立项" /> <br/>
+    <b>项目立项</b>
+</td>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="进行中项目" /> <br/>
+    <b>进行中项目</b>
+</td>
+</tr>
+
+<tr>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="已归档项目" /> <br/>
+    <b>已归档项目</b>
+</td>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="项目回收站" /> <br/>
+    <b>项目回收站</b>
+</td>
+</tr>
+
+<tr>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="项目管理" /> <br/>
+    <b>项目管理</b>
+</td>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="项目详情概览" /> <br/>
+    <b>项目详情概览</b>
+</td>
+</tr>
+
+<tr>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="项目详情成员管理" /> <br/>
+    <b>项目详情成员管理</b>
+</td>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="项目详情需求管理" /> <br/>
+    <b>项目详情需求管理</b>
+</td>
+</tr>
+
+<tr>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="项目详情仓库管理" /> <br/>
+    <b>项目详情仓库管理</b>
+</td>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="项目详情里程碑管理" /> <br/>
+    <b>项目详情里程碑管理</b>
+</td>
+</tr>
+
+
+<tr>
+<td align="center">
+    <img src="doc/img/view_sys_user.png" alt="用户管理" /> <br/>
+    <b>用户管理</b>
+</td>
+<td align="center">
+    <img src="doc/img/view_task_list.png" alt="项目详情里程碑管理" /> <br/>
+    <b>项目详情里程碑管理</b>
+</td>
+</tr>
+
 </table>
 
 </div>
