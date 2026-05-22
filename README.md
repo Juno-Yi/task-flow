@@ -279,8 +279,8 @@ log:
 
 打开微信关注官方公众号「钧逸网络科技」，回复 `研发任务管理系统数据库`，即可免费获取完整数据库结构和数据。
 
-<div align="center">
-    <img src="/doc/img/gongzhonghao.jpg" width="300" height="300"/>
+<div>
+    <img src="/doc/img/gongzhonghao.jpg" width="200" height="200"/>
 </div>
 
 后续更新计划将持续在公众号上发布更新。如果想要获取该项目完整商业授权，请通过微信公众号，联系我们的客服！
@@ -289,8 +289,8 @@ log:
 
 如果你对我们开源的项目感兴趣，或者想要学习，咨询问题，可以加入微信官方开源社区群！欢迎你的加入！
 
-<div align="center">
-    <img src="/doc/img/开源社区群.png" width="300" height="300"/>
+<div>
+    <img src="/doc/img/开源社区群.png" width="200" height="200"/>
 </div>
 
 # 商业使用说明（开源协议）
