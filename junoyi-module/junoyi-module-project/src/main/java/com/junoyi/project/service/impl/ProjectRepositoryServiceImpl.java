@@ -2,8 +2,6 @@ package com.junoyi.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.junoyi.framework.core.utils.DateUtils;
-import com.junoyi.framework.event.core.EventBus;
-import com.junoyi.framework.json.utils.JsonUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.convert.ProjectRepositoryConverter;
 import com.junoyi.project.domain.dto.ProjectRepositoryDTO;
@@ -13,7 +11,6 @@ import com.junoyi.project.mapper.ProjectRepositoryMapper;
 import com.junoyi.project.service.IProjectRepositoryService;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.vo.SysDictDataVO;
-import com.junoyi.system.event.UserOperationEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -92,13 +89,13 @@ public class ProjectRepositoryServiceImpl implements IProjectRepositoryService {
      */
     @Override
     public void addRepository(ProjectRepositoryDTO dto) {
-        ProjectRepository repository = ProjectRepositoryConverter.toPo(dto);
+        ProjectRepository repository = ProjectRepositoryConverter.toPO(dto);
         repository.setCreateBy(SecurityUtils.getUserName());
         repository.setCreateTime(DateUtils.getNowDate());
 
         projectRepositoryMapper.insert(repository);
 
-
+        // TODO: 后续发布项目动态事件
     }
 
     /**
@@ -107,7 +104,13 @@ public class ProjectRepositoryServiceImpl implements IProjectRepositoryService {
      */
     @Override
     public void updateRepository(ProjectRepositoryDTO dto) {
+        ProjectRepository repository = ProjectRepositoryConverter.toPO(dto);
+        repository.setUpdateBy(SecurityUtils.getUserName());
+        repository.setUpdateTime(DateUtils.getNowDate());
 
+        projectRepositoryMapper.updateById(repository);
+
+        // TODO: 后续发布项目动态事件
     }
 
     /**
@@ -116,6 +119,13 @@ public class ProjectRepositoryServiceImpl implements IProjectRepositoryService {
      */
     @Override
     public void deleteRepository(Long id) {
+        ProjectRepository repository = projectRepositoryMapper.selectById(id);
+        if (repository != null) {
+            projectRepositoryMapper.deleteById(id);
 
+            // TODO: 后续发布项目动态
+        }
     }
+
+
 }

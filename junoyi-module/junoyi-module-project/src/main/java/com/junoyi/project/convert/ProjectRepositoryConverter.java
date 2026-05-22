@@ -37,10 +37,21 @@ public final class ProjectRepositoryConverter {
 
     /**
      * 将 ProjectRepositoryDTO 转换成 ProjectRepository
-     * @param dto
-     * @return
+     * @param dto ProjectRepositoryDTO
+     * @return ProjectRepository
      */
     public static ProjectRepository toPO(ProjectRepositoryDTO dto){
-
+        ProjectRepository entity = new ProjectRepository();
+        entity.setId(dto.getId());
+        entity.setProjectId(dto.getProjectId());
+        entity.setName((dto.getName()));
+        entity.setType(dto.getType());
+        entity.setUrl(dto.getUrl());
+        entity.setBranch(dto.getBranch());
+        entity.setDescription(dto.getDescription());
+        entity.setIsMain(dto.getIsMain());
+        entity.setStatus(dto.getStatus());
+        entity.setRemark(dto.getRemark());
+        return entity;
     }
 }
