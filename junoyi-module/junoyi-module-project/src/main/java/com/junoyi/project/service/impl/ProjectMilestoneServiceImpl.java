@@ -1,17 +1,21 @@
 package com.junoyi.project.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.convert.ProjectMilestoneConverter;
 import com.junoyi.project.domain.dto.ProjectMilestoneDTO;
 import com.junoyi.project.domain.po.ProjectMilestone;
 import com.junoyi.project.domain.vo.ProjectMilestoneVO;
+import com.junoyi.project.exception.ProjectException;
 import com.junoyi.project.mapper.ProjectMilestoneMapper;
 import com.junoyi.project.service.IProjectMilestoneService;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.vo.SysDictDataVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -80,6 +84,48 @@ public class ProjectMilestoneServiceImpl implements IProjectMilestoneService {
         projectMilestone.setUpdateTime(DateUtils.getNowDate());
 
         projectMilestoneMapper.updateById(projectMilestone);
+
+        // TODO: 发布项目动态
+    }
+
+    /**
+     * 删除项目里程碑
+     * @param projectId 项目ID
+     * @param projectMilestoneId 项目里程碑ID
+     */
+    @Override
+    public void deleteProjectMilestone(Long projectId, Long projectMilestoneId) {
+        LambdaUpdateWrapper<ProjectMilestone> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(ProjectMilestone::getProjectId, projectId)
+                .eq(ProjectMilestone::getId, projectMilestoneId)
+                .eq(ProjectMilestone::getDelFlag, false)
+                .set(ProjectMilestone::getDelFlag, true);
+
+        int rows = projectMilestoneMapper.update(null, updateWrapper);
+        // 删除失败
+        if (rows <= 0)
+            throw new ProjectException("项目里程碑不存在或已删除");
+
+        // TODO: 发布项目动态
+    }
+
+    /**
+     * 完成项目里程碑
+     * @param projectId 项目ID
+     * @param projectMilestoneId 项目里程碑ID
+     */
+    @Override
+    public void completeProjectMilestone(Long projectId, Long projectMilestoneId) {
+        LambdaUpdateWrapper<ProjectMilestone> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(ProjectMilestone::getProjectId, projectId)
+                .eq(ProjectMilestone::getId, projectMilestoneId)
+                .eq(ProjectMilestone::getDelFlag, false)
+                .set(ProjectMilestone::getStatus, 1);
+
+        int rows = projectMilestoneMapper.update(updateWrapper);
+        // 更新失败
+        if (rows <= 0)
+            throw new ProjectException("项目里程碑不存在或已删除");
 
         // TODO: 发布项目动态
     }

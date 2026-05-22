@@ -123,7 +123,7 @@ public class ProjectMilestoneController extends BaseController {
         if (!isOwner && !isAdmin)
             return R.fail("权限不足，只有项目负责人或管理员可以删除里程碑");
 
-//        projectMilestoneService.deleteProjectMilestone(projectMilestoneId);
+        projectMilestoneService.deleteProjectMilestone(projectId,projectMilestoneId);
         return R.ok();
     }
 
@@ -150,7 +150,7 @@ public class ProjectMilestoneController extends BaseController {
         if (!isOwner && !isAdmin)
             return R.fail("权限不足，只有项目负责人或管理员可以完成里程碑");
 
-//        projectMilestoneService.completeProjectMilestone(projectMilestoneId);
+        projectMilestoneService.completeProjectMilestone(projectId,projectMilestoneId);
         return R.ok();
     }
 }

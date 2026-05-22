@@ -31,4 +31,18 @@ public interface IProjectMilestoneService {
      * @param dto 传输数据
      */
     void updateProjectMilestone(ProjectMilestoneDTO dto);
+
+    /**
+     * 删除项目里程碑
+     * @param projectId 项目ID
+     * @param projectMilestoneId 项目里程碑ID
+     */
+    void deleteProjectMilestone(Long projectId, Long projectMilestoneId);
+
+    /**
+     * 完成项目里程碑
+     * @param projectId 项目ID
+     * @param projectMilestoneId 项目里程碑ID
+     */
+    void completeProjectMilestone(Long projectId, Long projectMilestoneId);
 }
