@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.junoyi.project.mapper.ProjectMilestoneMapper">
+
+    <resultMap id="ProjectMilestoneVOResultMap" type="com.junoyi.project.domain.vo.ProjectMilestoneVO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="dueTime" column="due_time"/>
+        <result property="finishTime" column="finish_time"/>
+        <result property="sort" column="sort"/>
+        <result property="ownerId" column="owner_id"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectProjectMilestoneVOList" resultMap="ProjectMilestoneVOResultMap">
+        select
+            pm.id,
+            pm.name,
+            pm.description,
+            pm.status,
+            pm.due_time,
+            pm.finish_time,
+            pm.sort,
+            pm.owner_id,
+            su.nick_name,
+            pm.create_time,
+            pm.update_time
+        from project_milestone pm
+        left join sys_user su on su.user_id = pm.owner_id and su.del_flag = 0
+        where pm.del_flag = 0
+          and pm.project_id = #{projectId}
+        order by pm.sort asc, pm.create_time desc
+    </select>
+
+</mapper>

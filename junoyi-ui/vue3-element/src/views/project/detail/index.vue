@@ -40,6 +40,18 @@
             />
           </ElTabPane>
 
+          <!-- 里程碑 -->
+          <ElTabPane name="milestones" class="h-full">
+            <template #label>
+              <span class="flex items-center">
+                <ArtSvgIcon icon="ri:flag-line" class="mr-2" />
+                里程碑
+                <ElBadge v-if="projectInfo.milestoneCount > 0" :value="projectInfo.milestoneCount" class="ml-2" />
+              </span>
+            </template>
+            <MilestoneTab :project-info="projectInfo" />
+          </ElTabPane>
+
           <!-- 成员 -->
           <ElTabPane name="members" class="h-full">
             <template #label>
@@ -77,6 +89,7 @@
   import OverviewTab from "@views/project/detail/tab/overview-tab.vue";
   import MembersTab from "@views/project/detail/tab/members-tab.vue";
   import RepositoryTab from "@views/project/detail/tab/repository-tab.vue";
+  import MilestoneTab from "@views/project/detail/tab/milestone-tab.vue";
   import { useRoute, useRouter } from 'vue-router'
   import {fetchGetProjectDetailByNo} from "@/api/project/detail";
 
