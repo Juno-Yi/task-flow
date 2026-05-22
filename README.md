@@ -1,4 +1,5 @@
 <div align="center">
+    <img width="160" height="160" src="/doc/img/LOGO.png" />
     <h1>钧逸研发管理系统</h1>
     <p><strong>安全内建 · 开箱即用 · 企业级应用</strong></p>
     <p>专为软件团队打造的任务协作、项目管理与需求流转一体化平台</p>
