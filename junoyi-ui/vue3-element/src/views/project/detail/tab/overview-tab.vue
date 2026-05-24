@@ -54,7 +54,7 @@
               <ProjectRequirementSituationChart :data="overviewData.projectRequirementSituation" />
             </ElCard>
           </ElCol>
-          
+
           <ElCol :xs="24" :md="14">
             <ElCard shadow="never" class="chart-card mb-4 h-full">
               <template #header>
@@ -67,6 +67,16 @@
             </ElCard>
           </ElCol>
         </ElRow>
+
+        <ElCard shadow="never" class="chart-card mt-4 mb-4">
+          <template #header>
+            <div class="flex items-center">
+              <ArtSvgIcon icon="ri:line-chart-line" class="mr-2" />
+              <span class="font-semibold">近期任务完成趋势</span>
+            </div>
+          </template>
+          <div class="chart-placeholder chart-placeholder-task-trend">预留图表区域：近期任务完成趋势折线图</div>
+        </ElCard>
       </ElCol>
 
       <!--   右边区域   -->
@@ -273,6 +283,10 @@ watch(() => props.projectInfo.no, () => {
   min-height: 180px;
 }
 
+.chart-placeholder-task-trend {
+  min-height: 240px;
+}
+
 .member-card {
   display: flex;
   align-items: center;
@@ -311,6 +325,10 @@ watch(() => props.projectInfo.no, () => {
   }
 }
 
+.side-stat-item-full {
+  grid-column: 1 / -1;
+}
+
 .placeholder-list {
   display: flex;
   flex-direction: column;
@@ -332,6 +350,10 @@ watch(() => props.projectInfo.no, () => {
 
   .chart-placeholder-md {
     min-height: 160px;
+  }
+
+  .chart-placeholder-task-trend {
+    min-height: 200px;
   }
 
   .side-stat-grid {
