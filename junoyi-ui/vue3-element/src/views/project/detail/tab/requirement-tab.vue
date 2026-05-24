@@ -422,7 +422,11 @@
 
 
 <script setup lang="ts">
-import { fetchGetProjectRequirementList, fetchAddProjectRequirement } from "@/api/project/requirement"
+import {
+  fetchGetProjectRequirementList,
+  fetchAddProjectRequirement,
+  fetchUpdateProjectRequirement
+} from "@/api/project/requirement"
 import { fetchGetDictDataByType } from "@/api/system/dict"
 import { useProjectRole } from "@/hooks/useProjectRole"
 import ArtSvgIcon from "@/components/core/base/art-svg-icon/index.vue"
@@ -664,7 +668,10 @@ const handleSubmit = async () => {
 
     if (isEdit.value) {
       // TODO: 调用编辑接口
-      ElMessage.info('编辑需求功能待实现')
+      await fetchUpdateProjectRequirement(props.projectInfo.id,formData.value)
+      ElMessage.success('更新成功')
+      dialogVisible.value = false
+      await loadRequirementList()
     } else {
       await fetchAddProjectRequirement(props.projectInfo.id, formData.value)
       ElMessage.success('添加成功')
