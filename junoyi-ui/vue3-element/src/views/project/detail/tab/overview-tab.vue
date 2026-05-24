@@ -63,7 +63,7 @@
                   <span class="font-semibold">需求近期完成情况</span>
                 </div>
               </template>
-              <div class="chart-placeholder chart-placeholder-md">预留图表区域：需求近期完成折线图</div>
+              <ProjectRequirementCompletedChart :data="overviewData.projectRequirementCompletedVO" />
             </ElCard>
           </ElCol>
         </ElRow>
@@ -148,6 +148,7 @@ import ArtSvgIcon from '@/components/core/base/art-svg-icon/index.vue'
 import { fetchGetProjectOverview } from '@/api/project/detail'
 import { getProjectRoleName, getProjectRoleTagType } from '@/enums/project'
 import { useProjectRole } from '@/hooks/useProjectRole'
+import ProjectRequirementCompletedChart from './modules/overview/project-requirement-completed-chart.vue'
 import ProjectRequirementSituationChart from './modules/overview/project-requirement-situation-chart.vue'
 
 defineOptions({ name: 'OverviewTab' })
@@ -172,7 +173,12 @@ const recentMembers = computed(() => props.projectInfo.recentMembers || [])
 const canManageProject = computed(() => projectRole.isOwner.value || projectRole.isAdmin.value)
 const canContribute = computed(() => canManageProject.value || projectRole.isMember.value)
 const overviewData = ref<Api.Project.ProjectOverviewVO>({
-  projectRequirementSituation: []
+  projectRequirementSituation: [],
+  projectRequirementCompletedVO: {
+    sevenDayList: [],
+    thirtyDayList: [],
+    ninetyDayList: []
+  }
 })
 
 /**
@@ -208,7 +214,14 @@ const loadOverviewData = async () => {
   if (!props.projectInfo.no) return
   try {
     const data = await fetchGetProjectOverview(props.projectInfo.no)
-    overviewData.value = data || { projectRequirementSituation: [] }
+    overviewData.value = data || {
+      projectRequirementSituation: [],
+      projectRequirementCompletedVO: {
+        sevenDayList: [],
+        thirtyDayList: [],
+        ninetyDayList: []
+      }
+    }
   } catch (error) {
     console.error('加载项目概览数据失败：', error)
   }

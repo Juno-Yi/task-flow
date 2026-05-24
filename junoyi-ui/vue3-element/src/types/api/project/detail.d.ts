@@ -90,7 +90,7 @@ declare namespace Api.Project {
      * @author Fan
      */
     interface RequirementTrendVO {
-        data: string
+        date: string
         count: number
     }
 }
