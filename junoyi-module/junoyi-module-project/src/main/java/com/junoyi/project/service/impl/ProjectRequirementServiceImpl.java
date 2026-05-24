@@ -3,18 +3,23 @@ package com.junoyi.project.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.core.utils.StringUtils;
+import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.convert.ProjectRequirementConverter;
 import com.junoyi.project.domain.dto.ProjectRequirementDTO;
 import com.junoyi.project.domain.dto.ProjectRequirementQueryDTO;
 import com.junoyi.project.domain.po.ProjectRequirement;
 import com.junoyi.project.domain.vo.ProjectRequirementVO;
+import com.junoyi.project.exception.ProjectException;
 import com.junoyi.project.mapper.ProjectRequirementMapper;
 import com.junoyi.project.service.IProjectRequirementService;
+import com.junoyi.project.util.RequirementNoGenerateUtil;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.vo.SysDictDataVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,7 +149,69 @@ public class ProjectRequirementServiceImpl implements IProjectRequirementService
      * @param dto 传输数据
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void addRequirement(Long projectId, ProjectRequirementDTO dto) {
+        // 参数校验
+        if (StringUtils.isBlank(dto.getTitle())) {
+            throw new ProjectException("需求标题不能为空");
+        }
 
+        // 转换DTO为PO
+        ProjectRequirement requirement = ProjectRequirementConverter.toPO(dto);
+        requirement.setProjectId(projectId);
+
+        // 设置默认状态为待开始
+        requirement.setStatus(0);
+
+        // 设置软删除标志
+        requirement.setDelFlag(false);
+
+        // 设置创建信息
+        requirement.setCreateBy(SecurityUtils.getUserName());
+        requirement.setCreateTime(DateUtils.getNowDate());
+
+        // 生成需求编号并插入，如果编号重复则重试（最多3次）
+        int maxRetries = 3;
+        int retryCount = 0;
+        String requirementNo = null;
+
+        while (retryCount < maxRetries) {
+            try {
+                // 生成需求编号
+                requirementNo = RequirementNoGenerateUtil.generateRequirementCode();
+                requirement.setRequirementNo(requirementNo);
+
+                // 尝试插入需求
+                projectRequirementMapper.insert(requirement);
+
+                // 插入成功，跳出循环
+                break;
+            } catch (Exception e) {
+                retryCount++;
+
+                // 检查是否是唯一索引冲突
+                if (e.getMessage() != null && e.getMessage().contains("Duplicate entry")) {
+                    // 如果是唯一索引冲突且未达到最大重试次数，继续重试
+                    if (retryCount < maxRetries) {
+                        // 等待一小段时间后重试（避免并发冲突）
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                        }
+                        continue;
+                    }
+                }
+
+                // 如果不是唯一索引冲突，或者已达到最大重试次数，抛出异常
+                throw new RuntimeException("创建需求失败：" + e.getMessage(), e);
+            }
+        }
+
+        if (requirementNo == null) {
+            throw new RuntimeException("创建需求失败：无法生成唯一的需求编号");
+        }
+
+        // TODO: 发布项目动态
     }
 }
