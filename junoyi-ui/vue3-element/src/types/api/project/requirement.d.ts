@@ -44,8 +44,8 @@ declare namespace Api.Project {
         id?: number
         title: string
         description: string
-        priority: number
-        source: number
-        type: number
+        priority?: number
+        source?: number
+        type?: number
     }
 }

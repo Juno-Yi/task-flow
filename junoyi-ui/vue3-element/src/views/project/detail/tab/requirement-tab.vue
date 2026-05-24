@@ -297,6 +297,126 @@
         </div>
       </template>
     </ElDialog>
+
+    <!-- 需求详情抽屉 -->
+    <ElDrawer
+      v-model="drawerVisible"
+      title="需求详情"
+      size="60%"
+      direction="rtl"
+    >
+      <div v-if="currentRequirement" class="requirement-detail">
+        <!-- 基础信息区域 -->
+        <div class="detail-section">
+          <div class="section-title">基础信息</div>
+          <div class="section-content">
+            <!-- 需求编号 -->
+            <div class="detail-item">
+              <div class="item-label">需求编号</div>
+              <div class="item-value">{{ currentRequirement.requirementNo }}</div>
+            </div>
+
+            <!-- 需求标题 -->
+            <div class="detail-item">
+              <div class="item-label">需求标题</div>
+              <div class="item-value">{{ currentRequirement.title }}</div>
+            </div>
+
+            <!-- 需求描述 -->
+            <div class="detail-item">
+              <div class="item-label">需求描述</div>
+              <div class="item-value">
+                {{ currentRequirement.description || '暂无描述' }}
+              </div>
+            </div>
+
+            <!-- 优先级 -->
+            <div class="detail-item">
+              <div class="item-label">优先级</div>
+              <div class="item-value">
+                <ElTag :type="currentRequirement.priorityType as any" size="small">
+                  {{ currentRequirement.priorityLabel }}
+                </ElTag>
+              </div>
+            </div>
+
+            <!-- 状态 -->
+            <div class="detail-item">
+              <div class="item-label">状态</div>
+              <div class="item-value">
+                <ElTag :type="currentRequirement.statusType as any" size="small">
+                  {{ currentRequirement.statusLabel }}
+                </ElTag>
+              </div>
+            </div>
+
+            <!-- 需求来源 -->
+            <div class="detail-item">
+              <div class="item-label">需求来源</div>
+              <div class="item-value">
+                <ElTag :type="currentRequirement.sourceType as any" size="small" effect="plain">
+                  {{ currentRequirement.sourceLabel }}
+                </ElTag>
+              </div>
+            </div>
+
+            <!-- 需求类型 -->
+            <div class="detail-item">
+              <div class="item-label">需求类型</div>
+              <div class="item-value">
+                <ElTag :type="currentRequirement.typeLabelType as any" size="small" effect="plain">
+                  {{ currentRequirement.typeLabel }}
+                </ElTag>
+              </div>
+            </div>
+
+            <!-- 创建时间 -->
+            <div class="detail-item">
+              <div class="item-label">创建时间</div>
+              <div class="item-value">{{ formatDate(currentRequirement.createTime) }}</div>
+            </div>
+
+            <!-- 更新时间 -->
+            <div class="detail-item">
+              <div class="item-label">更新时间</div>
+              <div class="item-value">{{ formatDate(currentRequirement.updateTime) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 核心内容区域（留空） -->
+        <div class="detail-section">
+          <div class="section-title">需求详情</div>
+          <div class="section-content">
+            <ElEmpty description="核心内容待开发" />
+          </div>
+        </div>
+
+        <!-- 附件区域（留空） -->
+        <div class="detail-section">
+          <div class="section-title">附件</div>
+          <div class="section-content">
+            <ElEmpty description="附件功能待开发" />
+          </div>
+        </div>
+
+        <!-- 评论区域（留空） -->
+        <div class="detail-section">
+          <div class="section-title">评论</div>
+          <div class="section-content">
+            <ElEmpty description="评论功能待开发" />
+          </div>
+        </div>
+
+        <!-- 操作历史区域（留空） -->
+        <div class="detail-section">
+          <div class="section-title">操作历史</div>
+          <div class="section-content">
+            <ElEmpty description="操作历史待开发" />
+          </div>
+        </div>
+      </div>
+    </ElDrawer>
   </div>
 </template>
 
@@ -351,6 +471,10 @@ const dialogTitle = computed(() => (isEdit.value ? '编辑需求' : '添加需�
 const isEdit = ref(false)
 const submitLoading = ref(false)
 const formRef = ref<FormInstance>()
+
+// 抽屉相关
+const drawerVisible = ref(false)
+const currentRequirement = ref<Api.Project.ProjectRequirementVO | null>(null)
 
 // 表单数据
 const formData = ref<Api.Project.ProjectRequirementDTO>({
@@ -492,8 +616,8 @@ const handleCommand = (command: string, requirement: Api.Project.ProjectRequirem
  * 查看需求详情
  */
 const handleView = (requirement: Api.Project.ProjectRequirementVO) => {
-  ElMessage.info('查看需求详情功能待实现')
-  console.log('查看需求：', requirement)
+  currentRequirement.value = requirement
+  drawerVisible.value = true
 }
 
 /**
@@ -618,5 +742,42 @@ onMounted(() => {
 :deep(.el-form--inline .el-form-item) {
   margin-right: 16px;
   margin-bottom: 12px;
+}
+
+// 需求详情样式
+.requirement-detail {
+  .detail-section {
+    margin-bottom: 24px;
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #303133;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .section-content {
+      .detail-item {
+        display: flex;
+        margin-bottom: 16px;
+
+        .item-label {
+          width: 100px;
+          flex-shrink: 0;
+          color: #606266;
+          font-size: 14px;
+        }
+
+        .item-value {
+          flex: 1;
+          color: #303133;
+          font-size: 14px;
+          word-break: break-word;
+        }
+      }
+    }
+  }
 }
 </style>
