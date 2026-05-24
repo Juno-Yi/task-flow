@@ -109,19 +109,19 @@
           </template>
           <div class="side-stat-grid">
             <div class="side-stat-item">
-              <span>需求总数</span>
+              <span>项目完成度</span>
               <strong>--</strong>
             </div>
             <div class="side-stat-item">
-              <span>任务总数</span>
+              <span>进行中任务</span>
               <strong>--</strong>
             </div>
             <div class="side-stat-item">
-              <span>已完成</span>
+              <span>待开始需求</span>
               <strong>--</strong>
             </div>
             <div class="side-stat-item">
-              <span>进行中</span>
+              <span>逾期任务量</span>
               <strong>--</strong>
             </div>
           </div>
