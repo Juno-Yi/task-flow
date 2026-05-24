@@ -1,32 +1,51 @@
 <template>
-  <ElDrawer v-model="visible" title="需求详情" size="60%" direction="rtl">
-    <div v-if="requirement" class="requirement-detail">
-      <div class="detail-section">
-        <div class="section-title">基础信息</div>
-        <div class="section-content">
-          <div class="detail-item"><div class="item-label">需求编号</div><div class="item-value">{{ requirement.requirementNo }}</div></div>
-          <div class="detail-item"><div class="item-label">需求标题</div><div class="item-value">{{ requirement.title }}</div></div>
-          <div class="detail-item"><div class="item-label">优先级</div><div class="item-value"><ElTag :type="requirement.priorityType as any" size="small">{{ requirement.priorityLabel }}</ElTag></div></div>
-          <div class="detail-item"><div class="item-label">状态</div><div class="item-value"><ElTag :type="requirement.statusType as any" size="small">{{ requirement.statusLabel }}</ElTag></div></div>
-          <div class="detail-item"><div class="item-label">需求来源</div><div class="item-value"><ElTag :type="requirement.sourceType as any" size="small" effect="plain">{{ requirement.sourceLabel }}</ElTag></div></div>
-          <div class="detail-item"><div class="item-label">需求类型</div><div class="item-value"><ElTag :type="requirement.typeLabelType as any" size="small" effect="plain">{{ requirement.typeLabel }}</ElTag></div></div>
-          <div class="detail-item"><div class="item-label">创建时间</div><div class="item-value">{{ formatDate(requirement.createTime) }}</div></div>
-          <div class="detail-item"><div class="item-label">更新时间</div><div class="item-value">{{ formatDate(requirement.updateTime) }}</div></div>
+  <ElDrawer v-model="visible" title="需求详情" size="70%" direction="rtl" class="requirement-drawer">
+    <div v-if="requirement" class="flex h-full flex-col overflow-hidden">
+      <div class="shrink-0">
+        <div class="mb-4 border-b border-gray-200 pb-2 text-base font-semibold text-gray-800">基础信息</div>
+        <div class="space-y-4">
+          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">需求编号</div><div class="flex-1 break-words text-sm text-gray-800">{{ requirement.requirementNo }}</div></div>
+          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">需求标题</div><div class="flex-1 break-words text-sm text-gray-800">{{ requirement.title }}</div></div>
+          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">优先级</div><div class="flex-1 break-words text-sm text-gray-800"><ElTag :type="requirement.priorityType as any" size="small">{{ requirement.priorityLabel }}</ElTag></div></div>
+          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">状态</div><div class="flex-1 break-words text-sm text-gray-800"><ElTag :type="requirement.statusType as any" size="small">{{ requirement.statusLabel }}</ElTag></div></div>
+          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">需求来源</div><div class="flex-1 break-words text-sm text-gray-800"><ElTag :type="requirement.sourceType as any" size="small" effect="plain">{{ requirement.sourceLabel }}</ElTag></div></div>
+          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">需求类型</div><div class="flex-1 break-words text-sm text-gray-800"><ElTag :type="requirement.typeLabelType as any" size="small" effect="plain">{{ requirement.typeLabel }}</ElTag></div></div>
+          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">创建时间</div><div class="flex-1 break-words text-sm text-gray-800">{{ formatDate(requirement.createTime) }}</div></div>
+          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">更新时间</div><div class="flex-1 break-words text-sm text-gray-800">{{ formatDate(requirement.updateTime) }}</div></div>
         </div>
       </div>
 
-      <div class="detail-section">
-        <div class="section-title">需求描述</div>
-        <div class="section-content">
-          <div v-if="requirement.description" class="markdown-wrapper">
+      <div class="mt-6 shrink-0">
+        <div class="mb-4 border-b border-gray-200 pb-2 text-base font-semibold text-gray-800">需求描述</div>
+        <div>
+          <div v-if="requirement.description" class="h-[320px] overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-4">
             <div class="markdown-body" v-html="renderedDescription"></div>
           </div>
-          <ElEmpty v-else description="暂无描述" />
+          <div v-else class="flex h-[320px] items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
+            <ElEmpty description="暂无描述" />
+          </div>
         </div>
       </div>
-      <div class="detail-section"><div class="section-title">附件</div><div class="section-content"><ElEmpty description="附件功能待开发" /></div></div>
-      <div class="detail-section"><div class="section-title">评论</div><div class="section-content"><ElEmpty description="评论功能待开发" /></div></div>
-      <div class="detail-section"><div class="section-title">操作历史</div><div class="section-content"><ElEmpty description="操作历史待开发" /></div></div>
+
+      <div class="mt-6 min-h-0 flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white px-5 pb-5">
+        <ElTabs v-model="activeTab" class="flex h-full flex-col">
+          <ElTabPane label="附件" name="attachment">
+            <div class="h-[320px] overflow-y-auto pt-3">
+              <ElEmpty description="附件功能待开发" />
+            </div>
+          </ElTabPane>
+          <ElTabPane label="评论" name="comment">
+            <div class="h-[320px] overflow-y-auto pt-3">
+              <ElEmpty description="评论功能待开发" />
+            </div>
+          </ElTabPane>
+          <ElTabPane label="操作历史" name="history">
+            <div class="h-[320px] overflow-y-auto pt-3">
+              <ElEmpty description="操作历史待开发" />
+            </div>
+          </ElTabPane>
+        </ElTabs>
+      </div>
     </div>
   </ElDrawer>
 </template>
@@ -51,6 +70,8 @@ const visible = computed({
   set: (value: boolean) => emit('update:modelValue', value)
 })
 
+const activeTab = ref('attachment')
+
 marked.setOptions({
   breaks: true,
   gfm: true
@@ -72,45 +93,9 @@ const formatDate = (dateStr: string | undefined): string => {
 </script>
 
 <style scoped lang="scss">
-.requirement-detail {
-  .detail-section {
-    margin-bottom: 24px;
-    .section-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #303133;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .section-content {
-      .detail-item {
-        display: flex;
-        margin-bottom: 16px;
-        .item-label {
-          width: 100px;
-          flex-shrink: 0;
-          color: #606266;
-          font-size: 14px;
-        }
-        .item-value {
-          flex: 1;
-          color: #303133;
-          font-size: 14px;
-          word-break: break-word;
-        }
-      }
-    }
-  }
-}
-
-.markdown-wrapper {
-  max-height: 420px;
-  overflow-y: auto;
-  padding: 16px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #fafafa;
+:deep(.requirement-drawer .el-drawer__body) {
+  height: calc(100% - 55px);
+  overflow: hidden;
 }
 
 .markdown-body {
