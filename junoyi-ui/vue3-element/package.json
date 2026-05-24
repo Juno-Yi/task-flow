@@ -76,6 +76,7 @@
     "qrcode.vue": "^3.6.0",
     "sortablejs": "^1.15.6",
     "tailwindcss": "^4.1.14",
+    "vditor": "^3.11.2",
     "vue": "^3.5.21",
     "vue-draggable-plus": "^0.6.0",
     "vue-i18n": "^9.14.0",

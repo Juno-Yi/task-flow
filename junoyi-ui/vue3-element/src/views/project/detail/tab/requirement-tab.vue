@@ -221,94 +221,18 @@
       />
     </div>
 
-    <!-- 添加/编辑需求对话框 -->
-    <ElDialog
+    <RequirementFormDialog
       v-model="dialogVisible"
-      :title="dialogTitle"
-      width="600px"
+      :dialog-title="dialogTitle"
+      :submit-loading="submitLoading"
+      :form-data="formData"
+      :form-rules="formRules"
+      :priority-dict-list="priorityDictList"
+      :source-dict-list="sourceDictList"
+      :type-dict-list="typeDictList"
+      @submit="handleSubmit"
       @close="handleDialogClose"
-    >
-      <ElForm
-        ref="formRef"
-        :model="formData"
-        :rules="formRules"
-        label-width="100px"
-      >
-        <ElFormItem label="需求标题" prop="title">
-          <ElInput
-            v-model="formData.title"
-            placeholder="请输入需求标题"
-            maxlength="100"
-            show-word-limit
-          />
-        </ElFormItem>
-
-        <ElFormItem label="需求描述" prop="description">
-          <ElInput
-            v-model="formData.description"
-            type="textarea"
-            :rows="4"
-            placeholder="请输入需求描述"
-            maxlength="500"
-            show-word-limit
-          />
-        </ElFormItem>
-
-        <ElFormItem label="优先级" prop="priority">
-          <ElSelect
-            v-model="formData.priority"
-            placeholder="请选择优先级"
-            style="width: 100%"
-          >
-            <ElOption
-              v-for="item in priorityDictList"
-              :key="item.dictCode"
-              :label="item.dictLabel"
-              :value="Number(item.dictValue)"
-            />
-          </ElSelect>
-        </ElFormItem>
-
-        <ElFormItem label="需求来源" prop="source">
-          <ElSelect
-            v-model="formData.source"
-            placeholder="请选择需求来源"
-            style="width: 100%"
-          >
-            <ElOption
-              v-for="item in sourceDictList"
-              :key="item.dictCode"
-              :label="item.dictLabel"
-              :value="Number(item.dictValue)"
-            />
-          </ElSelect>
-        </ElFormItem>
-
-        <ElFormItem label="需求类型" prop="type">
-          <ElSelect
-            v-model="formData.type"
-            placeholder="请选择需求类型"
-            style="width: 100%"
-          >
-            <ElOption
-              v-for="item in typeDictList"
-              :key="item.dictCode"
-              :label="item.dictLabel"
-              :value="Number(item.dictValue)"
-            />
-          </ElSelect>
-        </ElFormItem>
-      </ElForm>
-
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <ElButton @click="dialogVisible = false">取消</ElButton>
-          <ElButton type="primary" :loading="submitLoading" @click="handleSubmit">
-            确定
-          </ElButton>
-        </div>
-      </template>
-    </ElDialog>
+    />
 
     <RequirementDetailDrawer
       v-model="drawerVisible"
@@ -328,7 +252,8 @@ import { fetchGetDictDataByType } from "@/api/system/dict"
 import { useProjectRole } from "@/hooks/useProjectRole"
 import ArtSvgIcon from "@/components/core/base/art-svg-icon/index.vue"
 import RequirementDetailDrawer from './modules/requirement-detail-drawer.vue'
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import RequirementFormDialog from './modules/requirement-form-dialog.vue'
+import { ElMessage, ElMessageBox, type FormRules } from 'element-plus'
 
 defineOptions({ name: 'RequirementTab' })
 
@@ -372,7 +297,6 @@ const dialogVisible = ref(false)
 const dialogTitle = computed(() => (isEdit.value ? '编辑需求' : '添加需求'))
 const isEdit = ref(false)
 const submitLoading = ref(false)
-const formRef = ref<FormInstance>()
 
 // 抽屉相关
 const drawerVisible = ref(false)
@@ -558,14 +482,11 @@ const handleEdit = (requirement: Api.Project.ProjectRequirementVO) => {
  * 提交表单
  */
 const handleSubmit = async () => {
-  if (!formRef.value) return
-
   try {
-    await formRef.value.validate()
     submitLoading.value = true
 
     if (isEdit.value) {
-      await fetchUpdateProjectRequirement(props.projectInfo.id,formData.value)
+      await fetchUpdateProjectRequirement(props.projectInfo.id, formData.value)
       ElMessage.success('更新成功')
       dialogVisible.value = false
       await loadRequirementList()
@@ -577,9 +498,7 @@ const handleSubmit = async () => {
     }
   } catch (error) {
     console.error('提交失败:', error)
-    if (error !== false) {
-      ElMessage.error('提交失败')
-    }
+    ElMessage.error('提交失败')
   } finally {
     submitLoading.value = false
   }
@@ -589,7 +508,7 @@ const handleSubmit = async () => {
  * 关闭对话框
  */
 const handleDialogClose = () => {
-  formRef.value?.resetFields()
+  // 关闭后由弹窗组件内部重置表单
 }
 
 /**
