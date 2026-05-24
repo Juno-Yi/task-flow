@@ -5,10 +5,12 @@ import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
+import com.junoyi.project.domain.dto.ProjectRequirementQueryDTO;
 import com.junoyi.project.domain.vo.ProjectRequirementVO;
 import com.junoyi.project.service.IProjectRequirementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,9 +31,13 @@ public class ProjectRequirementController extends BaseController {
     /**
      * 获取项目需求列表
      */
-    @GetMapping("/list")
+    @GetMapping("/list/{projectId}")
     @PlatformScope(PlatformType.ADMIN_WEB)
-    public R<PageResult<ProjectRequirementVO>> getRequirementList(){
-        return R.ok();
+    public R<PageResult<ProjectRequirementVO>> getRequirementList(@PathVariable("projectId") Long projectId,
+            ProjectRequirementQueryDTO queryDTO){
+
+        // 权限判断
+
+        return R.ok(projectRequirementService.getRequirementList(projectId,queryDTO, buildPage()));
     }
 }
