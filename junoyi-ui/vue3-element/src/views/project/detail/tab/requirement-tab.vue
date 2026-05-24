@@ -425,7 +425,7 @@
 import {
   fetchGetProjectRequirementList,
   fetchAddProjectRequirement,
-  fetchUpdateProjectRequirement
+  fetchUpdateProjectRequirement, fetchDeleteProjectRequirement
 } from "@/api/project/requirement"
 import { fetchGetDictDataByType } from "@/api/system/dict"
 import { useProjectRole } from "@/hooks/useProjectRole"
@@ -709,12 +709,10 @@ const handleDelete = async (requirement: Api.Project.ProjectRequirementVO) => {
       }
     )
 
-    ElMessage.info('删除需求功能待实现')
     console.log('删除需求：', requirement)
-    // TODO: 调用删除接口
-    // await fetchDeleteProjectRequirement(props.projectInfo.id, requirement.id)
-    // ElMessage.success('删除成功')
-    // await loadRequirementList()
+    await fetchDeleteProjectRequirement(props.projectInfo.id, requirement.id)
+    ElMessage.success('删除成功')
+    await loadRequirementList()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('删除失败:', error)

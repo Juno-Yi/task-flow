@@ -231,4 +231,28 @@ public class ProjectRequirementServiceImpl implements IProjectRequirementService
 
         // TODO: 发布项目动态
     }
+
+    /**
+     * 删除项目需求
+     * @param projectId 项目ID
+     * @param requirementId 项目需求ID
+     */
+    @Override
+    public void deleteRequirement(Long projectId, Long requirementId) {
+        LambdaQueryWrapper<ProjectRequirement> requirementLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        requirementLambdaQueryWrapper.eq(ProjectRequirement::getId, requirementId)
+                .eq(ProjectRequirement::getProjectId,projectId)
+                .eq(ProjectRequirement::getDelFlag,false);
+        ProjectRequirement requirement = projectRequirementMapper.selectOne(requirementLambdaQueryWrapper);
+        if (requirement == null)
+            throw new ProjectException("项目需求不存在");
+
+        requirement.setDelFlag(true);
+        requirement.setUpdateBy(SecurityUtils.getUserName());
+        requirement.setUpdateTime(DateUtils.getNowDate());
+
+        projectRequirementMapper.updateById(requirement);
+
+        // TODO：发布项目动态
+    }
 }

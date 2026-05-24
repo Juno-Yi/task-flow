@@ -107,4 +107,32 @@ public class ProjectRequirementController extends BaseController {
         projectRequirementService.updateRequirement(projectId,dto);
         return R.ok();
     }
+
+    /**
+     * 删除项目需求
+     */
+    @DeleteMapping("/{projectId}/remove/{requirementId}")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<Void> deleteRequirement(@PathVariable("projectId") Long projectId,
+                                     @PathVariable("requirementId") Long requirementId){
+
+        // 参数验证
+        if (projectId == null || projectId == 0)
+            return R.fail("项目ID不能为空");
+
+        // 获取当前用户ID
+        Long currentUserId = SecurityUtils.getUserId();
+        if (currentUserId == null || currentUserId == 0L)
+            return R.fail("非法请求");
+
+        boolean isOwner = projectPermissionService.isProjectOwner(projectId, currentUserId);
+        boolean isAdmin = projectPermissionService.isProjectAdmin(projectId, currentUserId);
+
+        if (!isOwner && !isAdmin) {
+            return R.fail("权限不足，只有项目负责人或管理员可以删除需求");
+        }
+
+        projectRequirementService.deleteRequirement(projectId, requirementId);
+        return R.ok();
+    }
 }

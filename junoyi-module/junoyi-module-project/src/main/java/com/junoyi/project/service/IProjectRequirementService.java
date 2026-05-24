@@ -36,4 +36,11 @@ public interface IProjectRequirementService {
      * @param dto 传输数据
      */
     void updateRequirement(Long projectId, ProjectRequirementDTO dto);
+
+    /**
+     * 删除项目需求
+     * @param projectId 项目ID
+     * @param requirementId 项目需求ID
+     */
+    void deleteRequirement(Long projectId, Long requirementId);
 }
