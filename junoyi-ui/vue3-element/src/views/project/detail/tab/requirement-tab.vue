@@ -667,7 +667,6 @@ const handleSubmit = async () => {
     submitLoading.value = true
 
     if (isEdit.value) {
-      // TODO: 调用编辑接口
       await fetchUpdateProjectRequirement(props.projectInfo.id,formData.value)
       ElMessage.success('更新成功')
       dialogVisible.value = false

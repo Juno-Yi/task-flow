@@ -104,6 +104,7 @@ public class ProjectRequirementController extends BaseController {
             return R.fail("权限不足，只有项目负责人或管理员可以修改需求");
         }
 
+        projectRequirementService.updateRequirement(projectId,dto);
         return R.ok();
     }
 }
