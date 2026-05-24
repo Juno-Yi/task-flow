@@ -140,9 +140,53 @@
           </template>
         </ElTableColumn>
 
-        <ElTableColumn prop="status" label="状态" width="100" align="center">
+        <ElTableColumn prop="status" label="状态" width="120" align="center">
           <template #default="{ row }">
-            <ElTag :type="row.statusType as any" size="small">
+            <ElDropdown
+              v-if="projectRole.isOwner.value || projectRole.isAdmin.value"
+              trigger="click"
+              @command="(status: number) => handleStatusChange(row, status)"
+            >
+              <div
+                class="status-dropdown-trigger"
+                :class="{
+                  'is-loading': updatingStatusId === row.id
+                }"
+              >
+                <ElTag :type="row.statusType as any" size="small" class="status-display-tag">
+                  {{ row.statusLabel }}
+                </ElTag>
+                <ArtSvgIcon icon="ri:arrow-down-s-line" class="status-dropdown-icon" />
+              </div>
+              <template #dropdown>
+                <ElDropdownMenu class="status-dropdown-menu">
+                  <ElDropdownItem
+                    v-for="item in statusDictList"
+                    :key="item.dictCode"
+                    :command="Number(item.dictValue)"
+                    :disabled="updatingStatusId === row.id"
+                    :class="{ 'is-current': Number(item.dictValue) === row.status }"
+                  >
+                    <div class="status-option-item">
+                      <ElTag
+                        :type="(item.listClass || 'info') as any"
+                        size="small"
+                        effect="plain"
+                        class="status-option-tag"
+                      >
+                        {{ item.dictLabel }}
+                      </ElTag>
+                      <ArtSvgIcon
+                        v-if="Number(item.dictValue) === row.status"
+                        icon="ri:check-line"
+                        class="status-option-check"
+                      />
+                    </div>
+                  </ElDropdownItem>
+                </ElDropdownMenu>
+              </template>
+            </ElDropdown>
+            <ElTag v-else :type="row.statusType as any" size="small">
               {{ row.statusLabel }}
             </ElTag>
           </template>
@@ -297,6 +341,7 @@ const dialogVisible = ref(false)
 const dialogTitle = computed(() => (isEdit.value ? '编辑需求' : '添加需求'))
 const isEdit = ref(false)
 const submitLoading = ref(false)
+const updatingStatusId = ref<number | null>(null)
 
 // 抽屉相关
 const drawerVisible = ref(false)
@@ -419,6 +464,46 @@ const formatDate = (dateStr: string | undefined): string => {
     return dateStr.replace('T', ' ').substring(0, 19)
   }
   return dateStr.substring(0, 19)
+}
+
+/**
+ * 下拉选择状态后更新
+ */
+const handleStatusChange = async (requirement: Api.Project.ProjectRequirementVO, status: number) => {
+  if (!projectRole.isOwner.value && !projectRole.isAdmin.value) return
+  if (updatingStatusId.value === requirement.id || requirement.status === status) return
+
+  const targetStatus = statusDictList.value.find(item => Number(item.dictValue) === status)
+  if (!targetStatus) {
+    ElMessage.warning('未获取到状态字典数据')
+    return
+  }
+
+  try {
+    updatingStatusId.value = requirement.id
+    await fetchUpdateProjectRequirement(props.projectInfo.id, {
+      id: requirement.id,
+      title: requirement.title,
+      description: requirement.description,
+      priority: requirement.priority,
+      status,
+      source: requirement.source,
+      type: requirement.type
+    })
+
+    requirement.status = status
+    requirement.statusLabel = targetStatus.dictLabel
+    requirement.statusType = targetStatus.listClass || 'info'
+    if (currentRequirement.value?.id === requirement.id) {
+      currentRequirement.value = { ...requirement }
+    }
+    ElMessage.success('状态更新成功')
+  } catch (error) {
+    console.error('状态更新失败:', error)
+    ElMessage.error('状态更新失败')
+  } finally {
+    updatingStatusId.value = null
+  }
 }
 
 /**
@@ -576,5 +661,53 @@ onMounted(() => {
   }
 }
 
+.status-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px 2px 2px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(64, 158, 255, 0.08);
+  }
+
+  &.is-loading {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+}
+
+.status-display-tag {
+  margin-right: 0;
+}
+
+.status-dropdown-icon {
+  font-size: 14px;
+  color: #909399;
+}
+
+:deep(.status-dropdown-menu .el-dropdown-menu__item) {
+  padding: 6px 10px;
+}
+
+.status-option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 88px;
+}
+
+.status-option-tag {
+  margin-right: 0;
+}
+
+.status-option-check {
+  color: #409eff;
+  font-size: 14px;
+}
 
 </style>
