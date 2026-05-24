@@ -6,6 +6,7 @@ import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.framework.web.domain.BaseController;
+import com.junoyi.project.domain.dto.ProjectRequirementDTO;
 import com.junoyi.project.domain.dto.ProjectRequirementQueryDTO;
 import com.junoyi.project.domain.vo.ProjectRequirementVO;
 import com.junoyi.project.service.IProjectPermissionService;
@@ -54,7 +55,8 @@ public class ProjectRequirementController extends BaseController {
      * 添加项目需求
      */
     @PostMapping
-    public R<Void> addRequirement(){
+    public R<Void> addRequirement(@RequestBody ProjectRequirementDTO dto){
+
         return R.ok();
     }
 }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.project.convert.ProjectRequirementConverter;
+import com.junoyi.project.domain.dto.ProjectRequirementDTO;
 import com.junoyi.project.domain.dto.ProjectRequirementQueryDTO;
 import com.junoyi.project.domain.po.ProjectRequirement;
 import com.junoyi.project.domain.vo.ProjectRequirementVO;
@@ -137,5 +138,13 @@ public class ProjectRequirementServiceImpl implements IProjectRequirementService
         );
     }
 
+    /**
+     * 添加项目需求
+     * @param projectId 项目ID
+     * @param dto 传输数据
+     */
+    @Override
+    public void addRequirement(Long projectId, ProjectRequirementDTO dto) {
 
+    }
 }

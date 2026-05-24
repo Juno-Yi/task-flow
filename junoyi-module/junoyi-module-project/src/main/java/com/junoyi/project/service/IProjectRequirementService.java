@@ -2,6 +2,7 @@ package com.junoyi.project.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.project.domain.dto.ProjectRequirementDTO;
 import com.junoyi.project.domain.dto.ProjectRequirementQueryDTO;
 import com.junoyi.project.domain.po.ProjectRequirement;
 import com.junoyi.project.domain.vo.ProjectRequirementVO;
@@ -21,4 +22,11 @@ public interface IProjectRequirementService {
      * @return 需求列表
      */
     PageResult<ProjectRequirementVO> getRequirementList(Long projectId,ProjectRequirementQueryDTO queryDTO, Page<ProjectRequirement> page);
+
+    /**
+     * 添加项目需求
+     * @param projectId 项目ID
+     * @param dto 传输数据
+     */
+    void addRequirement(Long projectId, ProjectRequirementDTO dto);
 }
