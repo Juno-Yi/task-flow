@@ -1,18 +1,19 @@
 package com.junoyi.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.junoyi.framework.core.utils.StringUtils;
-import com.junoyi.framework.permission.annotation.Permission;
-import com.junoyi.framework.permission.helper.PermissionHelper;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.convert.ProjectMemberConverter;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
+import com.junoyi.project.domain.po.ProjectRequirement;
 import com.junoyi.project.domain.vo.ProjectDetailVO;
 import com.junoyi.project.domain.vo.ProjectMemberVO;
+import com.junoyi.project.domain.vo.ProjectOverviewVO;
+import com.junoyi.project.domain.vo.ProjectRequirementSituationVO;
 import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.mapper.ProjectMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
+import com.junoyi.project.mapper.ProjectRequirementMapper;
 import com.junoyi.project.service.IProjectDetailService;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.po.SysUser;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 public class ProjectDetailServiceImpl implements IProjectDetailService {
 
     private final ProjectMapper projectMapper;
+    private final ProjectRequirementMapper projectRequirementMapper;
     private final SysUserMapper sysUserMapper;
     private final ProjectMemberMapper projectMemberMapper;
     private final SysDictApi sysDictApi;
@@ -168,5 +170,58 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
 
         // 使用转换器转换为VO并填充用户信息
         return ProjectMemberConverter.toVOListWithUserInfo(members, userMap);
+    }
+
+    /**
+     * 获取项目概览数据
+     * @param projectNo 项目编号
+     * @return 项目概览数据
+     */
+    @Override
+    public ProjectOverviewVO getProjectOverview(String projectNo) {
+        LambdaQueryWrapper<Project> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Project::getNo, projectNo)
+                .eq(Project::isDelFlag,false);
+        Project project = projectMapper.selectOne(wrapper);
+        if (project == null)
+            throw new ProjectNotFoundException("项目不存在");
+
+        ProjectOverviewVO projectOverviewVO = new ProjectOverviewVO();
+
+        // 获取项目需求情况饼图数据
+        List<ProjectRequirementSituationVO> projectRequirementSituationList = getProjectRequirementSituationList(project.getId());
+        projectOverviewVO.setProjectRequirementSituation(projectRequirementSituationList);
+
+        return projectOverviewVO;
+    }
+
+    /**
+     * 获取项目需求情况饼图数据
+     * @param projectId 项目ID
+     * @return 项目需求情况饼图数据
+     */
+    private List<ProjectRequirementSituationVO> getProjectRequirementSituationList(Long projectId){
+        // 查询项目下未删除的需求
+        LambdaQueryWrapper<ProjectRequirement> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProjectRequirement::getProjectId, projectId)
+                .eq(ProjectRequirement::getDelFlag, false);
+        List<ProjectRequirement> requirementList = projectRequirementMapper.selectList(wrapper);
+
+        // 按状态统计数量
+        Map<Integer, Long> statusCountMap = requirementList.stream()
+                .filter(item -> item.getStatus() != null)
+                .collect(Collectors.groupingBy(ProjectRequirement::getStatus, Collectors.counting()));
+
+        // 查询需求状态字典，按字典顺序组装返回
+        List<SysDictDataVO> statusDictList = sysDictApi.getDictDataByType("project_requirement_status");
+        return statusDictList.stream().map(dict -> {
+            Integer status = Integer.valueOf(dict.getDictValue());
+            ProjectRequirementSituationVO vo = new ProjectRequirementSituationVO();
+            vo.setStatus(status);
+            vo.setStatusLabel(dict.getDictLabel());
+            vo.setStatusType(dict.getListClass());
+            vo.setCount(statusCountMap.getOrDefault(status, 0L));
+            return vo;
+        }).collect(Collectors.toList());
     }
 }
