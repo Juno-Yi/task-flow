@@ -109,8 +109,6 @@
         style="width: 100%"
         height="100%"
       >
-        <ElTableColumn type="index" label="序号" width="60" align="center" />
-
         <ElTableColumn prop="requirementNo" label="需求编号" width="140" />
 
         <ElTableColumn prop="title" label="需求标题" min-width="200" show-overflow-tooltip />
