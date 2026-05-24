@@ -24,7 +24,7 @@
       </ElCol>
     </ElRow>
 
-    <AboutProject />
+    <DemoNotice />
   </div>
 </template>
 
@@ -35,7 +35,10 @@
   import NewUser from './modules/new-user.vue'
   import Dynamic from './modules/dynamic-stats.vue'
   import TodoList from './modules/todo-list.vue'
+  import DemoNotice from "@views/dashboard/console/modules/demo-notice.vue";
   import AboutProject from './modules/about-project.vue'
 
   defineOptions({ name: 'Console' })
+
 </script>
+

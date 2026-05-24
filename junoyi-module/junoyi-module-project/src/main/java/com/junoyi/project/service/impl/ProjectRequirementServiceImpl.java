@@ -1,0 +1,258 @@
+package com.junoyi.project.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.framework.core.utils.DateUtils;
+import com.junoyi.framework.core.utils.StringUtils;
+import com.junoyi.framework.security.utils.SecurityUtils;
+import com.junoyi.project.convert.ProjectRequirementConverter;
+import com.junoyi.project.domain.dto.ProjectRequirementDTO;
+import com.junoyi.project.domain.dto.ProjectRequirementQueryDTO;
+import com.junoyi.project.domain.po.ProjectRequirement;
+import com.junoyi.project.domain.vo.ProjectRequirementVO;
+import com.junoyi.project.exception.ProjectException;
+import com.junoyi.project.mapper.ProjectRequirementMapper;
+import com.junoyi.project.service.IProjectRequirementService;
+import com.junoyi.project.util.RequirementNoGenerateUtil;
+import com.junoyi.system.api.SysDictApi;
+import com.junoyi.system.domain.vo.SysDictDataVO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * 项目需求业务接口实现
+ *
+ * @author Fan
+ */
+@Service
+@RequiredArgsConstructor
+public class ProjectRequirementServiceImpl implements IProjectRequirementService {
+
+    private final ProjectRequirementMapper projectRequirementMapper;
+    private final SysDictApi sysDictApi;
+
+    /**
+     * 获取项目需求列表（分页）
+     * @param projectId 项目ID
+     * @param queryDTO 查询参数
+     * @param page 分页
+     * @return 需求列表
+     */
+    @Override
+    public PageResult<ProjectRequirementVO> getRequirementList(Long projectId,
+                                                               ProjectRequirementQueryDTO queryDTO,
+                                                               Page<ProjectRequirement> page) {
+        // 构建查询条件
+        LambdaQueryWrapper<ProjectRequirement> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProjectRequirement::getProjectId, projectId)
+                .eq(ProjectRequirement::getDelFlag, false)
+                .like(StringUtils.isNotBlank(queryDTO.getTitle()), ProjectRequirement::getTitle, queryDTO.getTitle())
+                .eq(queryDTO.getPriority() != null, ProjectRequirement::getPriority, queryDTO.getPriority())
+                .eq(queryDTO.getStatus() != null, ProjectRequirement::getStatus, queryDTO.getStatus())
+                .eq(queryDTO.getSource() != null, ProjectRequirement::getSource, queryDTO.getSource())
+                .eq(queryDTO.getType() != null, ProjectRequirement::getType, queryDTO.getType())
+                .orderByDesc(ProjectRequirement::getCreateTime);
+
+        // 分页查询
+        Page<ProjectRequirement> resultPage = projectRequirementMapper.selectPage(page, wrapper);
+        List<ProjectRequirement> requirements = resultPage.getRecords();
+
+        // 如果没有数据，直接返回空结果
+        if (requirements.isEmpty()) {
+            return PageResult.of(
+                    new ArrayList<>(),
+                    resultPage.getTotal(),
+                    (int) resultPage.getCurrent(),
+                    (int) resultPage.getSize()
+            );
+        }
+
+        // 批量查询字典数据（避免 N+1 查询）
+        List<SysDictDataVO> priorityDictList = sysDictApi.getDictDataByType("project_requirement_priority");
+        List<SysDictDataVO> statusDictList = sysDictApi.getDictDataByType("project_requirement_status");
+        List<SysDictDataVO> sourceDictList = sysDictApi.getDictDataByType("project_requirement_source");
+        List<SysDictDataVO> typeDictList = sysDictApi.getDictDataByType("project_requirement_type");
+
+        // 转换为 Map 便于查找
+        Map<String, SysDictDataVO> priorityDictMap = priorityDictList.stream()
+                .collect(Collectors.toMap(SysDictDataVO::getDictValue, dict -> dict));
+        Map<String, SysDictDataVO> statusDictMap = statusDictList.stream()
+                .collect(Collectors.toMap(SysDictDataVO::getDictValue, dict -> dict));
+        Map<String, SysDictDataVO> sourceDictMap = sourceDictList.stream()
+                .collect(Collectors.toMap(SysDictDataVO::getDictValue, dict -> dict));
+        Map<String, SysDictDataVO> typeDictMap = typeDictList.stream()
+                .collect(Collectors.toMap(SysDictDataVO::getDictValue, dict -> dict));
+
+        // 转换为VO并填充字典数据
+        List<ProjectRequirementVO> voList = new ArrayList<>();
+        for (ProjectRequirement requirement : requirements) {
+            ProjectRequirementVO vo = ProjectRequirementConverter.toVO(requirement);
+
+            // 字典翻译 - 优先级
+            if (requirement.getPriority() != null) {
+                SysDictDataVO priorityDict = priorityDictMap.get(String.valueOf(requirement.getPriority()));
+                if (priorityDict != null) {
+                    vo.setPriorityLabel(priorityDict.getDictLabel());
+                    vo.setPriorityType(priorityDict.getListClass());
+                }
+            }
+
+            // 字典翻译 - 状态
+            if (requirement.getStatus() != null) {
+                SysDictDataVO statusDict = statusDictMap.get(String.valueOf(requirement.getStatus()));
+                if (statusDict != null) {
+                    vo.setStatusLabel(statusDict.getDictLabel());
+                    vo.setStatusType(statusDict.getListClass());
+                }
+            }
+
+            // 字典翻译 - 来源
+            if (requirement.getSource() != null) {
+                SysDictDataVO sourceDict = sourceDictMap.get(String.valueOf(requirement.getSource()));
+                if (sourceDict != null) {
+                    vo.setSourceLabel(sourceDict.getDictLabel());
+                    vo.setSourceType(sourceDict.getListClass());
+                }
+            }
+
+            // 字典翻译 - 类型
+            if (requirement.getType() != null) {
+                SysDictDataVO typeDict = typeDictMap.get(String.valueOf(requirement.getType()));
+                if (typeDict != null) {
+                    vo.setTypeLabel(typeDict.getDictLabel());
+                    vo.setTypeLabelType(typeDict.getListClass());
+                }
+            }
+
+            voList.add(vo);
+        }
+
+        // 返回分页结果
+        return PageResult.of(
+                voList,
+                resultPage.getTotal(),
+                (int) resultPage.getCurrent(),
+                (int) resultPage.getSize()
+        );
+    }
+
+    /**
+     * 添加项目需求
+     * @param projectId 项目ID
+     * @param dto 传输数据
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void addRequirement(Long projectId, ProjectRequirementDTO dto) {
+        // 参数校验
+        if (StringUtils.isBlank(dto.getTitle())) {
+            throw new ProjectException("需求标题不能为空");
+        }
+
+        // 转换DTO为PO
+        ProjectRequirement requirement = ProjectRequirementConverter.toPO(dto);
+        requirement.setProjectId(projectId);
+
+        // 设置默认状态为待开始
+        requirement.setStatus(0);
+
+        // 设置软删除标志
+        requirement.setDelFlag(false);
+
+        // 设置创建信息
+        requirement.setCreateBy(SecurityUtils.getUserName());
+        requirement.setCreateTime(DateUtils.getNowDate());
+
+        // 生成需求编号并插入，如果编号重复则重试（最多3次）
+        int maxRetries = 3;
+        int retryCount = 0;
+        String requirementNo = null;
+
+        while (retryCount < maxRetries) {
+            try {
+                // 生成需求编号
+                requirementNo = RequirementNoGenerateUtil.generateRequirementCode();
+                requirement.setRequirementNo(requirementNo);
+
+                // 尝试插入需求
+                projectRequirementMapper.insert(requirement);
+
+                // 插入成功，跳出循环
+                break;
+            } catch (Exception e) {
+                retryCount++;
+
+                // 检查是否是唯一索引冲突
+                if (e.getMessage() != null && e.getMessage().contains("Duplicate entry")) {
+                    // 如果是唯一索引冲突且未达到最大重试次数，继续重试
+                    if (retryCount < maxRetries) {
+                        // 等待一小段时间后重试（避免并发冲突）
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                        }
+                        continue;
+                    }
+                }
+
+                // 如果不是唯一索引冲突，或者已达到最大重试次数，抛出异常
+                throw new RuntimeException("创建需求失败：" + e.getMessage(), e);
+            }
+        }
+
+        if (requirementNo == null) {
+            throw new RuntimeException("创建需求失败：无法生成唯一的需求编号");
+        }
+
+        // TODO: 发布项目动态
+    }
+
+    /**
+     * 修改项目需求
+     * @param projectId 项目ID
+     * @param dto 传输数据
+     */
+    @Override
+    public void updateRequirement(Long projectId, ProjectRequirementDTO dto) {
+        // 转换DTO为PO
+        ProjectRequirement requirement = ProjectRequirementConverter.toPO(dto);
+        requirement.setUpdateBy(SecurityUtils.getUserName());
+        requirement.setUpdateTime(DateUtils.getNowDate());
+
+        projectRequirementMapper.updateById(requirement);
+
+        // TODO: 发布项目动态
+    }
+
+    /**
+     * 删除项目需求
+     * @param projectId 项目ID
+     * @param requirementId 项目需求ID
+     */
+    @Override
+    public void deleteRequirement(Long projectId, Long requirementId) {
+        LambdaQueryWrapper<ProjectRequirement> requirementLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        requirementLambdaQueryWrapper.eq(ProjectRequirement::getId, requirementId)
+                .eq(ProjectRequirement::getProjectId,projectId)
+                .eq(ProjectRequirement::getDelFlag,false);
+        ProjectRequirement requirement = projectRequirementMapper.selectOne(requirementLambdaQueryWrapper);
+        if (requirement == null)
+            throw new ProjectException("项目需求不存在");
+
+        requirement.setDelFlag(true);
+        requirement.setUpdateBy(SecurityUtils.getUserName());
+        requirement.setUpdateTime(DateUtils.getNowDate());
+
+        projectRequirementMapper.updateById(requirement);
+
+        // TODO：发布项目动态
+    }
+}

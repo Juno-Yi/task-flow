@@ -40,6 +40,18 @@
             />
           </ElTabPane>
 
+          <!--    需求      -->
+          <ElTabPane name="requirement" class="h-full">
+            <template #label>
+              <span class="flex items-center">
+                <ArtSvgIcon icon="ri:flag-line" class="mr-2" />
+                需求
+                <ElBadge v-if="projectInfo.milestoneCount > 0" :value="projectInfo.milestoneCount" class="ml-2" />
+              </span>
+            </template>
+            <RequirementTab :project-info="projectInfo" />
+          </ElTabPane>
+
           <!-- 里程碑 -->
           <ElTabPane name="milestones" class="h-full">
             <template #label>
@@ -92,6 +104,7 @@
   import MilestoneTab from "@views/project/detail/tab/milestone-tab.vue";
   import { useRoute, useRouter } from 'vue-router'
   import {fetchGetProjectDetailByNo} from "@/api/project/detail";
+  import RequirementTab from "@views/project/detail/tab/requirement-tab.vue";
 
 
   defineOptions({ name: 'ProjectDetail' })
