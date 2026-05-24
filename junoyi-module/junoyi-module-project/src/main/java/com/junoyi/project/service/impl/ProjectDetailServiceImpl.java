@@ -6,10 +6,7 @@ import com.junoyi.project.convert.ProjectMemberConverter;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.po.ProjectRequirement;
-import com.junoyi.project.domain.vo.ProjectDetailVO;
-import com.junoyi.project.domain.vo.ProjectMemberVO;
-import com.junoyi.project.domain.vo.ProjectOverviewVO;
-import com.junoyi.project.domain.vo.ProjectRequirementSituationVO;
+import com.junoyi.project.domain.vo.*;
 import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.mapper.ProjectMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
@@ -23,6 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -192,6 +193,11 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
         List<ProjectRequirementSituationVO> projectRequirementSituationList = getProjectRequirementSituationList(project.getId());
         projectOverviewVO.setProjectRequirementSituation(projectRequirementSituationList);
 
+        // 获取项目需求趋势折线图数据
+        ProjectRequirementCompletedVO projectRequirementCompletedVO = getProjectRequirementCompletedVO(project.getId());
+        projectOverviewVO.setProjectRequirementCompletedVO(projectRequirementCompletedVO);
+
+
         return projectOverviewVO;
     }
 
@@ -223,5 +229,56 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
             vo.setCount(statusCountMap.getOrDefault(status, 0L));
             return vo;
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * 获取项目需求完成趋势条形图数据
+     * @param projectId 项目Id
+     * @return 数据
+     */
+    private ProjectRequirementCompletedVO getProjectRequirementCompletedVO(Long projectId){
+        LambdaQueryWrapper<ProjectRequirement> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProjectRequirement::getProjectId, projectId)
+                .eq(ProjectRequirement::getDelFlag, false)
+                .eq(ProjectRequirement::getStatus, 2);
+        List<ProjectRequirement> completedRequirementList = projectRequirementMapper.selectList(wrapper);
+
+        ProjectRequirementCompletedVO vo = new ProjectRequirementCompletedVO();
+        vo.setSevenDayList(buildRequirementTrendList(completedRequirementList, 7));
+        vo.setThirtyDayList(buildRequirementTrendList(completedRequirementList, 30));
+        vo.setNinetyDayList(buildRequirementTrendList(completedRequirementList, 90));
+        return vo;
+    }
+
+    /**
+     * 构建指定天数的需求完成趋势数据
+     */
+    private List<RequirementTrendVO> buildRequirementTrendList(List<ProjectRequirement> completedRequirementList, int days) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(days - 1L);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
+
+        Map<LocalDate, Long> dateCountMap = completedRequirementList.stream()
+                .map(ProjectRequirement::getUpdateTime)
+                .filter(date -> date != null)
+                .map(this::convertToLocalDate)
+                .filter(date -> !date.isBefore(startDate) && !date.isAfter(endDate))
+                .collect(Collectors.groupingBy(date -> date, Collectors.counting()));
+
+        return startDate.datesUntil(endDate.plusDays(1))
+                .map(date -> {
+                    RequirementTrendVO trendVO = new RequirementTrendVO();
+                    trendVO.setDate(date.format(formatter));
+                    trendVO.setCount(dateCountMap.getOrDefault(date, 0L));
+                    return trendVO;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Date 转 LocalDate
+     */
+    private LocalDate convertToLocalDate(Date date) {
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 }

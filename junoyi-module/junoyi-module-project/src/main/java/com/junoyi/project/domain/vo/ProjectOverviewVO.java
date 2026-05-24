@@ -17,5 +17,9 @@ public class ProjectOverviewVO {
      */
     private List<ProjectRequirementSituationVO> projectRequirementSituation;
 
+    /**
+     * 项目需求完成趋势数据
+     */
+    private ProjectRequirementCompletedVO projectRequirementCompletedVO;
 }
 

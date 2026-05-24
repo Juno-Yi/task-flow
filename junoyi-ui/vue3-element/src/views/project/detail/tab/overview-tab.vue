@@ -35,9 +35,8 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center">
                 <ArtSvgIcon icon="ri:line-chart-line" class="mr-2" />
-                <span class="font-semibold">活跃趋势折线图</span>
+                <span class="font-semibold">活跃趋势</span>
               </div>
-              <span class="chart-tip">建议放项目活跃度 / 更新次数趋势</span>
             </div>
           </template>
           <div class="chart-placeholder chart-placeholder-lg">预留图表区域：活跃趋势折线图</div>
@@ -49,7 +48,7 @@
               <template #header>
                 <div class="flex items-center">
                   <ArtSvgIcon icon="ri:pie-chart-line" class="mr-2" />
-                  <span class="font-semibold">需求情况饼图</span>
+                  <span class="font-semibold">需求情况</span>
                 </div>
               </template>
               <ProjectRequirementSituationChart :data="overviewData.projectRequirementSituation" />
@@ -61,10 +60,10 @@
               <template #header>
                 <div class="flex items-center">
                   <ArtSvgIcon icon="ri:bar-chart-box-line" class="mr-2" />
-                  <span class="font-semibold">任务状态分布条形图</span>
+                  <span class="font-semibold">需求近期完成情况</span>
                 </div>
               </template>
-              <div class="chart-placeholder chart-placeholder-md">预留图表区域：任务状态分布条形图</div>
+              <div class="chart-placeholder chart-placeholder-md">预留图表区域：需求近期完成折线图</div>
             </ElCard>
           </ElCol>
         </ElRow>
@@ -254,11 +253,11 @@ watch(() => props.projectInfo.no, () => {
 }
 
 .chart-placeholder-lg {
-  min-height: 340px;
+  min-height: 180px;
 }
 
 .chart-placeholder-md {
-  min-height: 280px;
+  min-height: 180px;
 }
 
 .member-card {
@@ -315,11 +314,11 @@ watch(() => props.projectInfo.no, () => {
 
 @media (max-width: 768px) {
   .chart-placeholder-lg {
-    min-height: 260px;
+    min-height: 160px;
   }
 
   .chart-placeholder-md {
-    min-height: 220px;
+    min-height: 160px;
   }
 
   .side-stat-grid {
