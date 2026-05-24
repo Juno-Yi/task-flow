@@ -158,29 +158,39 @@
           </template>
         </ElTableColumn>
 
-        <ElTableColumn label="操作" width="180" align="center" fixed="right">
+        <ElTableColumn label="操作" width="100" align="center" fixed="right">
           <template #default="{ row }">
-            <ElButton text type="primary" size="small" @click="handleView(row)">
-              查看
-            </ElButton>
-            <ElButton
-              v-if="projectRole.isOwner.value || projectRole.isAdmin.value"
-              text
-              type="primary"
-              size="small"
-              @click="handleEdit(row)"
-            >
-              编辑
-            </ElButton>
-            <ElButton
-              v-if="projectRole.isOwner.value"
-              text
-              type="danger"
-              size="small"
-              @click="handleDelete(row)"
-            >
-              删除
-            </ElButton>
+            <ElDropdown trigger="click" @command="(command: string) => handleCommand(command, row)">
+              <ElButton text type="primary" size="small">
+                更多
+                <ArtSvgIcon icon="ri:arrow-down-s-line" class="ml-1" />
+              </ElButton>
+              <template #dropdown>
+                <ElDropdownMenu>
+                  <ElDropdownItem command="view">
+                    <ArtSvgIcon icon="ri:eye-line" class="mr-2" />
+                    查看详情
+                  </ElDropdownItem>
+                  <ElDropdownItem
+                    v-if="projectRole.isOwner.value || projectRole.isAdmin.value"
+                    command="edit"
+                  >
+                    <ArtSvgIcon icon="ri:edit-line" class="mr-2" />
+                    编辑
+                  </ElDropdownItem>
+                  <ElDropdownItem
+                    v-if="projectRole.isOwner.value"
+                    command="delete"
+                    divided
+                  >
+                    <span class="text-red-500">
+                      <ArtSvgIcon icon="ri:delete-bin-line" class="mr-2" />
+                      删除
+                    </span>
+                  </ElDropdownItem>
+                </ElDropdownMenu>
+              </template>
+            </ElDropdown>
           </template>
         </ElTableColumn>
       </ElTable>
@@ -459,6 +469,23 @@ const formatDate = (dateStr: string | undefined): string => {
     return dateStr.replace('T', ' ').substring(0, 19)
   }
   return dateStr.substring(0, 19)
+}
+
+/**
+ * 处理下拉菜单命令
+ */
+const handleCommand = (command: string, requirement: Api.Project.ProjectRequirementVO) => {
+  switch (command) {
+    case 'view':
+      handleView(requirement)
+      break
+    case 'edit':
+      handleEdit(requirement)
+      break
+    case 'delete':
+      handleDelete(requirement)
+      break
+  }
 }
 
 /**

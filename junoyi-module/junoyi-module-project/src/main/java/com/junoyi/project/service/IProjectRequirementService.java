@@ -29,4 +29,11 @@ public interface IProjectRequirementService {
      * @param dto 传输数据
      */
     void addRequirement(Long projectId, ProjectRequirementDTO dto);
+
+    /**
+     * 修改项目需求
+     * @param projectId 项目ID
+     * @param dto 传输数据
+     */
+    void updateRequirement(Long projectId, ProjectRequirementDTO dto);
 }

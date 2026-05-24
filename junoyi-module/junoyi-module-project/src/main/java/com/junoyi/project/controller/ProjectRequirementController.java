@@ -54,6 +54,7 @@ public class ProjectRequirementController extends BaseController {
      * 添加项目需求
      */
     @PostMapping("/{projectId}")
+    @PlatformScope(PlatformType.ADMIN_WEB)
     public R<Void> addRequirement(@PathVariable("projectId") Long projectId,
             @RequestBody ProjectRequirementDTO dto){
 
@@ -75,6 +76,34 @@ public class ProjectRequirementController extends BaseController {
         }
 
         projectRequirementService.addRequirement(projectId,dto);
+        return R.ok();
+    }
+
+    /**
+     * 修改项目需求
+     */
+    @PutMapping("/{projectId}")
+    @PlatformScope({PlatformType.ADMIN_WEB})
+    public R<Void> updateRequirement(@PathVariable("projectId") Long projectId,
+                                     @RequestBody ProjectRequirementDTO dto){
+
+        // 参数验证
+        if (projectId == null || projectId == 0)
+            return R.fail("项目ID不能为空");
+
+        // 获取当前用户ID
+        Long currentUserId = SecurityUtils.getUserId();
+        if (currentUserId == null || currentUserId == 0L)
+            return R.fail("非法请求");
+
+        // 判断当前用户角色是否有权限添加（负责人或管理员）
+        boolean isOwner = projectPermissionService.isProjectOwner(projectId, currentUserId);
+        boolean isAdmin = projectPermissionService.isProjectAdmin(projectId, currentUserId);
+
+        if (!isOwner && !isAdmin) {
+            return R.fail("权限不足，只有项目负责人或管理员可以修改需求");
+        }
+
         return R.ok();
     }
 }

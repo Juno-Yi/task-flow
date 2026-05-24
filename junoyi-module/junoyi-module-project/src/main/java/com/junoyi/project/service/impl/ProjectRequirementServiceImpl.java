@@ -214,4 +214,21 @@ public class ProjectRequirementServiceImpl implements IProjectRequirementService
 
         // TODO: 发布项目动态
     }
+
+    /**
+     * 修改项目需求
+     * @param projectId 项目ID
+     * @param dto 传输数据
+     */
+    @Override
+    public void updateRequirement(Long projectId, ProjectRequirementDTO dto) {
+        // 转换DTO为PO
+        ProjectRequirement requirement = ProjectRequirementConverter.toPO(dto);
+        requirement.setUpdateBy(SecurityUtils.getUserName());
+        requirement.setUpdateTime(DateUtils.getNowDate());
+
+        projectRequirementMapper.updateById(requirement);
+
+        // TODO: 发布项目动态
+    }
 }
