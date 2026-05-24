@@ -116,9 +116,21 @@
         style="width: 100%"
         height="100%"
       >
-        <ElTableColumn prop="requirementNo" label="需求编号" width="140" />
+        <ElTableColumn prop="requirementNo" label="需求编号" width="140">
+          <template #default="{ row }">
+            <span class="link-text" @click="handleView(row)">
+              {{ row.requirementNo }}
+            </span>
+          </template>
+        </ElTableColumn>
 
-        <ElTableColumn prop="title" label="需求标题" min-width="200" show-overflow-tooltip />
+        <ElTableColumn prop="title" label="需求标题" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="link-text" @click="handleView(row)">
+              {{ row.title }}
+            </span>
+          </template>
+        </ElTableColumn>
 
         <ElTableColumn prop="priority" label="优先级" width="100" align="center">
           <template #default="{ row }">
@@ -746,6 +758,17 @@ onMounted(() => {
 :deep(.el-form--inline .el-form-item) {
   margin-right: 16px;
   margin-bottom: 12px;
+}
+
+// 表格可点击文本
+.link-text {
+  color: #303133;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #409eff;
+  }
 }
 
 // 需求详情样式
