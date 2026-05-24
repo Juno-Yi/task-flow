@@ -347,9 +347,9 @@ const formData = ref<Api.Project.ProjectRequirementDTO>({
   id: undefined,
   title: '',
   description: '',
-  priority: 0,
-  source: 0,
-  type: 0
+  priority: undefined,
+  source: undefined,
+  type: undefined
 })
 
 // 表单验证规则
@@ -478,9 +478,9 @@ const handleAdd = () => {
     id: undefined,
     title: '',
     description: '',
-    priority: 2,
-    source: 2,
-    type: 1
+    priority: undefined as any,
+    source: undefined as any,
+    type: undefined as any
   }
   dialogVisible.value = true
 }
