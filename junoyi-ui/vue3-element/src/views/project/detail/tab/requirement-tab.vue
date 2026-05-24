@@ -289,7 +289,9 @@
 import {
   fetchGetProjectRequirementList,
   fetchAddProjectRequirement,
-  fetchUpdateProjectRequirement, fetchDeleteProjectRequirement
+  fetchUpdateProjectRequirement,
+  fetchDeleteProjectRequirement,
+  fetchUpdateProjectRequirementStatus
 } from "@/api/project/requirement"
 import { fetchGetDictDataByType } from "@/api/system/dict"
 import { useProjectRole } from "@/hooks/useProjectRole"
@@ -497,14 +499,9 @@ const handleStatusChange = async (requirement: Api.Project.ProjectRequirementVO,
 
   try {
     updatingStatusId.value = requirement.id
-    await fetchUpdateProjectRequirement(props.projectInfo.id, {
+    await fetchUpdateProjectRequirementStatus(props.projectInfo.id, {
       id: requirement.id,
-      title: requirement.title,
-      description: requirement.description,
-      priority: requirement.priority,
-      status,
-      source: requirement.source,
-      type: requirement.type
+      status
     })
 
     requirement.status = status

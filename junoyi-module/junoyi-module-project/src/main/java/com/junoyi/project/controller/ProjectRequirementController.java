@@ -8,6 +8,7 @@ import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.project.domain.dto.ProjectRequirementDTO;
 import com.junoyi.project.domain.dto.ProjectRequirementQueryDTO;
+import com.junoyi.project.domain.dto.ProjectRequirementStatusUpdateDTO;
 import com.junoyi.project.domain.vo.ProjectRequirementVO;
 import com.junoyi.project.service.IProjectPermissionService;
 import com.junoyi.project.service.IProjectRequirementService;
@@ -133,6 +134,36 @@ public class ProjectRequirementController extends BaseController {
         }
 
         projectRequirementService.deleteRequirement(projectId, requirementId);
+        return R.ok();
+    }
+
+    /**
+     * 单独更新项目需求状态
+     */
+    @PutMapping("/{projectId}/status")
+    @PlatformScope({PlatformType.ADMIN_WEB})
+    public R<Void> updateRequirementStatus(@PathVariable("projectId") Long projectId,
+                                           @RequestBody ProjectRequirementStatusUpdateDTO dto) {
+
+        if (projectId == null || projectId == 0) {
+            return R.fail("项目ID不能为空");
+        }
+        if (dto == null || dto.getId() == null || dto.getStatus() == null) {
+            return R.fail("需求ID和状态不能为空");
+        }
+
+        Long currentUserId = SecurityUtils.getUserId();
+        if (currentUserId == null || currentUserId == 0L) {
+            return R.fail("非法请求");
+        }
+
+        boolean isOwner = projectPermissionService.isProjectOwner(projectId, currentUserId);
+        boolean isAdmin = projectPermissionService.isProjectAdmin(projectId, currentUserId);
+        if (!isOwner && !isAdmin) {
+            return R.fail("权限不足，只有项目负责人或管理员可以修改需求状态");
+        }
+
+        projectRequirementService.updateRequirementStatus(projectId, dto);
         return R.ok();
     }
 }

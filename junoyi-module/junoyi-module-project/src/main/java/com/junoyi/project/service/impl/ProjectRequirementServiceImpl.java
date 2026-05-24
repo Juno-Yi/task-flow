@@ -9,6 +9,7 @@ import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.convert.ProjectRequirementConverter;
 import com.junoyi.project.domain.dto.ProjectRequirementDTO;
 import com.junoyi.project.domain.dto.ProjectRequirementQueryDTO;
+import com.junoyi.project.domain.dto.ProjectRequirementStatusUpdateDTO;
 import com.junoyi.project.domain.po.ProjectRequirement;
 import com.junoyi.project.domain.vo.ProjectRequirementVO;
 import com.junoyi.project.exception.ProjectException;
@@ -251,6 +252,31 @@ public class ProjectRequirementServiceImpl implements IProjectRequirementService
         requirement.setUpdateBy(SecurityUtils.getUserName());
         requirement.setUpdateTime(DateUtils.getNowDate());
 
+        projectRequirementMapper.updateById(requirement);
+
+        // TODO：发布项目动态
+    }
+
+    /**
+     * 单独更新项目需求状态
+     * @param projectId 项目ID
+     * @param dto 状态更新参数
+     */
+    @Override
+    public void updateRequirementStatus(Long projectId, ProjectRequirementStatusUpdateDTO dto) {
+        LambdaQueryWrapper<ProjectRequirement> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProjectRequirement::getId, dto.getId())
+                .eq(ProjectRequirement::getProjectId, projectId)
+                .eq(ProjectRequirement::getDelFlag, false);
+
+        ProjectRequirement requirement = projectRequirementMapper.selectOne(wrapper);
+        if (requirement == null) {
+            throw new ProjectException("项目需求不存在");
+        }
+
+        requirement.setStatus(dto.getStatus());
+        requirement.setUpdateBy(SecurityUtils.getUserName());
+        requirement.setUpdateTime(DateUtils.getNowDate());
         projectRequirementMapper.updateById(requirement);
 
         // TODO：发布项目动态

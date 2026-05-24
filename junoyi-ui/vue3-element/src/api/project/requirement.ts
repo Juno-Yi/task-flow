@@ -39,3 +39,13 @@ export function fetchDeleteProjectRequirement(projectId: number, requirementId: 
         url: `/project/requirement/${projectId}/remove/${requirementId}`
     })
 }
+
+/**
+ * 单独更新项目需求状态
+ */
+export function fetchUpdateProjectRequirementStatus(projectId: number, data: Api.Project.ProjectRequirementStatusUpdateDTO){
+    return request.put<void>({
+        url: `/project/requirement/${projectId}/status`,
+        data
+    })
+}

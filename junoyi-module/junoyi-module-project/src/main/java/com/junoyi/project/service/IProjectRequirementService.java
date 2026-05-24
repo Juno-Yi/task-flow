@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.project.domain.dto.ProjectRequirementDTO;
 import com.junoyi.project.domain.dto.ProjectRequirementQueryDTO;
+import com.junoyi.project.domain.dto.ProjectRequirementStatusUpdateDTO;
 import com.junoyi.project.domain.po.ProjectRequirement;
 import com.junoyi.project.domain.vo.ProjectRequirementVO;
 
@@ -43,4 +44,11 @@ public interface IProjectRequirementService {
      * @param requirementId 项目需求ID
      */
     void deleteRequirement(Long projectId, Long requirementId);
+
+    /**
+     * 更新项目需求状态
+     * @param projectId 项目ID
+     * @param dto 状态更新参数
+     */
+    void updateRequirementStatus(Long projectId, ProjectRequirementStatusUpdateDTO dto);
 }
