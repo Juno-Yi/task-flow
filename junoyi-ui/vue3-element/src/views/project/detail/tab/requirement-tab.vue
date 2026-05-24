@@ -1,11 +1,23 @@
 <!-- 需求Tab -->
 <template>
-  <h1>项目需求管理tab</h1>
+  <div class="h-full flex flex-col">
+    <!-- 操作栏 -->
+    <div class="mb-4 flex justify-between items-center">
+      <div class="text-sm text-gray-500">
+        共 {{ requirementList.length }} 个需求
+      </div>
+      <ElButton v-if="projectRole.isOwner.value" type="primary" @click="handleAdd">
+        <ArtSvgIcon icon="ri:add-line" class="mr-1" />
+        添加需求
+      </ElButton>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
   import { fetchGetProjectRequirementList } from "@/api/project/requirement";
   import {useProjectRole} from "@/hooks/useProjectRole";
+  import ArtSvgIcon from "@/components/core/base/art-svg-icon/index.vue";
 
   defineOptions({name:'RequirementTab'})
 
@@ -19,8 +31,14 @@
   const projectRole = useProjectRole(computed(() => props.projectInfo.currentUserRole))
 
   // 需求列表
-  const requirementList = ref<Api.Project.ProjectRequirementVO[]>();
+  const requirementList = ref<Api.Project.ProjectRequirementVO[]>([]);
   const loading = ref(false)
+
+  // 表单数据
+  const formData = ref<Api.Project.ProjectRequirementDTO>({
+
+  })
+
 
   /**
    * 加载需求列表数据
@@ -36,6 +54,13 @@
     } finally {
       loading.value = false
     }
+  }
+
+  /**
+   * 添加需求
+   */
+  const handleAdd = async () => {
+
   }
 
   // 监听项目信息变化，重新加载数据

@@ -18,11 +18,6 @@ public class ProjectRequirementVO {
     private Long id;
 
     /**
-     * 项目ID
-     */
-    private Long projectId;
-
-    /**
      * 需求编号
      */
     private String requirementNo;
