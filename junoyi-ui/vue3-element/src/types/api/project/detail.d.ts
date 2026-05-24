@@ -62,6 +62,7 @@ declare namespace Api.Project {
      */
     interface ProjectOverviewVO {
         projectRequirementSituation: ProjectRequirementSituationVO[]
+        projectRequirementCompletedVO: ProjectRequirementCompletedVO
     }
 
     /**
@@ -71,6 +72,25 @@ declare namespace Api.Project {
         status: number
         statusLabel: string
         statusType: string
+        count: number
+    }
+
+    /**
+     * 项目需求完成情况 VO
+     */
+    interface ProjectRequirementCompletedVO {
+        sevenDayList: RequirementTrendVO[]
+        thirtyDayList: RequirementTrendVO[]
+        ninetyDayList: RequirementTrendVO[]
+    }
+
+    /**
+     * 需求趋势 VO
+     *
+     * @author Fan
+     */
+    interface RequirementTrendVO {
+        data: string
         count: number
     }
 }
