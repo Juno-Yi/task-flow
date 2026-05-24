@@ -14,7 +14,6 @@ import com.junoyi.project.service.IProjectRequirementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 /**
  * 项目需求控制器
@@ -54,9 +53,28 @@ public class ProjectRequirementController extends BaseController {
     /**
      * 添加项目需求
      */
-    @PostMapping
-    public R<Void> addRequirement(@RequestBody ProjectRequirementDTO dto){
+    @PostMapping("/{projectId}")
+    public R<Void> addRequirement(@PathVariable("projectId") Long projectId,
+            @RequestBody ProjectRequirementDTO dto){
 
+        // 参数验证
+        if (projectId == null || projectId == 0)
+            return R.fail("项目ID不能为空");
+
+        // 获取当前用户ID
+        Long currentUserId = SecurityUtils.getUserId();
+        if (currentUserId == null || currentUserId == 0L)
+            return R.fail("非法请求");
+
+        // 判断当前用户角色是否有权限添加（负责人或管理员）
+        boolean isOwner = projectPermissionService.isProjectOwner(projectId, currentUserId);
+        boolean isAdmin = projectPermissionService.isProjectAdmin(projectId, currentUserId);
+
+        if (!isOwner && !isAdmin) {
+            return R.fail("权限不足，只有项目负责人或管理员可以添加需求");
+        }
+
+        projectRequirementService.addRequirement(projectId,dto);
         return R.ok();
     }
 }

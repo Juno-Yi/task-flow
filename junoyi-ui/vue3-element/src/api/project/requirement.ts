@@ -1,11 +1,23 @@
 import request from '@/utils/http'
+import { PageResult } from '@/types'
 
 /**
  * 获取项目需求列表（分页）
  */
-export function fetchGetProjectRequirementList(projectId: number, params: Api.Project.ProjectRequirementQueryDTO & Api.Common.PageQuery){
-    return request.get<Api.Common.PageResult<Api.Project.ProjectRequirementVO>>({
+export function fetchGetProjectRequirementList(projectId: number, params: Api.Project.ProjectRequirementQueryDTO){
+    return request.get<PageResult<Api.Project.ProjectRequirementVO>>({
         url: `/project/requirement/list/${projectId}`,
         params
     })
 }
+
+/**
+ * 添加项目需求
+ */
+export function fetchAddProjectRequirement(projectId: number, data: Api.Project.ProjectRequirementDTO){
+    return request.post<void>({
+        url: `/project/requirement/${projectId}`,
+        data
+    })
+}
+

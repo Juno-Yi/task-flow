@@ -41,6 +41,11 @@ declare namespace Api.Project {
      * 需求添加修改表单 DTO
      */
     interface ProjectRequirementDTO {
-
+        id?: number
+        title: string
+        description: string
+        priority: number
+        source: number
+        type: number
     }
 }
