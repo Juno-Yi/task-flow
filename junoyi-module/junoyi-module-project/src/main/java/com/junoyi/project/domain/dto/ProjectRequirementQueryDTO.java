@@ -28,5 +28,10 @@ public class ProjectRequirementQueryDTO {
     /**
      * 需求来源
      */
-    private Integer Type;
+    private Integer source;
+
+    /**
+     * 需求类型
+     */
+    private Integer type;
 }
