@@ -1,5 +1,5 @@
 <template>
-  <ElDrawer v-model="visible" title="需求详情" size="70%" direction="rtl" class="requirement-drawer">
+  <ElDrawer v-model="visible" title="需求详情" size="50%" direction="rtl" class="requirement-drawer">
     <div v-if="requirement" class="flex h-full flex-col overflow-hidden">
       <div class="shrink-0">
         <div class="mb-4 border-b border-gray-200 pb-2 text-base font-semibold text-gray-800">基础信息</div>
