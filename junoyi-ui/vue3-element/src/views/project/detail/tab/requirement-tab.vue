@@ -424,10 +424,10 @@ const handleSearch = () => {
 const handleReset = () => {
   queryParams.value = {
     title: undefined,
-    priority: undefined,
-    status: undefined,
-    source: undefined,
-    type: undefined
+    priority: undefined as any,
+    status: undefined as any,
+    source: undefined as any,
+    type: undefined as any
   }
   pagination.value.current = 1
   loadRequirementList()
