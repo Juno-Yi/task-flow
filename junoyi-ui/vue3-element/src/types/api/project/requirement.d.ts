@@ -9,10 +9,10 @@ declare namespace Api.Project {
      * 需求查询参数 DTO
      */
     interface ProjectRequirementQueryDTO {
-        title: string
-        priority: number
-        status: number
-        source: number
-        type: number
+        title?: string
+        priority?: number
+        status?: number
+        source?: number
+        type?: number
     }
 }

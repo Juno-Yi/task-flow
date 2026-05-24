@@ -11,10 +11,7 @@ import com.junoyi.project.domain.vo.ProjectRequirementVO;
 import com.junoyi.project.service.IProjectPermissionService;
 import com.junoyi.project.service.IProjectRequirementService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -51,5 +48,13 @@ public class ProjectRequirementController extends BaseController {
             return R.fail("非法请求");
 
         return R.ok(projectRequirementService.getRequirementList(projectId,queryDTO, buildPage()));
+    }
+
+    /**
+     * 添加项目需求
+     */
+    @PostMapping
+    public R<Void> addRequirement(){
+        return R.ok();
     }
 }
