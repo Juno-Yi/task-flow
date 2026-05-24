@@ -102,7 +102,7 @@ const visible = computed({
   set: (value: boolean) => emit('update:modelValue', value)
 })
 
-const activeTab = ref('attachment')
+const activeTab = ref('comment')
 
 marked.setOptions({
   breaks: true,
