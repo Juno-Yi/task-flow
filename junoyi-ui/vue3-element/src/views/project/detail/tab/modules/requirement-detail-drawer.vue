@@ -1,50 +1,82 @@
 <template>
-  <ElDrawer v-model="visible" title="需求详情" size="50%" direction="rtl" class="requirement-drawer">
+  <ElDrawer v-model="visible" :modal="false" title="需求详情" size="50%" direction="rtl" class="requirement-drawer">
     <div v-if="requirement" class="flex h-full flex-col overflow-hidden">
-      <div class="shrink-0">
-        <div class="mb-4 border-b border-gray-200 pb-2 text-base font-semibold text-gray-800">基础信息</div>
-        <div class="space-y-4">
-          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">需求编号</div><div class="flex-1 break-words text-sm text-gray-800">{{ requirement.requirementNo }}</div></div>
-          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">需求标题</div><div class="flex-1 break-words text-sm text-gray-800">{{ requirement.title }}</div></div>
-          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">优先级</div><div class="flex-1 break-words text-sm text-gray-800"><ElTag :type="requirement.priorityType as any" size="small">{{ requirement.priorityLabel }}</ElTag></div></div>
-          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">状态</div><div class="flex-1 break-words text-sm text-gray-800"><ElTag :type="requirement.statusType as any" size="small">{{ requirement.statusLabel }}</ElTag></div></div>
-          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">需求来源</div><div class="flex-1 break-words text-sm text-gray-800"><ElTag :type="requirement.sourceType as any" size="small" effect="plain">{{ requirement.sourceLabel }}</ElTag></div></div>
-          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">需求类型</div><div class="flex-1 break-words text-sm text-gray-800"><ElTag :type="requirement.typeLabelType as any" size="small" effect="plain">{{ requirement.typeLabel }}</ElTag></div></div>
-          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">创建时间</div><div class="flex-1 break-words text-sm text-gray-800">{{ formatDate(requirement.createTime) }}</div></div>
-          <div class="flex"><div class="w-[100px] shrink-0 text-sm text-gray-500">更新时间</div><div class="flex-1 break-words text-sm text-gray-800">{{ formatDate(requirement.updateTime) }}</div></div>
+      <div class="min-h-0 flex-1 overflow-hidden">
+        <div class="shrink-0">
+          <div class="mb-3 border-b border-gray-200 pb-2 text-base font-semibold text-gray-800">基础信息</div>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+            <div>
+              <div class="mb-1 text-xs text-gray-500">需求编号</div>
+              <div class="break-words text-sm text-gray-800">{{ requirement.requirementNo }}</div>
+            </div>
+            <div>
+              <div class="mb-1 text-xs text-gray-500">需求标题</div>
+              <div class="break-words text-sm text-gray-800">{{ requirement.title }}</div>
+            </div>
+            <div>
+              <div class="mb-1 text-xs text-gray-500">优先级</div>
+              <div class="text-sm text-gray-800"><ElTag :type="requirement.priorityType as any" size="small">{{ requirement.priorityLabel }}</ElTag></div>
+            </div>
+            <div>
+              <div class="mb-1 text-xs text-gray-500">状态</div>
+              <div class="text-sm text-gray-800"><ElTag :type="requirement.statusType as any" size="small">{{ requirement.statusLabel }}</ElTag></div>
+            </div>
+            <div>
+              <div class="mb-1 text-xs text-gray-500">需求来源</div>
+              <div class="text-sm text-gray-800"><ElTag :type="requirement.sourceType as any" size="small" effect="plain">{{ requirement.sourceLabel }}</ElTag></div>
+            </div>
+            <div>
+              <div class="mb-1 text-xs text-gray-500">需求类型</div>
+              <div class="text-sm text-gray-800"><ElTag :type="requirement.typeLabelType as any" size="small" effect="plain">{{ requirement.typeLabel }}</ElTag></div>
+            </div>
+            <div>
+              <div class="mb-1 text-xs text-gray-500">创建时间</div>
+              <div class="break-words text-sm text-gray-800">{{ formatDate(requirement.createTime) }}</div>
+            </div>
+            <div>
+              <div class="mb-1 text-xs text-gray-500">更新时间</div>
+              <div class="break-words text-sm text-gray-800">{{ formatDate(requirement.updateTime) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 shrink-0">
+          <div class="mb-4 border-b border-gray-200 pb-2 text-base font-semibold text-gray-800">需求描述</div>
+          <div>
+            <div v-if="requirement.description" class="h-[320px] overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div class="markdown-body" v-html="renderedDescription"></div>
+            </div>
+            <div v-else class="flex h-[320px] items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
+              <ElEmpty description="暂无描述" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 min-h-0 flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white px-5 pb-5">
+          <ElTabs v-model="activeTab" class="flex h-full flex-col">
+            <ElTabPane label="评论" name="comment">
+              <div class="h-[320px] overflow-y-auto pt-3">
+                <ElEmpty description="评论功能待开发" />
+              </div>
+            </ElTabPane>
+            <ElTabPane label="附件" name="attachment">
+              <div class="h-[320px] overflow-y-auto pt-3">
+                <ElEmpty description="附件功能待开发" />
+              </div>
+            </ElTabPane>
+            <ElTabPane label="操作历史" name="history">
+              <div class="h-[320px] overflow-y-auto pt-3">
+                <ElEmpty description="操作历史待开发" />
+              </div>
+            </ElTabPane>
+          </ElTabs>
         </div>
       </div>
 
-      <div class="mt-6 shrink-0">
-        <div class="mb-4 border-b border-gray-200 pb-2 text-base font-semibold text-gray-800">需求描述</div>
-        <div>
-          <div v-if="requirement.description" class="h-[320px] overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <div class="markdown-body" v-html="renderedDescription"></div>
-          </div>
-          <div v-else class="flex h-[320px] items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
-            <ElEmpty description="暂无描述" />
-          </div>
+      <div class="mt-4 shrink-0 border-t border-gray-200 pt-4">
+        <div class="flex justify-end gap-3">
+          <ElButton @click="visible = false">关闭</ElButton>
         </div>
-      </div>
-
-      <div class="mt-6 min-h-0 flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white px-5 pb-5">
-        <ElTabs v-model="activeTab" class="flex h-full flex-col">
-          <ElTabPane label="附件" name="attachment">
-            <div class="h-[320px] overflow-y-auto pt-3">
-              <ElEmpty description="附件功能待开发" />
-            </div>
-          </ElTabPane>
-          <ElTabPane label="评论" name="comment">
-            <div class="h-[320px] overflow-y-auto pt-3">
-              <ElEmpty description="评论功能待开发" />
-            </div>
-          </ElTabPane>
-          <ElTabPane label="操作历史" name="history">
-            <div class="h-[320px] overflow-y-auto pt-3">
-              <ElEmpty description="操作历史待开发" />
-            </div>
-          </ElTabPane>
-        </ElTabs>
       </div>
     </div>
   </ElDrawer>
