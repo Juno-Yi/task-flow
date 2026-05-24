@@ -52,9 +52,10 @@
                   <span class="font-semibold">需求情况饼图</span>
                 </div>
               </template>
-              <div class="chart-placeholder chart-placeholder-md">预留图表区域：需求情况饼图</div>
+              <ProjectRequirementSituationChart :data="overviewData.projectRequirementSituation" />
             </ElCard>
           </ElCol>
+          
           <ElCol :xs="24" :md="14">
             <ElCard shadow="never" class="chart-card mb-4 h-full">
               <template #header>
@@ -145,8 +146,10 @@
 
 <script setup lang="ts">
 import ArtSvgIcon from '@/components/core/base/art-svg-icon/index.vue'
+import { fetchGetProjectOverview } from '@/api/project/detail'
 import { getProjectRoleName, getProjectRoleTagType } from '@/enums/project'
 import { useProjectRole } from '@/hooks/useProjectRole'
+import ProjectRequirementSituationChart from './modules/overview/project-requirement-situation-chart.vue'
 
 defineOptions({ name: 'OverviewTab' })
 
@@ -169,6 +172,9 @@ const emit = defineEmits<{
 const recentMembers = computed(() => props.projectInfo.recentMembers || [])
 const canManageProject = computed(() => projectRole.isOwner.value || projectRole.isAdmin.value)
 const canContribute = computed(() => canManageProject.value || projectRole.isMember.value)
+const overviewData = ref<Api.Project.ProjectOverviewVO>({
+  projectRequirementSituation: []
+})
 
 /**
  * 查看全部成员 - 切换到成员tab
@@ -198,6 +204,20 @@ const formatDate = (dateStr: string | undefined): string => {
   }
   return dateStr.split(' ')[0]
 }
+
+const loadOverviewData = async () => {
+  if (!props.projectInfo.no) return
+  try {
+    const data = await fetchGetProjectOverview(props.projectInfo.no)
+    overviewData.value = data || { projectRequirementSituation: [] }
+  } catch (error) {
+    console.error('加载项目概览数据失败：', error)
+  }
+}
+
+watch(() => props.projectInfo.no, () => {
+  loadOverviewData()
+}, { immediate: true })
 </script>
 
 <style scoped lang="scss">

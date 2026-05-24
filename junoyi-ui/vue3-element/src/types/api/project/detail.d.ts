@@ -69,7 +69,7 @@ declare namespace Api.Project {
      */
     interface ProjectRequirementSituationVO {
         status: number
-        statusLabel: number
+        statusLabel: string
         statusType: string
         count: number
     }

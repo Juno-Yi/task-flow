@@ -296,8 +296,8 @@ import {
 import { fetchGetDictDataByType } from "@/api/system/dict"
 import { useProjectRole } from "@/hooks/useProjectRole"
 import ArtSvgIcon from "@/components/core/base/art-svg-icon/index.vue"
-import RequirementDetailDrawer from './modules/requirement-detail-drawer.vue'
-import RequirementFormDialog from './modules/requirement-form-dialog.vue'
+import RequirementDetailDrawer from './modules/requirement/requirement-detail-drawer.vue'
+import RequirementFormDialog from './modules/requirement/requirement-form-dialog.vue'
 import { ElMessage, ElMessageBox, type FormRules } from 'element-plus'
 
 defineOptions({ name: 'RequirementTab' })

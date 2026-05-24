@@ -111,8 +111,8 @@
 
 <script setup lang="ts">
   import ArtSvgIcon from '@/components/core/base/art-svg-icon/index.vue'
-  import AddMemberDialog from './modules/add-member-dialog.vue'
-  import EditMemberRoleDialog from './modules/edit-member-role-dialog.vue'
+  import AddMemberDialog from './modules/member/add-member-dialog.vue'
+  import EditMemberRoleDialog from './modules/member/edit-member-role-dialog.vue'
   import { fetchGetProjectMembers, fetchRemoveMember } from '@/api/project/member'
   import { getProjectRoleName, getProjectRoleTagType } from '@/enums/project'
   import { useProjectRole } from '@/hooks/useProjectRole'
