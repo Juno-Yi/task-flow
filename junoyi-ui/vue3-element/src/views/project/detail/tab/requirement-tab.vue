@@ -198,16 +198,105 @@
         @current-change="handleCurrentChange"
       />
     </div>
+
+    <!-- 添加/编辑需求对话框 -->
+    <ElDialog
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      width="600px"
+      @close="handleDialogClose"
+    >
+      <ElForm
+        ref="formRef"
+        :model="formData"
+        :rules="formRules"
+        label-width="100px"
+      >
+        <ElFormItem label="需求标题" prop="title">
+          <ElInput
+            v-model="formData.title"
+            placeholder="请输入需求标题"
+            maxlength="100"
+            show-word-limit
+          />
+        </ElFormItem>
+
+        <ElFormItem label="需求描述" prop="description">
+          <ElInput
+            v-model="formData.description"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入需求描述"
+            maxlength="500"
+            show-word-limit
+          />
+        </ElFormItem>
+
+        <ElFormItem label="优先级" prop="priority">
+          <ElSelect
+            v-model="formData.priority"
+            placeholder="请选择优先级"
+            style="width: 100%"
+          >
+            <ElOption
+              v-for="item in priorityDictList"
+              :key="item.dictCode"
+              :label="item.dictLabel"
+              :value="Number(item.dictValue)"
+            />
+          </ElSelect>
+        </ElFormItem>
+
+        <ElFormItem label="需求来源" prop="source">
+          <ElSelect
+            v-model="formData.source"
+            placeholder="请选择需求来源"
+            style="width: 100%"
+          >
+            <ElOption
+              v-for="item in sourceDictList"
+              :key="item.dictCode"
+              :label="item.dictLabel"
+              :value="Number(item.dictValue)"
+            />
+          </ElSelect>
+        </ElFormItem>
+
+        <ElFormItem label="需求类型" prop="type">
+          <ElSelect
+            v-model="formData.type"
+            placeholder="请选择需求类型"
+            style="width: 100%"
+          >
+            <ElOption
+              v-for="item in typeDictList"
+              :key="item.dictCode"
+              :label="item.dictLabel"
+              :value="Number(item.dictValue)"
+            />
+          </ElSelect>
+        </ElFormItem>
+      </ElForm>
+
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <ElButton @click="dialogVisible = false">取消</ElButton>
+          <ElButton type="primary" :loading="submitLoading" @click="handleSubmit">
+            确定
+          </ElButton>
+        </div>
+      </template>
+    </ElDialog>
   </div>
 </template>
 
 
 <script setup lang="ts">
-import { fetchGetProjectRequirementList } from "@/api/project/requirement"
+import { fetchGetProjectRequirementList, fetchAddProjectRequirement } from "@/api/project/requirement"
 import { fetchGetDictDataByType } from "@/api/system/dict"
 import { useProjectRole } from "@/hooks/useProjectRole"
 import ArtSvgIcon from "@/components/core/base/art-svg-icon/index.vue"
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 
 defineOptions({ name: 'RequirementTab' })
 
@@ -245,6 +334,40 @@ const pagination = ref({
   size: 50,
   total: 0
 })
+
+// 对话框相关
+const dialogVisible = ref(false)
+const dialogTitle = computed(() => (isEdit.value ? '编辑需求' : '添加需求'))
+const isEdit = ref(false)
+const submitLoading = ref(false)
+const formRef = ref<FormInstance>()
+
+// 表单数据
+const formData = ref<Api.Project.ProjectRequirementDTO>({
+  id: undefined,
+  title: '',
+  description: '',
+  priority: 0,
+  source: 0,
+  type: 0
+})
+
+// 表单验证规则
+const formRules: FormRules = {
+  title: [
+    { required: true, message: '请输入需求标题', trigger: 'blur' },
+    { min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
+  ],
+  priority: [
+    { required: true, message: '请选择优先级', trigger: 'change' }
+  ],
+  source: [
+    { required: true, message: '请选择需求来源', trigger: 'change' }
+  ],
+  type: [
+    { required: true, message: '请选择需求类型', trigger: 'change' }
+  ]
+}
 
 /**
  * 加载字典数据
@@ -350,15 +473,68 @@ const handleView = (requirement: Api.Project.ProjectRequirementVO) => {
  * 添加需求
  */
 const handleAdd = () => {
-  ElMessage.info('添加需求功能待实现')
+  isEdit.value = false
+  formData.value = {
+    id: undefined,
+    title: '',
+    description: '',
+    priority: 2,
+    source: 2,
+    type: 1
+  }
+  dialogVisible.value = true
 }
 
 /**
  * 编辑需求
  */
 const handleEdit = (requirement: Api.Project.ProjectRequirementVO) => {
-  ElMessage.info('编辑需求功能待实现')
-  console.log('编辑需求：', requirement)
+  isEdit.value = true
+  formData.value = {
+    id: requirement.id,
+    title: requirement.title,
+    description: requirement.description,
+    priority: requirement.priority,
+    source: requirement.source,
+    type: requirement.type
+  }
+  dialogVisible.value = true
+}
+
+/**
+ * 提交表单
+ */
+const handleSubmit = async () => {
+  if (!formRef.value) return
+
+  try {
+    await formRef.value.validate()
+    submitLoading.value = true
+
+    if (isEdit.value) {
+      // TODO: 调用编辑接口
+      ElMessage.info('编辑需求功能待实现')
+    } else {
+      await fetchAddProjectRequirement(props.projectInfo.id, formData.value)
+      ElMessage.success('添加成功')
+      dialogVisible.value = false
+      await loadRequirementList()
+    }
+  } catch (error) {
+    console.error('提交失败:', error)
+    if (error !== false) {
+      ElMessage.error('提交失败')
+    }
+  } finally {
+    submitLoading.value = false
+  }
+}
+
+/**
+ * 关闭对话框
+ */
+const handleDialogClose = () => {
+  formRef.value?.resetFields()
 }
 
 /**

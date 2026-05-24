@@ -4,7 +4,7 @@ import { PageResult } from '@/types'
 /**
  * 获取项目需求列表（分页）
  */
-export function fetchGetProjectRequirementList(projectId: number, params: Api.Project.ProjectRequirementQueryDTO){
+export function fetchGetProjectRequirementList(projectId: number, params: Api.Project.ProjectRequirementQueryDTO & { current?: number; size?: number }){
     return request.get<PageResult<Api.Project.ProjectRequirementVO>>({
         url: `/project/requirement/list/${projectId}`,
         params
@@ -20,4 +20,3 @@ export function fetchAddProjectRequirement(projectId: number, data: Api.Project.
         data
     })
 }
-
