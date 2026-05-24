@@ -20,3 +20,13 @@ export function fetchAddProjectRequirement(projectId: number, data: Api.Project.
         data
     })
 }
+
+/**
+ * 更新项目需求
+ */
+export function fetchUpdateProjectRequirement(projectId: number, data: Api.Project.ProjectRequirementDTO){
+    return request.put<void>({
+        url: `/project/requirement/${projectId}`,
+        data
+    })
+}
