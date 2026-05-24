@@ -153,7 +153,7 @@
                   'is-loading': updatingStatusId === row.id
                 }"
               >
-                <ElTag :type="row.statusType as any" size="small" class="status-display-tag">
+                <ElTag :type="getTagType(row.statusType)" size="small" class="status-display-tag">
                   {{ row.statusLabel }}
                 </ElTag>
                 <ArtSvgIcon icon="ri:arrow-down-s-line" class="status-dropdown-icon" />
@@ -169,9 +169,8 @@
                   >
                     <div class="status-option-item">
                       <ElTag
-                        :type="(item.listClass || 'info') as any"
+                        :type="getTagType(item.listClass)"
                         size="small"
-                        effect="plain"
                         class="status-option-tag"
                       >
                         {{ item.dictLabel }}
@@ -186,7 +185,7 @@
                 </ElDropdownMenu>
               </template>
             </ElDropdown>
-            <ElTag v-else :type="row.statusType as any" size="small">
+            <ElTag v-else :type="getTagType(row.statusType)" size="small">
               {{ row.statusLabel }}
             </ElTag>
           </template>
@@ -467,6 +466,23 @@ const formatDate = (dateStr: string | undefined): string => {
 }
 
 /**
+ * 规范化 Tag 类型
+ */
+const getTagType = (type?: string) => {
+  const normalizedType = (type || 'info').toLowerCase()
+  const tagTypeMap: Record<string, 'success' | 'warning' | 'info' | 'primary' | 'danger'> = {
+    primary: 'primary',
+    success: 'success',
+    warning: 'warning',
+    danger: 'danger',
+    error: 'danger',
+    info: 'info'
+  }
+
+  return tagTypeMap[normalizedType] || 'info'
+}
+
+/**
  * 下拉选择状态后更新
  */
 const handleStatusChange = async (requirement: Api.Project.ProjectRequirementVO, status: number) => {
@@ -493,7 +509,7 @@ const handleStatusChange = async (requirement: Api.Project.ProjectRequirementVO,
 
     requirement.status = status
     requirement.statusLabel = targetStatus.dictLabel
-    requirement.statusType = targetStatus.listClass || 'info'
+    requirement.statusType = getTagType(targetStatus.listClass)
     if (currentRequirement.value?.id === requirement.id) {
       currentRequirement.value = { ...requirement }
     }
