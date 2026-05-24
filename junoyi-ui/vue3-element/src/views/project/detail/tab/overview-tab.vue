@@ -66,44 +66,23 @@
             <ElDescriptionsItem label="项目描述" :span="2">
               {{ projectInfo.description || '暂无描述' }}
             </ElDescriptionsItem>
+            <ElDescriptionsItem label="备注" :span="2">
+              {{ projectInfo.remark || '暂无描述' }}
+            </ElDescriptionsItem>
           </ElDescriptions>
         </ElCard>
 
-        <!-- 项目进度 -->
+        <!-- 项目活跃度 -->
         <ElCard shadow="never" class="mb-4">
           <template #header>
             <div class="flex items-center">
               <ArtSvgIcon icon="ri:bar-chart-line" class="mr-2" />
-              <span class="font-semibold">项目进度</span>
+              <span class="font-semibold">项目活跃度</span>
             </div>
           </template>
-          <div class="py-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-lg font-semibold">{{ projectInfo.progress }}%</span>
-              <span class="text-sm text-gray-500">
-                已完成 {{ projectInfo.completedTasks }} / {{ projectInfo.totalTasks }} 个任务
-              </span>
-            </div>
-            <ElProgress
-                :percentage="projectInfo.progress"
-                :stroke-width="12"
-                :show-text="false"
-            />
-          </div>
+
         </ElCard>
 
-        <!-- 备注信息 -->
-        <ElCard shadow="never">
-          <template #header>
-            <div class="flex items-center">
-              <ArtSvgIcon icon="ri:file-text-line" class="mr-2" />
-              <span class="font-semibold">备注信息</span>
-            </div>
-          </template>
-          <div class="text-gray-600">
-            {{ projectInfo.remark || '暂无备注' }}
-          </div>
-        </ElCard>
       </ElCol>
 
       <ElCol :span="8">

@@ -44,12 +44,23 @@
           <ElTabPane name="requirement" class="h-full">
             <template #label>
               <span class="flex items-center">
-                <ArtSvgIcon icon="ri:flag-line" class="mr-2" />
+                <ArtSvgIcon icon="ri:file-list-3-line" class="mr-2" />
                 需求
                 <ElBadge v-if="projectInfo.milestoneCount > 0" :value="projectInfo.milestoneCount" class="ml-2" />
               </span>
             </template>
             <RequirementTab :project-info="projectInfo" />
+          </ElTabPane>
+
+          <!--    任务      -->
+          <ElTabPane name="task" class="h-full">
+            <template #label>
+              <span class="flex items-center">
+                <ArtSvgIcon icon="ri:task-line" class="mr-2" />
+                任务
+                <ElBadge v-if="projectInfo.milestoneCount > 0" :value="projectInfo.milestoneCount" class="ml-2" />
+              </span>
+            </template>
           </ElTabPane>
 
           <!-- 里程碑 -->

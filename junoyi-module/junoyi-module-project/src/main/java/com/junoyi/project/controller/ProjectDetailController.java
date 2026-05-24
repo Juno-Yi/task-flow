@@ -46,4 +46,13 @@ public class ProjectDetailController extends BaseController {
 
         return R.ok(projectDetailService.getProjectDetailByNo(projectNo));
     }
+
+    /**
+     * 获取项目详情概览数据
+     */
+    @GetMapping("/overview")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<?> getOverviewData(@PathVariable("projectNo") String projectNo){
+        return R.ok();
+    }
 }

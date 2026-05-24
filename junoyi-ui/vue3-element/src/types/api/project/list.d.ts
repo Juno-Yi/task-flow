@@ -129,14 +129,6 @@ declare namespace Api.Project {
     priorityType?: string
     /** 项目成员数量 */
     memberCount: number
-    /** 项目进度百分比 */
-    progress: number
-    /** 总任务数量 */
-    totalTasks: number
-    /** 完成任务数量 */
-    completedTasks: number
-    /** 未完成任务数量（待处理、进行中、测试中等） */
-    pendingTasks: number
     /** 仓库数量 */
     repositoryCount: number
     /** 文档数量 */
@@ -254,14 +246,6 @@ declare namespace Api.Project {
     priorityType?: string
     /** 项目成员数量 */
     memberCount: number
-    /** 项目进度百分比 */
-    progress: number
-    /** 总任务数量 */
-    totalTasks: number
-    /** 完成任务数量 */
-    completedTasks: number
-    /** 未完成任务数量（待处理、进行中、测试中等） */
-    pendingTasks: number
     /** 仓库数量 */
     repositoryCount: number
     /** 文档数量 */

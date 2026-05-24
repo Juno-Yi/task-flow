@@ -81,12 +81,6 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
         long memberCount = projectMemberMapper.selectCount(memberWrapper);
         detailVO.setMemberCount((int) memberCount);
 
-        // TODO 统计项目进度
-        detailVO.setTotalTasks(0);
-        detailVO.setCompletedTasks(0);
-        detailVO.setPendingTasks(0);
-        detailVO.setProgress(0);
-
         // TODO: 统计仓库数量
         detailVO.setRepositoryCount(0);
 

@@ -93,25 +93,6 @@ public class ProjectDetailVO {
      */
     private Integer memberCount;
 
-    /**
-     * 项目进度百分比
-     */
-    private Integer progress;
-
-    /**
-     * 总任务数量
-     */
-    private Integer totalTasks;
-
-    /**
-     * 完成任务数量
-     */
-    private Integer completedTasks;
-
-    /**
-     * 未完成任务数量（待处理、进行中、测试中等）
-     */
-    private Integer pendingTasks;
 
     /**
      * 仓库数量
