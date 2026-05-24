@@ -23,10 +23,12 @@
             style="width: 150px"
             @change="handleSearch"
           >
-            <ElOption label="低" :value="1" />
-            <ElOption label="中" :value="2" />
-            <ElOption label="高" :value="3" />
-            <ElOption label="紧急" :value="4" />
+            <ElOption
+              v-for="item in priorityDictList"
+              :key="item.dictCode"
+              :label="item.dictLabel"
+              :value="Number(item.dictValue)"
+            />
           </ElSelect>
         </ElFormItem>
 
@@ -38,11 +40,12 @@
             style="width: 150px"
             @change="handleSearch"
           >
-            <ElOption label="待评审" :value="1" />
-            <ElOption label="已通过" :value="2" />
-            <ElOption label="开发中" :value="3" />
-            <ElOption label="已完成" :value="4" />
-            <ElOption label="已拒绝" :value="5" />
+            <ElOption
+              v-for="item in statusDictList"
+              :key="item.dictCode"
+              :label="item.dictLabel"
+              :value="Number(item.dictValue)"
+            />
           </ElSelect>
         </ElFormItem>
 
@@ -54,10 +57,12 @@
             style="width: 150px"
             @change="handleSearch"
           >
-            <ElOption label="客户" :value="1" />
-            <ElOption label="内部" :value="2" />
-            <ElOption label="市场" :value="3" />
-            <ElOption label="其他" :value="4" />
+            <ElOption
+              v-for="item in sourceDictList"
+              :key="item.dictCode"
+              :label="item.dictLabel"
+              :value="Number(item.dictValue)"
+            />
           </ElSelect>
         </ElFormItem>
 
@@ -69,10 +74,12 @@
             style="width: 150px"
             @change="handleSearch"
           >
-            <ElOption label="功能" :value="1" />
-            <ElOption label="优化" :value="2" />
-            <ElOption label="修复" :value="3" />
-            <ElOption label="其他" :value="4" />
+            <ElOption
+              v-for="item in typeDictList"
+              :key="item.dictCode"
+              :label="item.dictLabel"
+              :value="Number(item.dictValue)"
+            />
           </ElSelect>
         </ElFormItem>
 
@@ -197,6 +204,7 @@
 
 <script setup lang="ts">
 import { fetchGetProjectRequirementList } from "@/api/project/requirement"
+import { fetchGetDictDataByType } from "@/api/system/dict"
 import { useProjectRole } from "@/hooks/useProjectRole"
 import ArtSvgIcon from "@/components/core/base/art-svg-icon/index.vue"
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -216,6 +224,12 @@ const projectRole = useProjectRole(computed(() => props.projectInfo.currentUserR
 const requirementList = ref<Api.Project.ProjectRequirementVO[]>([])
 const loading = ref(false)
 
+// 字典数据
+const priorityDictList = ref<Api.System.DictDataVO[]>([])
+const statusDictList = ref<Api.System.DictDataVO[]>([])
+const sourceDictList = ref<Api.System.DictDataVO[]>([])
+const typeDictList = ref<Api.System.DictDataVO[]>([])
+
 // 查询参数
 const queryParams = ref<Api.Project.ProjectRequirementQueryDTO>({
   title: undefined,
@@ -231,6 +245,26 @@ const pagination = ref({
   size: 50,
   total: 0
 })
+
+/**
+ * 加载字典数据
+ */
+const loadDictData = async () => {
+  try {
+    const [priority, status, source, type] = await Promise.all([
+      fetchGetDictDataByType('project_requirement_priority'),
+      fetchGetDictDataByType('project_requirement_status'),
+      fetchGetDictDataByType('project_requirement_source'),
+      fetchGetDictDataByType('project_requirement_type')
+    ])
+    priorityDictList.value = priority
+    statusDictList.value = status
+    sourceDictList.value = source
+    typeDictList.value = type
+  } catch (error) {
+    console.error('加载字典数据失败：', error)
+  }
+}
 
 /**
  * 加载需求列表数据
@@ -370,6 +404,11 @@ watch(() => props.projectInfo.id, (newId) => {
     loadRequirementList()
   }
 }, { immediate: true })
+
+// 初始化时加载字典数据
+onMounted(() => {
+  loadDictData()
+})
 </script>
 
 <style scoped lang="scss">
