@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.core.utils.StringUtils;
+import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.convert.ProjectRequirementConverter;
 import com.junoyi.project.domain.dto.ProjectRequirementDTO;
@@ -12,6 +13,9 @@ import com.junoyi.project.domain.dto.ProjectRequirementQueryDTO;
 import com.junoyi.project.domain.dto.ProjectRequirementStatusUpdateDTO;
 import com.junoyi.project.domain.po.ProjectRequirement;
 import com.junoyi.project.domain.vo.ProjectRequirementVO;
+import com.junoyi.project.enums.ProjectRecordTargetType;
+import com.junoyi.project.enums.ProjectRecordType;
+import com.junoyi.project.event.ProjectRecordEvent;
 import com.junoyi.project.exception.ProjectException;
 import com.junoyi.project.mapper.ProjectRequirementMapper;
 import com.junoyi.project.service.IProjectRequirementService;
@@ -213,7 +217,14 @@ public class ProjectRequirementServiceImpl implements IProjectRequirementService
             throw new RuntimeException("创建需求失败：无法生成唯一的需求编号");
         }
 
-        // TODO: 发布项目动态
+        // 发布项目动态
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(),
+                ProjectRecordType.CREATE_REQUIREMENT,
+                ProjectRecordTargetType.REQUIREMENT,
+                "创建了需求「" + dto.getTitle() + "」"
+        ));
     }
 
     /**
