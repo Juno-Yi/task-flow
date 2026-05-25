@@ -35,12 +35,10 @@ declare namespace Api.Project {
         priorityType?: string
         /** 项目成员数量 */
         memberCount: number
-        /** 仓库数量 */
-        repositoryCount: number
-        /** 文档数量 */
-        documentCount: number
         /** 里程碑数量 */
         milestoneCount: number
+        /** 未完成的需求数量 */
+        requirementCount: number
         /** 创建者 */
         createBy?: string
         /** 创建时间 */

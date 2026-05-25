@@ -46,7 +46,7 @@
               <span class="flex items-center">
                 <ArtSvgIcon icon="ri:file-list-3-line" class="mr-2" />
                 需求
-                <ElBadge v-if="projectInfo.milestoneCount > 0" :value="projectInfo.milestoneCount" class="ml-2" />
+                <ElBadge v-if="projectInfo.requirementCount > 0" :value="projectInfo.requirementCount" class="ml-2" />
               </span>
             </template>
             <RequirementTab :project-info="projectInfo" />

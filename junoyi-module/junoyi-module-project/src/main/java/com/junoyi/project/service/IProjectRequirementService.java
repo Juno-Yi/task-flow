@@ -51,4 +51,11 @@ public interface IProjectRequirementService {
      * @param dto 状态更新参数
      */
     void updateRequirementStatus(Long projectId, ProjectRequirementStatusUpdateDTO dto);
+
+    /**
+     * 获取未完成的项目需求数量
+     * @param projectId 项目Id
+     * @return 未完成的项目需求数量
+     */
+    long getNotCompletedRequirementCount(Long projectId);
 }

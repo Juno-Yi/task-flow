@@ -12,6 +12,7 @@ import com.junoyi.project.mapper.ProjectMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.mapper.ProjectRequirementMapper;
 import com.junoyi.project.service.IProjectDetailService;
+import com.junoyi.project.service.IProjectRequirementService;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
@@ -36,6 +37,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProjectDetailServiceImpl implements IProjectDetailService {
+
+    private final IProjectRequirementService projectRequirementService;
 
     private final ProjectMapper projectMapper;
     private final ProjectRequirementMapper projectRequirementMapper;
@@ -84,11 +87,8 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
         long memberCount = projectMemberMapper.selectCount(memberWrapper);
         detailVO.setMemberCount((int) memberCount);
 
-        // TODO: 统计仓库数量
-        detailVO.setRepositoryCount(0);
-
-        // TODO: 统计文档数量
-        detailVO.setDocumentCount(0);
+        // 统计未完成的需求数量
+        detailVO.setRequirementCount(projectRequirementService.getNotCompletedRequirementCount(project.getId()));
 
         // TODO: 统计里程碑数量
         detailVO.setMilestoneCount(0);
@@ -189,6 +189,8 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
 
         ProjectOverviewVO projectOverviewVO = new ProjectOverviewVO();
 
+        // TODO: 获取项目活跃情况折线统计图数据
+
         // 获取项目需求情况饼图数据
         List<ProjectRequirementSituationVO> projectRequirementSituationList = getProjectRequirementSituationList(project.getId());
         projectOverviewVO.setProjectRequirementSituation(projectRequirementSituationList);
@@ -197,6 +199,7 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
         ProjectRequirementCompletedVO projectRequirementCompletedVO = getProjectRequirementCompletedVO(project.getId());
         projectOverviewVO.setProjectRequirementCompletedVO(projectRequirementCompletedVO);
 
+        // TODO: 近期任务完成趋势折线图数据
 
         return projectOverviewVO;
     }

@@ -93,21 +93,15 @@ public class ProjectDetailVO {
      */
     private Integer memberCount;
 
-
-    /**
-     * 仓库数量
-     */
-    private Integer repositoryCount;
-
-    /**
-     * 文档数量
-     */
-    private Integer documentCount;
-
     /**
      * 里程碑数量
      */
     private Integer milestoneCount;
+
+    /**
+     * 未完成需求数量
+     */
+    private Long requirementCount;
 
     /**
      * 创建者

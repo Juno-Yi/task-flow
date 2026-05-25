@@ -281,4 +281,18 @@ public class ProjectRequirementServiceImpl implements IProjectRequirementService
 
         // TODO：发布项目动态
     }
+
+    /**
+     * 获取未完成的项目需求数量
+     * @param projectId 项目Id
+     * @return 未完成的项目需求数量
+     */
+    @Override
+    public long getNotCompletedRequirementCount(Long projectId) {
+        LambdaQueryWrapper<ProjectRequirement> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProjectRequirement::getProjectId, projectId)
+                .eq(ProjectRequirement::getDelFlag,false)
+                .in(ProjectRequirement::getStatus,0,1);
+        return projectRequirementMapper.selectCount(wrapper);
+    }
 }
