@@ -39,7 +39,7 @@
               </div>
             </div>
           </template>
-          <div class="chart-placeholder chart-placeholder-lg">预留图表区域：活跃趋势折线图</div>
+          <ProjectActivityTrendChart :data="overviewData.projectActivityTrend" />
         </ElCard>
 
         <ElRow :gutter="20">
@@ -158,6 +158,7 @@ import ArtSvgIcon from '@/components/core/base/art-svg-icon/index.vue'
 import { fetchGetProjectOverview } from '@/api/project/detail'
 import { getProjectRoleName, getProjectRoleTagType } from '@/enums/project'
 import { useProjectRole } from '@/hooks/useProjectRole'
+import ProjectActivityTrendChart from './modules/overview/project-activity-trend-chart.vue'
 import ProjectRequirementCompletedChart from './modules/overview/project-requirement-completed-chart.vue'
 import ProjectRequirementSituationChart from './modules/overview/project-requirement-situation-chart.vue'
 
@@ -183,6 +184,7 @@ const recentMembers = computed(() => props.projectInfo.recentMembers || [])
 const canManageProject = computed(() => projectRole.isOwner.value || projectRole.isAdmin.value)
 const canContribute = computed(() => canManageProject.value || projectRole.isMember.value)
 const overviewData = ref<Api.Project.ProjectOverviewVO>({
+  projectActivityTrend: [],
   projectRequirementSituation: [],
   projectRequirementCompletedVO: {
     sevenDayList: [],
@@ -225,6 +227,7 @@ const loadOverviewData = async () => {
   try {
     const data = await fetchGetProjectOverview(props.projectInfo.no)
     overviewData.value = data || {
+      projectActivityTrend: [],
       projectRequirementSituation: [],
       projectRequirementCompletedVO: {
         sevenDayList: [],

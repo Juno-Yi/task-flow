@@ -59,6 +59,7 @@ declare namespace Api.Project {
      * 项目概览数据 VO
      */
     interface ProjectOverviewVO {
+        projectActivityTrend: ProjectActivityTrendVO[]
         projectRequirementSituation: ProjectRequirementSituationVO[]
         projectRequirementCompletedVO: ProjectRequirementCompletedVO
     }
@@ -88,6 +89,14 @@ declare namespace Api.Project {
      * @author Fan
      */
     interface RequirementTrendVO {
+        date: string
+        count: number
+    }
+
+    /**
+     * 项目活跃度
+     */
+    interface ProjectActivityTrendVO {
         date: string
         count: number
     }

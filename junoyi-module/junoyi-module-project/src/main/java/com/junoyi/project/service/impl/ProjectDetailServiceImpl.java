@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -189,7 +190,9 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
 
         ProjectOverviewVO projectOverviewVO = new ProjectOverviewVO();
 
-        // TODO: 获取项目活跃情况折线统计图数据
+        // 获取项目活跃情况折线统计图数据
+        List<ProjectActivityTrendVO> projectActivityTrend = getProjectActivityTrend(project.getId());
+        projectOverviewVO.setProjectActivityTrend(projectActivityTrend);
 
         // 获取项目需求情况饼图数据
         List<ProjectRequirementSituationVO> projectRequirementSituationList = getProjectRequirementSituationList(project.getId());
@@ -202,6 +205,50 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
         // TODO: 近期任务完成趋势折线图数据
 
         return projectOverviewVO;
+    }
+
+    /**
+     * 项目活跃度趋势数据
+     * @param projectId 项目ID
+     * @return 项目活跃度趋势数据
+     */
+    List<ProjectActivityTrendVO> getProjectActivityTrend(Long projectId){
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(364);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LambdaQueryWrapper<ProjectRequirement> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProjectRequirement::getProjectId, projectId)
+                .eq(ProjectRequirement::getDelFlag, false);
+        List<ProjectRequirement> requirementList = projectRequirementMapper.selectList(wrapper);
+
+        Map<LocalDate, Integer> dayCountMap = new LinkedHashMap<>();
+        startDate.datesUntil(endDate.plusDays(1)).forEach(date -> dayCountMap.put(date, 0));
+
+        for (ProjectRequirement requirement : requirementList) {
+            accumulateDayCount(dayCountMap, requirement.getCreateTime());
+            accumulateDayCount(dayCountMap, requirement.getUpdateTime());
+        }
+
+        return dayCountMap.entrySet().stream().map(entry -> {
+            ProjectActivityTrendVO vo = new ProjectActivityTrendVO();
+            vo.setDate(entry.getKey().format(formatter));
+            vo.setCount(entry.getValue());
+            return vo;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 统计指定时间在天维度的活跃度
+     */
+    private void accumulateDayCount(Map<LocalDate, Integer> dayCountMap, Date date) {
+        if (date == null) {
+            return;
+        }
+        LocalDate localDate = convertToLocalDate(date);
+        if (dayCountMap.containsKey(localDate)) {
+            dayCountMap.put(localDate, dayCountMap.get(localDate) + 1);
+        }
     }
 
     /**
