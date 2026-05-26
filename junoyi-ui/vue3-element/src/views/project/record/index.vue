@@ -367,6 +367,7 @@ onMounted(() => {
 .timeline-date-group {
   position: relative;
   margin-bottom: 32px;
+  overflow: hidden;
 
   &:last-child {
     margin-bottom: 0;
@@ -382,9 +383,6 @@ onMounted(() => {
   top: 0;
   z-index: 10;
   margin-bottom: 16px;
-
-  // 调试：添加背景色看看范围
-  // background: rgba(255, 0, 0, 0.1);
 }
 
 .date-label {
