@@ -64,6 +64,8 @@ declare namespace Api.Project {
     completedTasks: number
     planStartTime?: string
     planEndTime?: string
+    startTime?: string
+    endTime?: string
     /** 创建者 */
     createBy?: string
     /** 创建时间 */

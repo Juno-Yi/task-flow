@@ -113,6 +113,15 @@ public class ProjectListVO {
      */
     private Date planEndTime;
 
+    /**
+     * 项目开始时间
+     */
+    private Date startTime;
+
+    /**
+     * 项目结束时间
+     */
+    private Date endTime;
 
 
     /**

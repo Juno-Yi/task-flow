@@ -286,6 +286,25 @@
           }
         },
         {
+          prop: 'realPeriod',
+          label: '实际周期',
+          width: 210,
+          align: 'center',
+          headerAlign: 'center',
+          formatter: (row: RepoVO) => {
+            if (row.startTime && row.endTime) {
+              const startDate = formatTime(row.startTime as any)
+              const endDate = formatTime(row.endTime as any)
+              return `${startDate} ~ ${endDate}`
+            } else if (row.startTime) {
+              return `${formatTime(row.startTime as any)} ~ 未结束`
+            } else if (row.endTime) {
+              return `无 ~ ${formatTime(row.planEndTime as any)}`
+            }
+            return '无'
+          }
+        },
+        {
           prop: 'operation',
           label: '操作',
           width: 80,
