@@ -1,5 +1,5 @@
 <template>
-  <div class="activity-heatmap">
+  <div class="activity-heatmap" :class="{ 'is-dark': settingStore.isDark }">
     <div class="heatmap-header">
       <div>
         <div class="heatmap-title">最近一年活跃度</div>
@@ -30,6 +30,8 @@
 </template>
 
 <script setup lang="ts">
+import { useSettingStore } from '@/store/modules/setting'
+
 defineOptions({ name: 'ProjectActivityTrendChart' })
 
 interface Props {
@@ -44,6 +46,7 @@ interface HeatmapCell {
 }
 
 const props = defineProps<Props>()
+const settingStore = useSettingStore()
 
 const normalizedData = computed(() => {
   return [...(props.data || [])]
@@ -103,6 +106,13 @@ const getTooltipText = (cell: HeatmapCell) => `${cell.date}：${cell.count} 次�
 
 <style scoped lang="scss">
 .activity-heatmap {
+  --heatmap-empty-color: #d8dee4;
+  --heatmap-level-1: #9be9a8;
+  --heatmap-level-2: #40c463;
+  --heatmap-level-3: #30a14e;
+  --heatmap-level-4: #216e39;
+  --heatmap-hover-ring: rgba(33, 110, 57, 0.24);
+
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -165,6 +175,10 @@ const getTooltipText = (cell: HeatmapCell) => `${cell.date}：${cell.count} 次�
   border-radius: 999px;
 }
 
+.heatmap-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .weeks-grid {
   display: grid;
   gap: 4px;
@@ -183,13 +197,13 @@ const getTooltipText = (cell: HeatmapCell) => `${cell.date}：${cell.count} 次�
   width: 12px;
   height: 12px;
   border-radius: 3px;
-  background: #ebedf0;
+  background: var(--heatmap-empty-color);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .day-cell:not(.day-cell-placeholder):hover {
   transform: scale(1.08);
-  box-shadow: 0 0 0 1px rgba(64, 158, 255, 0.18);
+  box-shadow: 0 0 0 1px var(--heatmap-hover-ring);
 }
 
 .day-cell-placeholder {
@@ -203,11 +217,20 @@ const getTooltipText = (cell: HeatmapCell) => `${cell.date}：${cell.count} 次�
   border-radius: 3px;
 }
 
-.level-0 { background: #ebedf0; }
-.level-1 { background: #d3f1cf; }
-.level-2 { background: #95de8b; }
-.level-3 { background: #4cb050; }
-.level-4 { background: #1f7a31; }
+.level-0 { background: var(--heatmap-empty-color); }
+.level-1 { background: var(--heatmap-level-1); }
+.level-2 { background: var(--heatmap-level-2); }
+.level-3 { background: var(--heatmap-level-3); }
+.level-4 { background: var(--heatmap-level-4); }
+
+.activity-heatmap.is-dark {
+  --heatmap-empty-color: #2b2f36;
+  --heatmap-level-1: #1f4d2f;
+  --heatmap-level-2: #2f7d3c;
+  --heatmap-level-3: #46a758;
+  --heatmap-level-4: #6fd27f;
+  --heatmap-hover-ring: rgba(111, 210, 127, 0.28);
+}
 
 @media (max-width: 768px) {
   .heatmap-header {
