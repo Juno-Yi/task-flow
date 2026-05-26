@@ -1,5 +1,6 @@
 package com.junoyi.project.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
@@ -39,11 +40,13 @@ public class ProjectListDTO {
     /**
      * 计划开始时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date planStartTime;
 
     /**
      * 计划结束时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date planEndTime;
 
     /** 项目备注 */
