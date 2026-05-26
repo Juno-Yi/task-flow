@@ -1,111 +1,115 @@
 <!-- 项目协作 - 项目动态 -->
 <template>
-  <div class="project-record-page">
-    <!-- 筛选区域 -->
-    <ElCard shadow="never" class="filter-card">
-      <div class="filter-wrapper">
-        <div class="filter-item">
-          <span class="filter-label">项目筛选</span>
-          <ElSelect
-            v-model="queryParams.projectNo"
-            placeholder="请选择项目（不选则显示全部）"
-            clearable
-            filterable
-            :loading="projectLoading"
-            class="filter-select"
-            @change="handleProjectChange"
-          >
-            <ElOption
-              v-for="item in projectOptions"
-              :key="item.no"
-              :label="item.name"
-              :value="item.no"
+  <div class="art-full-height">
+    <div class="flex flex-col h-full">
+      <!-- 筛选区域 -->
+      <ElCard shadow="never" class="mb-4 flex-shrink-0 filter-card">
+        <div class="filter-content">
+          <div class="filter-item">
+            <label class="filter-label">项目</label>
+            <ElSelect
+              v-model="queryParams.projectNo"
+              placeholder="全部项目"
+              clearable
+              filterable
+              :loading="projectLoading"
+              class="filter-select"
+              @change="handleProjectChange"
             >
-              <div class="project-option">
-                <span class="project-name">{{ item.name }}</span>
-                <span class="project-no">{{ item.no }}</span>
-              </div>
-            </ElOption>
-          </ElSelect>
-        </div>
-      </div>
-    </ElCard>
-
-    <!-- 时间线内容 -->
-    <ElCard shadow="never" class="timeline-card">
-      <div
-        v-loading="loading"
-        class="timeline-container"
-        @scroll="handleScroll"
-      >
-        <div v-if="recordList.length === 0 && !loading" class="empty-state">
-          <ElEmpty description="暂无项目动态" />
-        </div>
-
-        <div v-else class="timeline-wrapper">
-          <div
-            v-for="(group, date) in groupedRecords"
-            :key="date"
-            class="timeline-date-group"
-          >
-            <!-- 日期标签 -->
-            <div class="date-label">
-              <span class="date-text">{{ formatDateLabel(date) }}</span>
-            </div>
-
-            <!-- 该日期下的动态列表 -->
-            <div class="timeline-items">
-              <div
-                v-for="record in group"
-                :key="record.id"
-                class="timeline-item"
+              <ElOption
+                v-for="item in projectOptions"
+                :key="item.no"
+                :label="item.name"
+                :value="item.no"
               >
-                <!-- 时间线节点 -->
-                <div class="timeline-node">
-                  <div class="node-dot"></div>
-                  <div class="node-line"></div>
+                <div class="project-option">
+                  <span class="project-name">{{ item.name }}</span>
+                  <span class="project-no">{{ item.no }}</span>
                 </div>
+              </ElOption>
+            </ElSelect>
+          </div>
+        </div>
+      </ElCard>
 
-                <!-- 动态内容 -->
-                <div class="timeline-content">
-                  <div class="content-header">
-                    <span class="operator-name">{{ record.operatorNickName }}</span>
-                    <span class="action-text">{{ record.content }}</span>
+      <!-- 时间线内容 -->
+      <ElCard shadow="never" class="flex-1 min-h-0 art-table-card">
+        <div
+          v-loading="loading"
+          class="timeline-container"
+          @scroll="handleScroll"
+        >
+          <div v-if="recordList.length === 0 && !loading" class="empty-state">
+            <ElEmpty description="暂无项目动态" />
+          </div>
+
+          <div v-else>
+            <div
+              v-for="(group, date) in groupedRecords"
+              :key="date"
+              class="timeline-date-group"
+            >
+              <!-- 日期标签容器 -->
+              <div class="date-label-wrapper">
+                <div class="date-label">
+                  <span class="date-text">{{ formatDateLabel(date) }}</span>
+                </div>
+              </div>
+
+              <!-- 该日期下的动态列表 -->
+              <div class="timeline-items">
+                <div
+                  v-for="record in group"
+                  :key="record.id"
+                  class="timeline-item"
+                >
+                  <!-- 时间线节点 -->
+                  <div class="timeline-node">
+                    <div class="node-dot"></div>
+                    <div class="node-line"></div>
                   </div>
 
-                  <div class="content-meta">
-                    <ElTag size="small" type="info" effect="plain">
-                      {{ record.projectTitle }}
-                    </ElTag>
-                    <ElTag size="small" type="success" effect="plain">
-                      {{ record.typeLabel }}
-                    </ElTag>
-                    <ElTag v-if="record.targetTypeLabel" size="small" effect="plain">
-                      {{ record.targetTypeLabel }}
-                    </ElTag>
-                    <span class="time-text">{{ formatTime(record.createTime) }}</span>
+                  <!-- 动态内容 -->
+                  <div class="timeline-content">
+                    <div class="content-header">
+                      <span class="operator-name">{{ record.operatorNickName }}</span>
+                      <span class="action-text">{{ record.content }}</span>
+                    </div>
+
+                    <div class="content-meta">
+                      <ElTag size="small" type="info" effect="plain">
+                        {{ record.projectTitle }}
+                      </ElTag>
+                      <ElTag size="small" type="success" effect="plain">
+                        {{ record.typeLabel }}
+                      </ElTag>
+                      <ElTag v-if="record.targetTypeLabel" size="small" effect="plain">
+                        {{ record.targetTypeLabel }}
+                      </ElTag>
+                      <span class="time-text">{{ formatTime(record.createTime) }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- 加载更多提示 -->
-          <div v-if="hasMore" class="loading-more">
-            <ElIcon v-if="loadingMore" class="is-loading">
-              <Loading />
-            </ElIcon>
-            <span v-if="loadingMore">加载中...</span>
-            <span v-else>滚动加载更多</span>
-          </div>
+            <!-- 加载更多提示 -->
+            <div v-if="hasMore" class="loading-more">
+              <ElIcon v-if="loadingMore" class="is-loading">
+                <Loading />
+              </ElIcon>
+              <span v-if="loadingMore">加载中...</span>
+              <span v-else>滚动加载更多</span>
+            </div>
 
-          <!-- 没有更多数据提示 -->
-          <div v-if="!hasMore && recordList.length > 0" class="no-more">
-            <span>没有更多数据了</span>
+            <!-- 没有更多数据提示 -->
+            <div v-if="!hasMore && recordList.length > 0" class="no-more">
+              <span>没有更多数据了</span>
+            </div>
           </div>
         </div>
-      </div>
-    </ElCard>
+      </ElCard>
+    </div>
   </div>
 </template>
 
@@ -209,8 +213,25 @@ const handleScroll = (event: Event) => {
   const scrollHeight = target.scrollHeight
   const clientHeight = target.clientHeight
 
+  // 计算距离底部的距离
+  const distanceToBottom = scrollHeight - scrollTop - clientHeight
+
+  // 调试信息
+  console.log('滚动信息:', {
+    scrollTop,
+    scrollHeight,
+    clientHeight,
+    distanceToBottom,
+    hasMore: hasMore.value,
+    loadingMore: loadingMore.value,
+    loading: loading.value,
+    recordCount: recordList.value.length,
+    total: total.value
+  })
+
   // 滚动到底部前 100px 时触发加载
-  if (scrollHeight - scrollTop - clientHeight < 100 && hasMore.value && !loadingMore.value && !loading.value) {
+  if (distanceToBottom < 100 && hasMore.value && !loadingMore.value && !loading.value) {
+    console.log('触发加载更多')
     queryParams.value.current = (queryParams.value.current || 1) + 1
     getRecordList(true)
   }
@@ -269,38 +290,41 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.project-record-page {
+:deep(.el-card__body) {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  height: 100%;
-  padding: 16px;
+  padding: 0;
 }
 
+// 筛选卡片样式
 .filter-card {
-  flex-shrink: 0;
+  :deep(.el-card__body) {
+    padding: 16px 20px;
+    height: auto;
+  }
 }
 
-.filter-wrapper {
+.filter-content {
   display: flex;
   gap: 16px;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .filter-item {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .filter-label {
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--el-text-color-regular);
-  white-space: nowrap;
 }
 
 .filter-select {
-  width: 320px;
+  width: 280px;
 }
 
 .project-option {
@@ -313,37 +337,31 @@ onMounted(() => {
 .project-name {
   font-size: 14px;
   color: var(--el-text-color-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .project-no {
   font-size: 12px;
   color: var(--el-text-color-secondary);
-}
-
-.timeline-card {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  margin-left: 12px;
+  flex-shrink: 0;
 }
 
 .timeline-container {
-  flex: 1;
+  height: 100%;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
+  overflow-x: hidden;
+  padding: 24px 16px;
 }
 
 .empty-state {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.timeline-wrapper {
-  flex: 1;
-  padding: 24px 0;
+  min-height: 400px;
 }
 
 .timeline-date-group {
@@ -359,15 +377,23 @@ onMounted(() => {
   }
 }
 
-.date-label {
+.date-label-wrapper {
   position: sticky;
   top: 0;
   z-index: 10;
   margin-bottom: 16px;
+
+  // 调试：添加背景色看看范围
+  // background: rgba(255, 0, 0, 0.1);
+}
+
+.date-label {
   padding: 8px 16px;
-  background: var(--el-fill-color-light);
+  background: var(--el-bg-color);
   border-radius: 8px;
   display: inline-block;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(8px);
 }
 
 .date-text {
@@ -491,7 +517,8 @@ onMounted(() => {
 // 暗色主题适配
 :global(html.dark) {
   .date-label {
-    background: var(--el-fill-color-dark);
+    background: var(--el-bg-color);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   }
 
   .timeline-content {
