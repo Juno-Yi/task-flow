@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -205,9 +206,41 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
         ProjectRequirementCompletedVO projectRequirementCompletedVO = getProjectRequirementCompletedVO(project.getId());
         projectOverviewVO.setProjectRequirementCompletedVO(projectRequirementCompletedVO);
 
+        // 获取项目关键数据
+        ProjectKeyDataVO projectKeyData = getProjectKeyData(project.getId());
+        projectOverviewVO.setProjectKeyData(projectKeyData);
+
         // TODO: 近期任务完成趋势折线图数据
 
         return projectOverviewVO;
+    }
+
+    /**
+     * 获取项目关键数据
+     * @param projectId 项目ID
+     * @return 项目关键数据
+     */
+    private ProjectKeyDataVO getProjectKeyData(Long projectId){
+        ProjectKeyDataVO projectKeyDataVO = new ProjectKeyDataVO();
+
+        // TODO: 项目完成进度统计
+        projectKeyDataVO.setProjectCompletion(new BigDecimal(0));
+
+        // TODO: 项目进行中的任务量
+        projectKeyDataVO.setOngoingTasks(0L);
+
+        // 项目待开始的需求量
+        LambdaQueryWrapper<ProjectRequirement> projectRequirementWrapper = new LambdaQueryWrapper<>();
+        projectRequirementWrapper.eq(ProjectRequirement::getProjectId,projectId)
+                .eq(ProjectRequirement::getDelFlag, false)
+                .eq(ProjectRequirement::getStatus, 0);
+        Long pendingRequirementCount = projectRequirementMapper.selectCount(projectRequirementWrapper);
+        projectKeyDataVO.setPendingRequirements(pendingRequirementCount);
+
+        // TODO: 项目逾期的任务量
+        projectKeyDataVO.setOverdueTasks(0L);
+
+        return projectKeyDataVO;
     }
 
     /**
@@ -215,7 +248,7 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
      * @param projectId 项目ID
      * @return 项目活跃度趋势数据
      */
-    List<ProjectActivityTrendVO> getProjectActivityTrend(Long projectId){
+    private List<ProjectActivityTrendVO> getProjectActivityTrend(Long projectId){
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(364);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

@@ -120,19 +120,23 @@
           <div class="side-stat-grid">
             <div class="side-stat-item">
               <span>项目完成度</span>
-              <strong>--</strong>
+              <strong v-if="overviewData.projectKeyData.projectCompletion == null">--</strong>
+              <strong v-else>{{overviewData.projectKeyData.projectCompletion}} %</strong>
             </div>
             <div class="side-stat-item">
               <span>进行中任务</span>
-              <strong>--</strong>
+              <strong v-if="overviewData.projectKeyData.ongoingTasks == null">--</strong>
+              <strong v-else>{{overviewData.projectKeyData.ongoingTasks}}</strong>
             </div>
             <div class="side-stat-item">
               <span>待开始需求</span>
-              <strong>--</strong>
+              <strong v-if="overviewData.projectKeyData.pendingRequirements == null">--</strong>
+              <strong v-else>{{overviewData.projectKeyData.pendingRequirements}}</strong>
             </div>
             <div class="side-stat-item">
               <span>逾期任务量</span>
-              <strong>--</strong>
+              <strong v-if="overviewData.projectKeyData.overdueTasks == null">--</strong>
+              <strong v-else>{{overviewData.projectKeyData.overdueTasks}}</strong>
             </div>
           </div>
         </ElCard>
@@ -185,6 +189,12 @@ const canManageProject = computed(() => projectRole.isOwner.value || projectRole
 const canContribute = computed(() => canManageProject.value || projectRole.isMember.value)
 const overviewData = ref<Api.Project.ProjectOverviewVO>({
   projectActivityTrend: [],
+  projectKeyData: {
+    projectCompletion: 0,
+    ongoingTasks: 0,
+    pendingRequirements: 0,
+    overdueTasks: 0
+  },
   projectRequirementSituation: [],
   projectRequirementCompletedVO: {
     sevenDayList: [],

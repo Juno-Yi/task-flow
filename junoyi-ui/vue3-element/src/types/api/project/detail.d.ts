@@ -60,6 +60,7 @@ declare namespace Api.Project {
      */
     interface ProjectOverviewVO {
         projectActivityTrend: ProjectActivityTrendVO[]
+        projectKeyData: ProjectKeyDateVO
         projectRequirementSituation: ProjectRequirementSituationVO[]
         projectRequirementCompletedVO: ProjectRequirementCompletedVO
     }
@@ -99,5 +100,15 @@ declare namespace Api.Project {
     interface ProjectActivityTrendVO {
         date: string
         count: number
+    }
+
+    /**
+     * 项目关键指标数据 VO
+     */
+    interface ProjectKeyDateVO {
+        projectCompletion: number
+        ongoingTasks: number
+        pendingRequirements: number
+        overdueTasks: number
     }
 }

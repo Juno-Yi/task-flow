@@ -17,6 +17,10 @@ public class ProjectOverviewVO {
      */
     private List<ProjectActivityTrendVO> projectActivityTrend;
 
+    /**
+     * 项目关键指标数据
+     */
+    private ProjectKeyDataVO projectKeyData;
 
     /**
      * 项目需求情况饼图数据
