@@ -13,6 +13,12 @@ import java.util.List;
 public class ProjectOverviewVO {
 
     /**
+     * 近一年的项目活跃度
+     */
+    private List<ProjectActivityTrendVO> projectActivityTrend;
+
+
+    /**
      * 项目需求情况饼图数据
      */
     private List<ProjectRequirementSituationVO> projectRequirementSituation;
