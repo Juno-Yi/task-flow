@@ -48,7 +48,7 @@ import DeleteVerifyDialog from './modules/delete-verify-dialog.vue'
 import { ElTag, ElMessageBox, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
 import { fetchDeleteRepo, fetchDeleteRepoBatch, fetchExportProjectBook } from '@/api/project/list'
-import {fetchGetProjectActiveList} from "@/api/project/active";
+import {fetchGetProjectActiveList} from "@/api/project/execution";
 
 
 defineOptions({ name: 'ProjectRepo' })

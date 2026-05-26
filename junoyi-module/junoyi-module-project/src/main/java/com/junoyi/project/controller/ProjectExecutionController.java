@@ -7,30 +7,30 @@ import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
 import com.junoyi.project.domain.vo.ProjectListVO;
-import com.junoyi.project.service.IProjectActiveService;
+import com.junoyi.project.service.IProjectExecutionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 活跃项目控制器
+ * 项目执行控制器
  *
  * @author Fan
  */
 @RestController
-@RequestMapping("/project/active")
+@RequestMapping("/project/execution")
 @RequiredArgsConstructor
-public class ProjectActiveController extends BaseController {
+public class ProjectExecutionController extends BaseController {
 
-    private final IProjectActiveService projectActiveService;
+    private final IProjectExecutionService projectActiveService;
 
     /**
-     * 获取活跃项目列表（分页）
+     * 获取项目执行中列表（分页）
      */
     @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
-    public R<PageResult<ProjectListVO>> getActiveList(ProjectListQueryDTO queryDTO){
-        return R.ok(projectActiveService.getActiveList(queryDTO,buildPage()));
+    public R<PageResult<ProjectListVO>> getExecutionList(ProjectListQueryDTO queryDTO){
+        return R.ok(projectActiveService.getExecutionList(queryDTO,buildPage()));
     }
 }
