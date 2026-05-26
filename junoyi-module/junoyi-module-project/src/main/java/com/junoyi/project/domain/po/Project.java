@@ -47,7 +47,22 @@ public class Project extends BaseEntity {
     private boolean delFlag;
 
     /**
+     * 计划开始时间
+     */
+    private Date planStartTime;
+
+    /**
+     * 计划结束时间
+     */
+    private Date planEndTime;
+
+    /**
      * 项目开始时间
      */
     private Date startTime;
+
+    /**
+     * 项目结束时间
+     */
+    private Date endTime;
 }

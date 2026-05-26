@@ -82,6 +82,53 @@
         </ElSelect>
       </ElFormItem>
 
+      <ElFormItem label="计划周期">
+        <div class="plan-period-wrapper">
+          <!-- 开始时间 -->
+          <ElDatePicker
+            v-model="formData.planStartTime"
+            type="date"
+            placeholder="开始时间"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            class="plan-date-picker"
+            @change="handleStartTimeChange"
+          />
+
+          <span class="period-separator">~</span>
+
+          <!-- 结束时间 -->
+          <ElDatePicker
+            v-model="formData.planEndTime"
+            type="date"
+            placeholder="结束时间"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            class="plan-date-picker"
+            :disabled-date="disabledEndDate"
+          />
+
+          <!-- 天数输入 -->
+          <div class="days-input-wrapper">
+            <span class="days-label">或</span>
+            <ElInputNumber
+              v-model="planDays"
+              :min="1"
+              :max="3650"
+              :step="1"
+              placeholder="天数"
+              class="days-input"
+              controls-position="right"
+              @change="handleDaysChange"
+            />
+            <span class="days-unit">天</span>
+          </div>
+        </div>
+        <div class="plan-period-tip">
+          可直接选择开始和结束时间，或选择开始时间后输入天数自动计算结束时间
+        </div>
+      </ElFormItem>
+
       <ElFormItem label="备注" prop="remark">
         <ElInput
           v-model="formData.remark"
@@ -122,6 +169,8 @@
     type?: number
     status?: number
     priority?: number
+    planStartTime?: string
+    planEndTime?: string
     remark?: string
   }
 
@@ -140,6 +189,7 @@
   const formRef = ref<FormInstance>()
   const submitLoading = ref(false)
   const userLoading = ref(false)
+  const planDays = ref<number>()
 
   // 用户列表
   const userList = ref<Api.System.SysUserVO[]>([])
@@ -155,6 +205,8 @@
     type: undefined,
     status: undefined,
     priority: undefined,
+    planStartTime: undefined,
+    planEndTime: undefined,
     remark: ''
   })
 
@@ -214,6 +266,51 @@
     loadUserList(keyword)
   }
 
+  /**
+   * 禁用结束日期（不能早于开始日期）
+   */
+  const disabledEndDate = (time: Date) => {
+    if (!formData.value.planStartTime) return false
+    const startTime = new Date(formData.value.planStartTime)
+    return time.getTime() < startTime.getTime()
+  }
+
+  /**
+   * 开始时间变化时，清空天数输入
+   */
+  const handleStartTimeChange = () => {
+    planDays.value = undefined
+    // 如果有结束时间，计算天数
+    if (formData.value.planStartTime && formData.value.planEndTime) {
+      const start = new Date(formData.value.planStartTime)
+      const end = new Date(formData.value.planEndTime)
+      const diffTime = end.getTime() - start.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      if (diffDays > 0) {
+        planDays.value = diffDays
+      }
+    }
+  }
+
+  /**
+   * 天数变化时，自动计算结束时间
+   */
+  const handleDaysChange = (value: number | undefined) => {
+    if (!value || !formData.value.planStartTime) {
+      return
+    }
+
+    const startDate = new Date(formData.value.planStartTime)
+    const endDate = new Date(startDate)
+    endDate.setDate(endDate.getDate() + value)
+
+    // 格式化为 YYYY-MM-DD
+    const year = endDate.getFullYear()
+    const month = String(endDate.getMonth() + 1).padStart(2, '0')
+    const day = String(endDate.getDate()).padStart(2, '0')
+    formData.value.planEndTime = `${year}-${month}-${day}`
+  }
+
   watch(
     () => props.repoData,
     (val) => {
@@ -267,6 +364,7 @@
 
   const handleClosed = () => {
     formRef.value?.resetFields()
+    planDays.value = undefined
     formData.value = {
       name: '',
       description: '',
@@ -274,7 +372,55 @@
       type: undefined,
       status: undefined,
       priority: undefined,
+      planStartTime: undefined,
+      planEndTime: undefined,
       remark: ''
     }
   }
 </script>
+
+<style scoped lang="scss">
+.plan-period-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.plan-date-picker {
+  flex: 1;
+  min-width: 150px;
+}
+
+.period-separator {
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+}
+
+.days-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.days-label {
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+}
+
+.days-input {
+  width: 120px;
+}
+
+.days-unit {
+  color: var(--el-text-color-regular);
+  font-size: 14px;
+}
+
+.plan-period-tip {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.5;
+}
+</style>
