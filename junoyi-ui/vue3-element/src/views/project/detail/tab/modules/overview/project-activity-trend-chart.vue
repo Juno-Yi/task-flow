@@ -106,6 +106,8 @@ const getTooltipText = (cell: HeatmapCell) => `${cell.date}：${cell.count} 次�
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-height: 220px;
+  height: 100%;
 }
 
 .heatmap-header {
@@ -113,6 +115,7 @@ const getTooltipText = (cell: HeatmapCell) => `${cell.date}：${cell.count} 次�
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .heatmap-title {
@@ -144,7 +147,12 @@ const getTooltipText = (cell: HeatmapCell) => `${cell.date}：${cell.count} 次�
 }
 
 .heatmap-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow-x: auto;
+  overflow-y: hidden;
   padding: 4px 0 6px;
 }
 
@@ -161,8 +169,8 @@ const getTooltipText = (cell: HeatmapCell) => `${cell.date}：${cell.count} 次�
   display: grid;
   gap: 4px;
   width: max-content;
-  min-width: 100%;
-  justify-content: end;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .week-column {
@@ -209,7 +217,6 @@ const getTooltipText = (cell: HeatmapCell) => `${cell.date}：${cell.count} 次�
 
   .weeks-grid {
     min-width: 720px;
-    justify-content: start;
   }
 }
 </style>
