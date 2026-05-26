@@ -241,7 +241,16 @@ public class ProjectRequirementServiceImpl implements IProjectRequirementService
 
         projectRequirementMapper.updateById(requirement);
 
-        // TODO: 发布项目动态
+        // 发布项目动态
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(),
+                ProjectRecordType.UPDATE_REQUIREMENT,
+                ProjectRecordTargetType.REQUIREMENT,
+                requirement.getId(),
+                "更新了需求「" + requirement.getTitle() + "」"
+        ));
+
     }
 
     /**
@@ -265,7 +274,14 @@ public class ProjectRequirementServiceImpl implements IProjectRequirementService
 
         projectRequirementMapper.updateById(requirement);
 
-        // TODO：发布项目动态
+        // 发布项目动态
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(),
+                ProjectRecordType.DELETE_REQUIREMENT,
+                ProjectRecordTargetType.REQUIREMENT,
+                "删除了需求「" + requirement.getTitle() + "」"
+        ));
     }
 
     /**
@@ -290,7 +306,17 @@ public class ProjectRequirementServiceImpl implements IProjectRequirementService
         requirement.setUpdateTime(DateUtils.getNowDate());
         projectRequirementMapper.updateById(requirement);
 
-        // TODO：发布项目动态
+
+        // 发布项目动态
+        String projectRequirementStatusLabel = sysDictApi.getDictLabel("project_requirement_status", dto.getStatus().toString());
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(),
+                ProjectRecordType.UPDATE_REQUIREMENT,
+                ProjectRecordTargetType.REQUIREMENT,
+                requirement.getId(),
+                "更新需求「" + requirement.getTitle() + "」" + "状态为" + projectRequirementStatusLabel
+        ));
     }
 
     /**

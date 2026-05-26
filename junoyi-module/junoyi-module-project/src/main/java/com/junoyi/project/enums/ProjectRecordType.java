@@ -13,7 +13,17 @@ public enum ProjectRecordType {
     /**
      * 创建需求
      */
-    CREATE_REQUIREMENT(1, "创建需求");
+    CREATE_REQUIREMENT(1, "创建需求"),
+
+    /**
+     * 更新需求
+     */
+    UPDATE_REQUIREMENT(2,"更新需求"),
+
+    /**
+     * 删除需求
+     */
+    DELETE_REQUIREMENT(3,"删除需求");
 
     private final Integer code;
 

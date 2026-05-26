@@ -44,7 +44,7 @@ public class ProjectRecord {
     /**
      * 操作目标ID
      */
-    private Integer targetId;
+    private Long targetId;
 
     /**
      * 操作内容

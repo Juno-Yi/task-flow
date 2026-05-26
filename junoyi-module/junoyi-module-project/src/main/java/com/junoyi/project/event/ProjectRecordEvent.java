@@ -84,6 +84,7 @@ public class ProjectRecordEvent extends BaseEvent {
         this.operatorId = operatorId;
         this.type = type.getCode();
         this.targetType = targetType.getCode();
+        this.targetId = null;
         this.content = content;
     }
 }
