@@ -6,11 +6,13 @@ import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.permission.helper.PermissionHelper;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.domain.po.Project;
+import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.po.ProjectRecord;
 import com.junoyi.project.domain.vo.ProjectRecordVO;
 import com.junoyi.project.enums.ProjectRecordTargetType;
 import com.junoyi.project.enums.ProjectRecordType;
 import com.junoyi.project.mapper.ProjectMapper;
+import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.mapper.ProjectRecordMapper;
 import com.junoyi.project.service.IProjectRecordService;
 import com.junoyi.system.domain.po.SysUser;
@@ -20,6 +22,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +39,7 @@ public class ProjectRecordServiceImpl implements IProjectRecordService {
     private final ProjectRecordMapper projectRecordMapper;
     private final ProjectMapper projectMapper;
     private final SysUserMapper sysUserMapper;
+    private final ProjectMemberMapper projectMemberMapper;
 
     /**
      * 添加项目动态记录
@@ -49,10 +53,37 @@ public class ProjectRecordServiceImpl implements IProjectRecordService {
     /**
      * 获取项目动态记录列表
      * @param projectNo 项目编号
+     * @param page 分页参数
      * @return 项目动态记录列表
      */
     @Override
     public PageResult<ProjectRecordVO> getProjectRecordList(String projectNo, Page<ProjectRecord> page) {
+        // 获取当前用户ID
+        Long currentUserId = SecurityUtils.getUserId();
+
+        // 判断用户是否有查看所有项目数据权限
+        boolean hasAllDataPermission = PermissionHelper.hasPermission("project.data.list.all");
+
+        // 如果没有查看所有项目的权限，需要筛选出用户参与的项目
+        List<Long> accessibleProjectIds = null;
+        if (!hasAllDataPermission) {
+            // 查询用户作为成员的项目ID列表
+            LambdaQueryWrapper<ProjectMember> memberWrapper = new LambdaQueryWrapper<>();
+            memberWrapper.eq(ProjectMember::getUserId, currentUserId)
+                    .eq(ProjectMember::getStatus, 1); // 只查询在职成员
+            List<ProjectMember> userProjects = projectMemberMapper.selectList(memberWrapper);
+
+            if (userProjects.isEmpty()) {
+                // 用户不是任何项目的成员，返回空结果
+                return PageResult.of(new ArrayList<>(), 0L, (int) page.getCurrent(), (int) page.getSize());
+            }
+
+            accessibleProjectIds = userProjects.stream()
+                    .map(ProjectMember::getProjectId)
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
+
         LambdaQueryWrapper<ProjectRecord> wrapper = new LambdaQueryWrapper<>();
 
         // 如果指定了项目编号，先查询项目ID
@@ -63,10 +94,20 @@ public class ProjectRecordServiceImpl implements IProjectRecordService {
             Project project = projectMapper.selectOne(projectWrapper);
 
             if (project != null) {
+                // 检查用户是否有权限查看该项目
+                if (!hasAllDataPermission && !accessibleProjectIds.contains(project.getId())) {
+                    // 用户没有权限查看该项目，返回空结果
+                    return PageResult.of(new ArrayList<>(), 0L, (int) page.getCurrent(), (int) page.getSize());
+                }
                 wrapper.eq(ProjectRecord::getProjectId, project.getId());
             } else {
                 // 项目不存在，返回空结果
-                return PageResult.of(List.of(), 0L, (int) page.getCurrent(), (int) page.getSize());
+                return PageResult.of(new ArrayList<>(), 0L, (int) page.getCurrent(), (int) page.getSize());
+            }
+        } else {
+            // 如果没有指定项目编号，且用户没有查看所有项目的权限，则只查询用户有权限的项目
+            if (!hasAllDataPermission) {
+                wrapper.in(ProjectRecord::getProjectId, accessibleProjectIds);
             }
         }
 
@@ -78,7 +119,7 @@ public class ProjectRecordServiceImpl implements IProjectRecordService {
         List<ProjectRecord> records = resultPage.getRecords();
 
         if (records.isEmpty()) {
-            return PageResult.of(List.of(), 0L, (int) page.getCurrent(), (int) page.getSize());
+            return PageResult.of(new ArrayList<>(), 0L, (int) page.getCurrent(), (int) page.getSize());
         }
 
         // 批量查询项目信息
