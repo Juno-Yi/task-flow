@@ -139,6 +139,10 @@ declare namespace Api.Project {
     status?: number
     /** 项目优先级 */
     priority?: number
+    /** 计划开始时间 */
+    planStartTime?: string
+    /** 计划结束时间 */
+    planEndTime?: string
     /** 备注 */
     remark?: string
   }
