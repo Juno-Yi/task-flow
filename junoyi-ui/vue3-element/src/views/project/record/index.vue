@@ -6,7 +6,6 @@
       <ElCard shadow="never" class="mb-4 flex-shrink-0 filter-card">
         <div class="filter-content">
           <div class="filter-item">
-            <label class="filter-label">项目</label>
             <ElSelect
               v-model="queryParams.projectNo"
               placeholder="全部项目"
@@ -43,7 +42,7 @@
             <ElEmpty description="暂无项目动态" />
           </div>
 
-          <div v-else>
+          <div v-else class="timeline-wrapper">
             <div
               v-for="(group, date) in groupedRecords"
               :key="date"
