@@ -5,11 +5,13 @@ import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.convert.ProjectMemberConverter;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
+import com.junoyi.project.domain.po.ProjectRecord;
 import com.junoyi.project.domain.po.ProjectRequirement;
 import com.junoyi.project.domain.vo.*;
 import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.mapper.ProjectMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
+import com.junoyi.project.mapper.ProjectRecordMapper;
 import com.junoyi.project.mapper.ProjectRequirementMapper;
 import com.junoyi.project.service.IProjectDetailService;
 import com.junoyi.project.service.IProjectRequirementService;
@@ -43,6 +45,7 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
 
     private final ProjectMapper projectMapper;
     private final ProjectRequirementMapper projectRequirementMapper;
+    private final ProjectRecordMapper projectRecordMapper;
     private final SysUserMapper sysUserMapper;
     private final ProjectMemberMapper projectMemberMapper;
     private final SysDictApi sysDictApi;
@@ -217,17 +220,18 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
         LocalDate startDate = endDate.minusDays(364);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        LambdaQueryWrapper<ProjectRequirement> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ProjectRequirement::getProjectId, projectId)
-                .eq(ProjectRequirement::getDelFlag, false);
-        List<ProjectRequirement> requirementList = projectRequirementMapper.selectList(wrapper);
+        LambdaQueryWrapper<ProjectRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProjectRecord::getProjectId, projectId)
+                .ge(ProjectRecord::getCreateTime, java.sql.Date.valueOf(startDate))
+                .lt(ProjectRecord::getCreateTime, java.sql.Date.valueOf(endDate.plusDays(1)))
+                .orderByAsc(ProjectRecord::getCreateTime);
+        List<ProjectRecord> recordList = projectRecordMapper.selectList(wrapper);
 
         Map<LocalDate, Integer> dayCountMap = new LinkedHashMap<>();
         startDate.datesUntil(endDate.plusDays(1)).forEach(date -> dayCountMap.put(date, 0));
 
-        for (ProjectRequirement requirement : requirementList) {
-            accumulateDayCount(dayCountMap, requirement.getCreateTime());
-            accumulateDayCount(dayCountMap, requirement.getUpdateTime());
+        for (ProjectRecord record : recordList) {
+            accumulateDayCount(dayCountMap, record.getCreateTime());
         }
 
         return dayCountMap.entrySet().stream().map(entry -> {
