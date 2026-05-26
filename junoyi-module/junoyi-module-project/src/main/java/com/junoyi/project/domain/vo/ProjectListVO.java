@@ -102,6 +102,19 @@ public class ProjectListVO {
     /** 完成任务数量（如果任务没有，使用默认值）*/
     private Integer completedTasks = 0;
 
+
+    /**
+     * 计划开始时间
+     */
+    private Date planStartTime;
+
+    /**
+     * 计划结束时间
+     */
+    private Date planEndTime;
+
+
+
     /**
      * 创建者
      */

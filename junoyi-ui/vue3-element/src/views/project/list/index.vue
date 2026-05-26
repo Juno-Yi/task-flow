@@ -267,20 +267,23 @@
           }
         },
         {
-          prop: 'createTime',
-          label: '创建时间',
-          width: 120,
+          prop: 'planPeriod',
+          label: '计划周期',
+          width: 210,
           align: 'center',
           headerAlign: 'center',
-          formatter: (row: RepoVO) => formatTime(row.createTime)
-        },
-        {
-          prop: 'updateTime',
-          label: '更新时间',
-          width: 120,
-          align: 'center',
-          headerAlign: 'center',
-          formatter: (row: RepoVO) => formatTime(row.updateTime)
+          formatter: (row: RepoVO) => {
+            if (row.planStartTime && row.planEndTime) {
+              const startDate = formatTime(row.planStartTime as any)
+              const endDate = formatTime(row.planEndTime as any)
+              return `${startDate} ~ ${endDate}`
+            } else if (row.planStartTime) {
+              return `${formatTime(row.planStartTime as any)} ~ 未设置`
+            } else if (row.planEndTime) {
+              return `未设置 ~ ${formatTime(row.planEndTime as any)}`
+            }
+            return '未设置'
+          }
         },
         {
           prop: 'operation',
