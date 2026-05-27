@@ -47,6 +47,7 @@ public class TaskListServiceImpl implements ITaskListService {
     private final TaskListMapper taskListMapper;
     private final TaskUserMapper taskUserMapper;
     private final SysDictApi sysDictApi;
+    private final SysUserMapper sysUserMapper;
 
     /**
      * 分页查询任务列表
@@ -67,12 +68,19 @@ public class TaskListServiceImpl implements ITaskListService {
             return PageResult.of(new ArrayList<>(), 0L, (int) page.getCurrent(), (int) page.getSize());
         }
 
+        // 批量查询协作人列表
+        List<Long> taskIds = records.stream().map(TaskListVO::getId).collect(Collectors.toList());
+        Map<Long, List<TaskListVO.TaskUser>> taskUsersMap = batchQueryTaskUsers(taskIds);
+
         // 批量获取字典数据
         Map<String, SysDictDataVO> statusMap = buildDictMap("task_status");
         Map<String, SysDictDataVO> priorityMap = buildDictMap("task_priority");
 
-        // 填充字典标签和类型
+        // 填充字典标签和协作人列表
         for (TaskListVO vo : records) {
+            // 填充协作人列表
+            vo.setTaskUserList(taskUsersMap.getOrDefault(vo.getId(), new ArrayList<>()));
+
             // 填充状态标签
             if (vo.getStatus() != null) {
                 SysDictDataVO statusDict = statusMap.get(String.valueOf(vo.getStatus()));
@@ -95,8 +103,55 @@ public class TaskListServiceImpl implements ITaskListService {
         return PageResult.of(records, resultPage.getTotal(), (int) page.getCurrent(), (int) page.getSize());
     }
 
+    /**
+     * 批量查询任务协作人
+     *
+     * @param taskIds 任务ID列表
+     * @return 任务ID为key，协作人列表为value的Map
+     */
+    private Map<Long, List<TaskListVO.TaskUser>> batchQueryTaskUsers(List<Long> taskIds) {
+        if (taskIds.isEmpty()) {
+            return new java.util.HashMap<>();
+        }
 
+        // 查询协作人关联关系（taskRole = 2 表示协作人）
+        LambdaQueryWrapper<TaskUser> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(TaskUser::getTaskId, taskIds)
+                .eq(TaskUser::getTaskRole, 2);
+        List<TaskUser> taskUsers = taskUserMapper.selectList(wrapper);
 
+        if (taskUsers.isEmpty()) {
+            return new java.util.HashMap<>();
+        }
+
+        // 批量查询用户信息
+        List<Long> userIds = taskUsers.stream()
+                .map(TaskUser::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+        List<SysUser> users = sysUserMapper.selectBatchIds(userIds);
+        Map<Long, SysUser> userMap = users.stream()
+                .collect(Collectors.toMap(SysUser::getUserId, u -> u));
+
+        // 按任务ID分组
+        return taskUsers.stream()
+                .collect(Collectors.groupingBy(
+                        TaskUser::getTaskId,
+                        Collectors.mapping(
+                                tu -> {
+                                    TaskListVO.TaskUser taskUser = new TaskListVO.TaskUser();
+                                    SysUser user = userMap.get(tu.getUserId());
+                                    if (user != null) {
+                                        taskUser.setUserId(user.getUserId());
+                                        taskUser.setAvatar(user.getAvatar());
+                                        taskUser.setNickName(user.getNickName());
+                                    }
+                                    return taskUser;
+                                },
+                                Collectors.toList()
+                        )
+                ));
+    }
 
     /**
      * 构建字典映射表

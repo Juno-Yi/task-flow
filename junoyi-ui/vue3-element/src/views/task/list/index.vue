@@ -292,7 +292,7 @@ const {
     columnsFactory: () => [
       {
         prop: 'title',
-        label: '任务标题',
+        label: '任务',
         align: 'center',
         headerAlign: 'center',
         minWidth: 220,
@@ -331,13 +331,6 @@ const {
         }
       },
       {
-        prop: 'taskUserList',
-        label: '执行人',
-        headerAlign: 'center',
-        minWidth: 180,
-        formatter: (row: TaskListVO) => renderAssignees(row.taskUserList)
-      },
-      {
         prop: 'ownerUser.nickName',
         label: '负责人',
         align: 'center',
@@ -346,25 +339,49 @@ const {
         formatter: (row: TaskListVO) => row.ownerUser?.nickName || '-'
       },
       {
-        prop: 'startTime',
-        label: '开始时间',
+        prop: 'taskUserList',
+        label: '协助人',
         headerAlign: 'center',
-        width: 180,
-        formatter: (row: TaskListVO) => formatTime(row.startTime)
+        minWidth: 180,
+        formatter: (row: TaskListVO) => renderAssignees(row.taskUserList)
       },
       {
-        prop: 'dueTime',
-        label: '截止时间',
+        prop: 'planPeriod',
+        label: '计划时间',
+        width: 250,
+        align: 'center',
         headerAlign: 'center',
-        width: 180,
-        formatter: (row: TaskListVO) => formatTime(row.dueTime || row.DueTime)
+        formatter: (row: TaskListVO) => {
+          if (row.planStartTime && row.planEndTime) {
+            const startDate = formatTime(row.planStartTime as any)
+            const endDate = formatTime(row.planEndTime as any)
+            return `${startDate} ~ ${endDate}`
+          } else if (row.planStartTime) {
+            return `${formatTime(row.planStartTime as any)} ~ 未设置`
+          } else if (row.planEndTime) {
+            return `未设置 ~ ${formatTime(row.planEndTime as any)}`
+          }
+          return '未设置'
+        }
       },
       {
-        prop: 'finishTime',
-        label: '完成时间',
+        prop: 'realPeriod',
+        label: '实际时间',
+        width: 250,
+        align: 'center',
         headerAlign: 'center',
-        width: 180,
-        formatter: (row: TaskListVO) => formatTime(row.finishTime)
+        formatter: (row: TaskListVO) => {
+          if (row.startTime && row.endTime) {
+            const startDate = formatTime(row.startTime as any)
+            const endDate = formatTime(row.endTime as any)
+            return `${startDate} ~ ${endDate}`
+          } else if (row.startTime) {
+            return `${formatTime(row.startTime as any)} ~ 未结束`
+          } else if (row.endTime) {
+            return `无 ~ ${formatTime(row.planEndTime as any)}`
+          }
+          return '无'
+        }
       },
       {
         prop: 'isOverdue',

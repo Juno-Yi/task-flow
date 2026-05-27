@@ -34,12 +34,12 @@ declare namespace Api.Task {
     priority: number
     priorityLabel?: string
     priorityType?: string
-    taskUserList?: TaskUser[]
     ownerUser?: OwnerUser
+    taskUserList?: TaskUser[]
+    planStartTime?: string
+    planEndTime?: string
     startTime?: string
-    dueTime?: string
-    DueTime?: string
-    finishTime?: string
+    endTime?: string
     isOverdue?: boolean
     latestSubmitTime?: string
   }

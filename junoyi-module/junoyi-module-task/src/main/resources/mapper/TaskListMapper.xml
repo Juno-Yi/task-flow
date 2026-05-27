@@ -10,8 +10,8 @@
         <result property="title" column="title"/>
         <result property="status" column="status"/>
         <result property="priority" column="priority"/>
-        <result property="plantStartTime" column="plan_start_time"/>
-        <result property="plantEndTime" column="plan_end_time"/>
+        <result property="planStartTime" column="plan_start_time"/>
+        <result property="planEndTime" column="plan_end_time"/>
         <result property="startTime" column="start_time"/>
         <result property="endTime" column="end_time"/>
         <result property="isOverdue" column="is_overdue"/>
@@ -23,12 +23,6 @@
             <result property="avatar" column="owner_avatar"/>
             <result property="nickName" column="owner_nick_name"/>
         </association>
-
-        <!-- 协作人列表（延迟加载） -->
-        <collection property="taskUserList"
-                    ofType="com.junoyi.task.domain.vo.TaskListVO$TaskUser"
-                    column="id"
-                    select="selectTaskUsersByTaskId"/>
     </resultMap>
 
     <!-- 分页查询任务列表 -->
@@ -97,19 +91,6 @@
             </if>
         </where>
         ORDER BY t.create_time DESC
-    </select>
-
-    <!-- 根据任务ID查询协作人列表 -->
-    <select id="selectTaskUsersByTaskId" resultType="com.junoyi.task.domain.vo.TaskListVO$TaskUser">
-        SELECT
-            su.user_id AS userId,
-            su.avatar AS avatar,
-            su.nick_name AS nickName
-        FROM task_user tu
-        INNER JOIN sys_user su ON su.user_id = tu.user_id AND su.del_flag = 0
-        WHERE tu.task_id = #{id}
-          AND tu.task_role = 2
-        ORDER BY tu.create_time ASC
     </select>
 
 </mapper>

@@ -54,12 +54,12 @@ public class TaskListVO {
     /**
      * 计划开始时间
      */
-    private Date plantStartTime;
+    private Date planStartTime;
 
     /**
-     * 计划结束世界
+     * 计划结束时间
      */
-    private Date plantEndTime;
+    private Date planEndTime;
 
     /**
      * 实际开始时间
