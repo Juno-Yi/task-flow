@@ -23,7 +23,27 @@ public enum ProjectRecordType {
     /**
      * 删除需求
      */
-    DELETE_REQUIREMENT(3,"删除需求");
+    DELETE_REQUIREMENT(3,"删除需求"),
+
+    /**
+     * 创建里程碑
+     */
+    CREATE_MILESTONE(4,"创建里程碑"),
+
+    /**
+     * 更新里程碑
+     */
+    UPDATE_MILESTONE(5,"更新里程碑"),
+
+    /**
+     * 删除里程碑
+     */
+    DELETE_MILESTONE(6,"删除里程碑"),
+
+    /**
+     * 完成里程碑
+     */
+    COMPLETE_MILESTONE(7,"完成里程碑");
 
     private final Integer code;
 

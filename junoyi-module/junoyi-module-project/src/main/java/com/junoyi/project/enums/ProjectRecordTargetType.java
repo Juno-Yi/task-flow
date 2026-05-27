@@ -13,7 +13,12 @@ public enum ProjectRecordTargetType {
     /**
      * 需求
      */
-    REQUIREMENT(1, "需求");
+    REQUIREMENT(1, "需求"),
+
+    /**
+     * 里程碑
+     */
+    MILESTONE(2,"里程碑");
 
     private final Integer code;
 

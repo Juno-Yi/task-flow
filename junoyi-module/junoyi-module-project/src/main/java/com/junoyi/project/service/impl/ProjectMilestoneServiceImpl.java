@@ -3,11 +3,15 @@ package com.junoyi.project.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.junoyi.framework.core.utils.DateUtils;
+import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.convert.ProjectMilestoneConverter;
 import com.junoyi.project.domain.dto.ProjectMilestoneDTO;
 import com.junoyi.project.domain.po.ProjectMilestone;
 import com.junoyi.project.domain.vo.ProjectMilestoneVO;
+import com.junoyi.project.enums.ProjectRecordTargetType;
+import com.junoyi.project.enums.ProjectRecordType;
+import com.junoyi.project.event.ProjectRecordEvent;
 import com.junoyi.project.exception.ProjectException;
 import com.junoyi.project.mapper.ProjectMilestoneMapper;
 import com.junoyi.project.service.IProjectMilestoneService;
@@ -69,7 +73,14 @@ public class ProjectMilestoneServiceImpl implements IProjectMilestoneService {
 
         projectMilestoneMapper.insert(projectMilestone);
 
-        // TODO: 发布项目动态
+        // 发布项目动态
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                dto.getProjectId(),
+                SecurityUtils.getUserId(),
+                ProjectRecordType.CREATE_MILESTONE,
+                ProjectRecordTargetType.MILESTONE,
+                "创建了里程碑「" + dto.getName() + "」"
+        ));
     }
 
     /**
@@ -85,7 +96,15 @@ public class ProjectMilestoneServiceImpl implements IProjectMilestoneService {
 
         projectMilestoneMapper.updateById(projectMilestone);
 
-        // TODO: 发布项目动态
+        // 发布项目动态
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                dto.getProjectId(),
+                SecurityUtils.getUserId(),
+                ProjectRecordType.UPDATE_MILESTONE,
+                ProjectRecordTargetType.REQUIREMENT,
+                projectMilestone.getId(),
+                "更新了里程碑「" + projectMilestone.getName() + "」"
+        ));
     }
 
     /**
@@ -106,7 +125,16 @@ public class ProjectMilestoneServiceImpl implements IProjectMilestoneService {
         if (rows <= 0)
             throw new ProjectException("项目里程碑不存在或已删除");
 
-        // TODO: 发布项目动态
+        ProjectMilestone projectMilestone = projectMilestoneMapper.selectById(projectMilestoneId);
+
+        // 发布项目动态
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(),
+                ProjectRecordType.DELETE_MILESTONE,
+                ProjectRecordTargetType.MILESTONE,
+                "删除了里程碑「" + projectMilestone.getName() + "」"
+        ));
     }
 
     /**
@@ -127,6 +155,15 @@ public class ProjectMilestoneServiceImpl implements IProjectMilestoneService {
         if (rows <= 0)
             throw new ProjectException("项目里程碑不存在或已删除");
 
-        // TODO: 发布项目动态
+        ProjectMilestone projectMilestone = projectMilestoneMapper.selectById(projectMilestoneId);
+
+        // 发布项目动态
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(),
+                ProjectRecordType.COMPLETE_MILESTONE,
+                ProjectRecordTargetType.MILESTONE,
+                "完成了里程碑「" + projectMilestone.getName() + "」"
+        ));
     }
 }
