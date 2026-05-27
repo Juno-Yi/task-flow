@@ -43,11 +43,9 @@ import ArtButtonMore, { ButtonMoreItem } from '@/components/core/forms/art-butto
 import { useTable } from '@/hooks/core/useTable'
 import { useRouter } from 'vue-router'
 import RepoSearch from './modules/repo-search.vue'
-import RepoDialog from './modules/repo-dialog.vue'
-import DeleteVerifyDialog from './modules/delete-verify-dialog.vue'
-import { ElTag, ElMessageBox, ElProgress } from 'element-plus'
+import { ElTag, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
-import { fetchDeleteRepo, fetchDeleteRepoBatch, fetchExportProjectBook } from '@/api/project/list'
+import { fetchExportProjectBook } from '@/api/project/list'
 import {fetchGetProjectAacceptanceList} from "@/api/project/acceptance";
 
 
@@ -288,12 +286,6 @@ const {
               label: '查看详情',
               icon: 'ri:eye-line'
             },
-            {
-              key: 'edit',
-              label: '编辑',
-              icon: 'ri:edit-line',
-              auth: 'project.ui.list.edit.button'
-            },
           ]
 
           return h(ArtButtonMore, {
@@ -345,16 +337,6 @@ const resetSearchParams = () => {
   getData()
 }
 
-/**
- * 显示仓库弹窗
- */
-const showDialog = (type: DialogType, row?: RepoVO): void => {
-  dialogType.value = type
-  currentRepoData.value = row || {}
-  nextTick(() => {
-    dialogVisible.value = true
-  })
-}
 
 /**
  * 操作按钮点击
@@ -365,7 +347,6 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
       viewRepo(row)
       break
     case 'edit':
-      showDialog('edit', row)
       break
   }
 }

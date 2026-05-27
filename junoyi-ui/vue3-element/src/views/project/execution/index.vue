@@ -43,11 +43,9 @@ import ArtButtonMore, { ButtonMoreItem } from '@/components/core/forms/art-butto
 import { useTable } from '@/hooks/core/useTable'
 import { useRouter } from 'vue-router'
 import RepoSearch from './modules/repo-search.vue'
-import RepoDialog from './modules/repo-dialog.vue'
-import DeleteVerifyDialog from './modules/delete-verify-dialog.vue'
-import { ElTag, ElMessageBox, ElProgress } from 'element-plus'
+import { ElTag, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
-import { fetchDeleteRepo, fetchDeleteRepoBatch, fetchExportProjectBook } from '@/api/project/list'
+import { fetchExportProjectBook } from '@/api/project/list'
 import {fetchGetProjectActiveList} from "@/api/project/execution";
 
 
@@ -289,10 +287,11 @@ const {
               icon: 'ri:eye-line'
             },
             {
-              key: 'edit',
-              label: '编辑',
-              icon: 'ri:edit-line',
-              auth: 'project.ui.list.edit.button'
+              key: 'acceptance',
+              label: '请求验收',
+              icon: 'ri:checkbox-circle-line',
+              color: '#e7ac10',
+              auth: 'project.ui.list.acceptance.button'
             },
           ]
 
@@ -364,8 +363,7 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
     case 'view':
       viewRepo(row)
       break
-    case 'edit':
-      showDialog('edit', row)
+    case 'acceptance':
       break
   }
 }
