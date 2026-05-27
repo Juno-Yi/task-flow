@@ -45,7 +45,7 @@ public class Task extends BaseEntity {
     private  Integer priority;
 
     /**
-     * 任务类型（0普通任务，1项目任务，2审批任务）
+     * 任务类型（0普通任务，1项目任务）
      */
     private Integer type;
 
@@ -60,24 +60,24 @@ public class Task extends BaseEntity {
     private Long biz_id;
 
     /**
-     * 开始时间
+     * 计划开始时间
+     */
+    private Date planStartTime;
+
+    /**
+     * 计划结束时间
+     */
+    private Date planEndTime;
+
+    /**
+     * 实际开始时间
      */
     private Date startTime;
 
     /**
-     * 截止时间
+     * 实际结束时间
      */
-    private Date dueTime;
-
-    /**
-     * 实际完成时间
-     */
-    private Date finishTime;
-
-    /**
-     * 企业微信日程ID
-     */
-    private String wecomScheduleId;
+    private Date endTime;
 
     /**
      * 任务创建者ID

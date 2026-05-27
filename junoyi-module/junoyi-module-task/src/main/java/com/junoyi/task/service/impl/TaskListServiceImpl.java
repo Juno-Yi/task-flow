@@ -3,13 +3,16 @@ package com.junoyi.task.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.junoyi.framework.core.domain.page.PageQuery;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.json.utils.JsonUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
+import com.junoyi.system.api.SysDictApi;
+import com.junoyi.system.domain.po.SysUser;
+import com.junoyi.system.domain.vo.SysDictDataVO;
 import com.junoyi.system.event.UserOperationEvent;
+import com.junoyi.system.mapper.SysUserMapper;
 import com.junoyi.task.domain.dto.TaskListDTO;
 import com.junoyi.task.domain.dto.TaskListQueryDTO;
 import com.junoyi.task.domain.po.Task;
@@ -21,6 +24,7 @@ import com.junoyi.task.mapper.TaskListMapper;
 import com.junoyi.task.mapper.TaskUserMapper;
 import com.junoyi.task.service.ITaskListService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -28,6 +32,8 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 任务列表业务接口实现类
@@ -40,19 +46,68 @@ public class TaskListServiceImpl implements ITaskListService {
 
     private final TaskListMapper taskListMapper;
     private final TaskUserMapper taskUserMapper;
+    private final SysDictApi sysDictApi;
 
     /**
      * 分页查询任务列表
      *
      * @param queryDTO 查询条件
-     * @param pageQuery 分页参数
+     * @param page 分页参数
      * @return 分页结果
      */
     @Override
-    public PageResult<TaskListVO> getTaskList(TaskListQueryDTO queryDTO, PageQuery pageQuery) {
-        IPage<TaskListVO> page = new Page<>(pageQuery.getCurrent(), pageQuery.getSize());
-        IPage<TaskListVO> result = taskListMapper.selectTaskListPage(page, queryDTO);
-        return PageResult.of(result.getRecords(), result.getTotal(), (int) result.getCurrent(), (int) result.getSize());
+    public PageResult<TaskListVO> getTaskList(TaskListQueryDTO queryDTO, Page<Task> page) {
+        // 使用 XML 中定义的 SQL 查询
+        IPage<TaskListVO> voPage = new Page<>(page.getCurrent(), page.getSize());
+        IPage<TaskListVO> resultPage = taskListMapper.selectTaskListPage(voPage, queryDTO);
+
+        List<TaskListVO> records = resultPage.getRecords();
+
+        if (records.isEmpty()) {
+            return PageResult.of(new ArrayList<>(), 0L, (int) page.getCurrent(), (int) page.getSize());
+        }
+
+        // 批量获取字典数据
+        Map<String, SysDictDataVO> statusMap = buildDictMap("task_status");
+        Map<String, SysDictDataVO> priorityMap = buildDictMap("task_priority");
+
+        // 填充字典标签和类型
+        for (TaskListVO vo : records) {
+            // 填充状态标签
+            if (vo.getStatus() != null) {
+                SysDictDataVO statusDict = statusMap.get(String.valueOf(vo.getStatus()));
+                if (statusDict != null) {
+                    vo.setStatusLabel(statusDict.getDictLabel());
+                    vo.setStatusType(statusDict.getListClass());
+                }
+            }
+
+            // 填充优先级标签
+            if (vo.getPriority() != null) {
+                SysDictDataVO priorityDict = priorityMap.get(String.valueOf(vo.getPriority()));
+                if (priorityDict != null) {
+                    vo.setPriorityLabel(priorityDict.getDictLabel());
+                    vo.setPriorityType(priorityDict.getListClass());
+                }
+            }
+        }
+
+        return PageResult.of(records, resultPage.getTotal(), (int) page.getCurrent(), (int) page.getSize());
+    }
+
+
+
+
+    /**
+     * 构建字典映射表
+     *
+     * @param dictType 字典类型
+     * @return 字典值为key，字典数据为value的Map
+     */
+    private Map<String, SysDictDataVO> buildDictMap(String dictType) {
+        List<SysDictDataVO> dictList = sysDictApi.getDictDataByType(dictType);
+        return dictList.stream()
+                .collect(Collectors.toMap(SysDictDataVO::getDictValue, dict -> dict, (v1, v2) -> v1));
     }
 
     /**
@@ -117,7 +172,7 @@ public class TaskListServiceImpl implements ITaskListService {
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
         task.setPriority(dto.getPriority());
-        task.setDueTime(dto.getDueTime());
+//        task.setDueTime(dto.getDueTime());
         task.setRemark(dto.getRemark());
 
         // 默认值
@@ -209,7 +264,7 @@ public class TaskListServiceImpl implements ITaskListService {
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
         task.setPriority(dto.getPriority());
-        task.setDueTime(dto.getDueTime());
+//        task.setDueTime(dto.getDueTime());
         task.setRemark(dto.getRemark());
         task.setUpdateBy(SecurityUtils.getUserName());
         task.setUpdateTime(DateUtils.getNowDate());

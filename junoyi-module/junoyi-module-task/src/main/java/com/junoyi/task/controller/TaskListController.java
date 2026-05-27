@@ -36,7 +36,7 @@ public class TaskListController extends BaseController {
             value = {"task.ui.list.view"}
     )
     public R<PageResult<TaskListVO>> getList(TaskListQueryDTO queryDTO) {
-        return R.ok(taskListService.getTaskList(queryDTO, getPageQuery()));
+        return R.ok(taskListService.getTaskList(queryDTO, buildPage()));
     }
 
     /**
