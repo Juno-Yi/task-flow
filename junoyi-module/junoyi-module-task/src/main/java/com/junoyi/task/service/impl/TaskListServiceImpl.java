@@ -21,11 +21,10 @@ import com.junoyi.task.domain.vo.TaskListDetailVO;
 import com.junoyi.task.domain.vo.TaskListVO;
 import com.junoyi.task.enums.TaskRecordActionType;
 import com.junoyi.task.exception.TaskException;
-import com.junoyi.task.mapper.TaskListMapper;
+import com.junoyi.task.mapper.TaskMapper;
 import com.junoyi.task.mapper.TaskUserMapper;
 import com.junoyi.task.service.ITaskListService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -45,7 +44,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskListServiceImpl implements ITaskListService {
 
-    private final TaskListMapper taskListMapper;
+    private final TaskMapper taskListMapper;
     private final TaskUserMapper taskUserMapper;
     private final SysDictApi sysDictApi;
     private final SysUserMapper sysUserMapper;

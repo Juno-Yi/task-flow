@@ -19,7 +19,7 @@ import java.util.List;
  * @author Fan
  */
 @Mapper
-public interface TaskListMapper extends BaseMapper<Task> {
+public interface TaskMapper extends BaseMapper<Task> {
 
     /**
      * 分页查询任务列表

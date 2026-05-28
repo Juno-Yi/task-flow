@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.junoyi.task.mapper.TaskListMapper">
+<mapper namespace="com.junoyi.task.mapper.TaskMapper">
 
     <!-- TaskListVO 结果映射 -->
     <resultMap id="TaskListVOResultMap" type="com.junoyi.task.domain.vo.TaskListVO">
