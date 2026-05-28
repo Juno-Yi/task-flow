@@ -8,10 +8,7 @@ import com.junoyi.task.domain.vo.TaskItemVO;
 import com.junoyi.task.domain.vo.TaskListDetailVO;
 import com.junoyi.task.service.IMyTaskService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -51,5 +48,15 @@ public class MyTaskController extends BaseController {
             return R.fail("请登录后操作");
         }
         return R.ok(myTaskService.getMyTaskDetail(taskId, userId));
+    }
+
+    /**
+     * 开始任务
+     */
+    @PutMapping("/start/{taskId}")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<Void> startTask(@PathVariable("taskId") Long taskId){
+        myTaskService.startTask(taskId);
+        return R.ok();
     }
 }

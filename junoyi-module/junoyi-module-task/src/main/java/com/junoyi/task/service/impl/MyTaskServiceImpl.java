@@ -1,5 +1,8 @@
 package com.junoyi.task.service.impl;
 
+import com.junoyi.framework.core.utils.DateUtils;
+import com.junoyi.framework.security.utils.SecurityUtils;
+import com.junoyi.task.domain.po.Task;
 import com.junoyi.task.domain.vo.TaskItemVO;
 import com.junoyi.task.domain.vo.TaskListDetailVO;
 import com.junoyi.task.exception.TaskException;
@@ -90,7 +93,38 @@ public class MyTaskServiceImpl implements IMyTaskService {
             throw new TaskException("任务不存在");
         }
 
-        // 4. 返回任务详情
+        // 返回任务详情
         return detailVO;
+    }
+
+    /**
+     * 开始任务
+     * @param taskId 任务ID
+     */
+    @Override
+    public void startTask(Long taskId) {
+        if (taskId == null || taskId <= 0) {
+            throw new TaskException("任务ID不能为空");
+        }
+
+        Task existTask = taskMapper.selectById(taskId);
+        if (existTask == null || Boolean.TRUE.equals(existTask.getDelFlag())) {
+            throw new TaskException("任务不存在");
+        }
+        if (existTask.getStatus() == null) {
+            throw new TaskException("任务状态异常");
+        }
+        if (!Integer.valueOf(0).equals(existTask.getStatus())) {
+            throw new TaskException("当前任务不是待处理状态，无法开始");
+        }
+
+        Task updateTask = new Task();
+        updateTask.setId(taskId);
+        // 状态1为进行中
+        updateTask.setStatus(1);
+        updateTask.setStartTime(existTask.getStartTime() == null ? DateUtils.getNowDate() : existTask.getStartTime());
+        updateTask.setUpdateBy(SecurityUtils.getUserName());
+        updateTask.setUpdateTime(DateUtils.getNowDate());
+        taskMapper.updateById(updateTask);
     }
 }

@@ -25,4 +25,10 @@ public interface IMyTaskService {
      * @return 任务详情
      */
     TaskListDetailVO getMyTaskDetail(Long taskId, Long userId);
+
+    /**
+     * 开始任务
+     * @param taskId 任务ID
+     */
+    void startTask(Long taskId);
 }
