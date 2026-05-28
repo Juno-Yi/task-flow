@@ -34,9 +34,13 @@
           <ArtSvgIcon icon="ri:user-star-line" class="text-sm" />
           <span>{{ task.ownerUser?.nickName }}</span>
         </div>
-        <div v-if="task.dueTime || task.DueTime" class="flex items-center gap-1" :class="dueDateClass">
+        <div v-if="task.planStartTime || task.planEndTime" class="flex items-center gap-1" :class="dueDateClass">
           <ArtSvgIcon icon="ri:calendar-line" class="text-sm" />
-          <span>{{ formatDateTime(task.dueTime || task.DueTime) }}</span>
+          <span>{{ formatPlanPeriod(task.planStartTime, task.planEndTime) }}</span>
+        </div>
+        <div v-if="task.planStartTime && task.planEndTime" class="flex items-center gap-1">
+          <ArtSvgIcon icon="ri:time-line" class="text-sm" />
+          <span>{{ calculateHours(task.planStartTime, task.planEndTime) }}</span>
         </div>
       </div>
     </div>
@@ -66,16 +70,60 @@ const priorityConfig: Record<number, { type: 'info' | 'primary' | 'warning' | 'd
 
 const getPriorityConfig = (priority?: number) => priorityConfig[priority ?? -1] || { type: 'info', text: '-' }
 
-const formatDateTime = (value?: string) => {
+/**
+ * 紧凑格式化时间（只显示月-日）
+ */
+const formatCompactTime = (value?: string) => {
   if (!value) return '-'
   const date = new Date(value)
   if (isNaN(date.getTime())) return value
-  const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  return `${year}-${month}-${day} ${hours}:${minutes}`
+  return `${month}-${day}`
+}
+
+/**
+ * 格式化计划时间范围
+ */
+const formatPlanPeriod = (startTime?: string, endTime?: string) => {
+  if (startTime && endTime) {
+    return `${formatCompactTime(startTime)} ~ ${formatCompactTime(endTime)}`
+  } else if (startTime) {
+    return `${formatCompactTime(startTime)} ~`
+  } else if (endTime) {
+    return `~ ${formatCompactTime(endTime)}`
+  }
+  return '-'
+}
+
+/**
+ * 计算预计工时
+ */
+const calculateHours = (startTime?: string, endTime?: string) => {
+  if (!startTime || !endTime) return '-'
+
+  const start = new Date(startTime)
+  const end = new Date(endTime)
+  const diffMs = end.getTime() - start.getTime()
+  const diffHours = diffMs / (1000 * 60 * 60)
+
+  if (diffHours <= 0) return '-'
+
+  // 如果小于1小时，显示分钟
+  if (diffHours < 1) {
+    const minutes = Math.round(diffHours * 60)
+    return `${minutes}分钟`
+  }
+
+  // 如果小于24小时，显示小时
+  if (diffHours < 24) {
+    return `${diffHours.toFixed(1)}小时`
+  }
+
+  // 如果大于24小时，显示天数
+  const days = Math.floor(diffHours / 24)
+  const hours = Math.round(diffHours % 24)
+  return hours > 0 ? `${days}天${hours}小时` : `${days}天`
 }
 
 // 截止日期样式
@@ -89,10 +137,10 @@ const dueDateClass = computed(() => {
   if (props.task.isOverdue) return 'text-red-500'
 
   // 其他状态：3天内到期显示橙色
-  const dueTime = props.task.dueTime || props.task.DueTime
-  if (!dueTime) return ''
+  const planEndTime = props.task.planEndTime
+  if (!planEndTime) return ''
   const today = new Date()
-  const dueDate = new Date(dueTime)
+  const dueDate = new Date(planEndTime)
   if (isNaN(dueDate.getTime())) return ''
   const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 
