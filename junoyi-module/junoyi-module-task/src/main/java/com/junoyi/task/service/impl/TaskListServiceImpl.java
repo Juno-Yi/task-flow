@@ -385,7 +385,8 @@ public class TaskListServiceImpl implements ITaskListService {
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
         task.setPriority(dto.getPriority());
-//        task.setDueTime(dto.getDueTime());
+        task.setPlanStartTime(dto.getPlanStartTime());
+        task.setPlanEndTime(dto.getPlanEndTime());
         task.setRemark(dto.getRemark());
         task.setUpdateBy(SecurityUtils.getUserName());
         task.setUpdateTime(DateUtils.getNowDate());
@@ -399,7 +400,7 @@ public class TaskListServiceImpl implements ITaskListService {
         TaskUser ownerRel = new TaskUser();
         ownerRel.setTaskId(dto.getId());
         ownerRel.setUserId(dto.getOwnerUserId());
-        ownerRel.setTaskRole(2);
+        ownerRel.setTaskRole(1);
         ownerRel.setCreateTime(now);
         taskUserMapper.insert(ownerRel);
 
@@ -411,7 +412,7 @@ public class TaskListServiceImpl implements ITaskListService {
                 TaskUser executorRel = new TaskUser();
                 executorRel.setTaskId(dto.getId());
                 executorRel.setUserId(userId);
-                executorRel.setTaskRole(1);
+                executorRel.setTaskRole(2);
                 executorRel.setCreateTime(now);
                 taskUserMapper.insert(executorRel);
             }
