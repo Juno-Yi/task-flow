@@ -1,7 +1,7 @@
 declare namespace Api.Task {
 
     /**
-     * 任务物品 VO
+     * 任务物品 VO（我的任务列表项）
      */
     interface TaskItemVO {
         id: number
