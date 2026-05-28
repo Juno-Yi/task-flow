@@ -225,9 +225,99 @@
             record_id AS recordId,
             file_name AS fileName,
             file_url AS fileUrl
-        FROM task_record_attachment
+        FROM task_attachment
         WHERE record_id = #{id}
         ORDER BY create_time ASC
     </select>
 
+    <!-- TaskItemVO 结果映射 -->
+    <resultMap id="TaskItemVOResultMap" type="com.junoyi.task.domain.vo.TaskItemVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="priority" column="priority"/>
+        <result property="planStartTime" column="plan_start_time"/>
+        <result property="planEndTime" column="plan_end_time"/>
+        <result property="isOverdue" column="is_overdue"/>
+        <result property="remark" column="remark"/>
+
+        <!-- 负责人信息 -->
+        <association property="ownerUser" javaType="com.junoyi.task.domain.vo.TaskItemVO$OwnerUser">
+            <result property="userId" column="owner_user_id"/>
+            <result property="avatar" column="owner_avatar"/>
+            <result property="nickName" column="owner_nick_name"/>
+        </association>
+
+        <!-- 协作人列表 -->
+        <collection property="taskUserList"
+                    ofType="com.junoyi.task.domain.vo.TaskItemVO$TaskUser"
+                    column="id"
+                    select="selectItemTaskUsersByTaskId"/>
+    </resultMap>
+
+    <!-- 查询当前月份与任务时间区间有交集的任务列表 -->
+    <select id="selectCurrentMonthTaskList" resultMap="TaskItemVOResultMap">
+        SELECT
+        t.id,
+        t.title,
+        t.description,
+        t.status,
+        t.priority,
+        t.plan_start_time,
+        t.plan_end_time,
+        -- 计算是否逾期：已完成不算逾期，未完成且超过计划结束时间算逾期
+        CASE
+        WHEN t.status = 4 THEN FALSE
+        WHEN t.plan_end_time IS NULL THEN FALSE
+        WHEN NOW() > t.plan_end_time THEN TRUE
+        ELSE FALSE
+        END AS is_overdue,
+        t.remark,
+        -- 负责人信息（taskRole = 1 表示负责人）
+        owner_su.user_id AS owner_user_id,
+        owner_su.avatar AS owner_avatar,
+        owner_su.nick_name AS owner_nick_name
+        FROM task t
+        -- 关联负责人
+        LEFT JOIN task_user owner_tu ON owner_tu.task_id = t.id AND owner_tu.task_role = 1
+        LEFT JOIN sys_user owner_su ON owner_su.user_id = owner_tu.user_id AND owner_su.del_flag = 0
+        WHERE t.del_flag = 0
+        -- 用户是任务的参与者（负责人或协作人）
+        AND EXISTS (
+        SELECT 1
+        FROM task_user tu
+        WHERE tu.task_id = t.id
+        AND tu.user_id = #{userId}
+        )
+        -- 任务的计划时间与当前月份有交集
+        -- 交集条件：任务开始时间 = 月末 AND 任务结束时间 >= 月初
+        AND (
+        (t.plan_start_time IS NOT NULL AND t.plan_end_time IS NOT NULL
+        AND t.plan_start_time &lt;= #{monthEnd}
+        AND t.plan_end_time &gt;= #{monthStart})
+        OR
+        -- 如果只有开始时间，判断开始时间在当前月内
+        (t.plan_start_time IS NOT NULL AND t.plan_end_time IS NULL
+        AND t.plan_start_time BETWEEN #{monthStart} AND #{monthEnd})
+        OR
+        -- 如果只有结束时间，判断结束时间在当前月内
+        (t.plan_start_time IS NULL AND t.plan_end_time IS NOT NULL
+        AND t.plan_end_time BETWEEN #{monthStart} AND #{monthEnd})
+        )
+        ORDER BY t.plan_start_time ASC, t.create_time DESC
+    </select>
+
+    <!-- 根据任务ID查询TaskItem协作人列表 -->
+    <select id="selectItemTaskUsersByTaskId" resultType="com.junoyi.task.domain.vo.TaskItemVO$TaskUser">
+        SELECT
+            su.user_id AS userId,
+            su.avatar AS avatar,
+            su.nick_name AS nickName
+        FROM task_user tu
+                 INNER JOIN sys_user su ON su.user_id = tu.user_id AND su.del_flag = 0
+        WHERE tu.task_id = #{id}
+          AND tu.task_role = 2
+        ORDER BY tu.create_time ASC
+    </select>
 </mapper>

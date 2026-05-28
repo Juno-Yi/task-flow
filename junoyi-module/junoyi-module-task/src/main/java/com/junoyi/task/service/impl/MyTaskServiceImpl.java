@@ -31,15 +31,18 @@ public class MyTaskServiceImpl implements IMyTaskService {
 
     /**
      * 获取当前月的任务列表
+     *
      * @param userId 用户ID
      * @return 任务列表
      */
     @Override
-    public List<TaskItemVO> getCurrentMonthMyTask(Long userId){
+    public List<TaskItemVO> getCurrentMonthMyTask(Long userId) {
+        // 参数校验
         if (userId == null || userId <= 0) {
             throw new TaskException("用户ID不能为空");
         }
 
+        // 2. 计算当前月的起止时间
         LocalDate currentDate = LocalDate.now();
         LocalDate firstDayOfMonth = currentDate.withDayOfMonth(1);
         int daysOfMonth = currentDate.lengthOfMonth();
@@ -51,7 +54,10 @@ public class MyTaskServiceImpl implements IMyTaskService {
         Date monthStart = Date.from(monthStartDateTime.atZone(ZoneId.systemDefault()).toInstant());
         Date monthEnd = Date.from(monthEndDateTime.atZone(ZoneId.systemDefault()).toInstant());
 
+        // 查询当前月的任务列表
+        List<TaskItemVO> taskList = taskMapper.selectCurrentMonthTaskList(userId, monthStart, monthEnd);
 
-        return List.of();
+        // 返回结果（如果为空返回空列表）
+        return taskList != null ? taskList : List.of();
     }
 }
