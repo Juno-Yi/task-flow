@@ -93,21 +93,6 @@ declare namespace Api.Task {
     latestRejectRecord?: TaskRecordItem
   }
 
-  interface TaskItemVO {
-    id: number
-    title: string
-    description?: string
-    status: number
-    priority: number
-    ownerUser?: OwnerUser
-    taskUserList?: TaskUser[]
-    startTime?: string
-    dueTime?: string
-    DueTime?: string
-    isOverdue?: boolean
-    remark?: string
-    projectId?: number
-  }
 
   interface TaskFormData {
     id?: number
