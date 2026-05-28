@@ -70,11 +70,17 @@ declare namespace Api.Task {
     title: string
     description?: string
     status?: number
+    statusLabel?: string
+    statusType?: string
     priority: number
+    priorityLabel?: string
+    priorityType?: string
     taskUserList?: TaskUser[]
     ownerUser?: OwnerUser
+    planStartTime?: string
+    planEndTime?: string
     startTime?: string
-    dueTime?: string
+    endTime?: string
     remark?: string
     isOverdue?: boolean
     projectId?: number

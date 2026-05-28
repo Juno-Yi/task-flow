@@ -47,14 +47,24 @@ public class TaskListDetailVO {
     private String priorityType;
 
     /**
-     * 开始时间
+     * 计划开始时间
+     */
+    private Date planStartTime;
+
+    /**
+     * 计划结束时间
+     */
+    private Date planEndTime;
+
+    /**
+     * 实际开始时间
      */
     private Date startTime;
 
     /**
-     * 截止时间
+     * 实际结束时间
      */
-    private Date dueTime;
+    private Date endTime;
 
     /**
      * 是否逾期（计算字段，非数据库存储）

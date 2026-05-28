@@ -19,6 +19,7 @@ import com.junoyi.task.domain.po.Task;
 import com.junoyi.task.domain.po.TaskUser;
 import com.junoyi.task.domain.vo.TaskListDetailVO;
 import com.junoyi.task.domain.vo.TaskListVO;
+import com.junoyi.task.enums.TaskRecordActionType;
 import com.junoyi.task.exception.TaskException;
 import com.junoyi.task.mapper.TaskListMapper;
 import com.junoyi.task.mapper.TaskUserMapper;
@@ -173,36 +174,98 @@ public class TaskListServiceImpl implements ITaskListService {
      */
     @Override
     public TaskListDetailVO getTaskDetail(Long taskId) {
+        // 参数校验
         if (taskId == null) {
             throw new TaskException("任务ID不能为空");
         }
+
+        // 查询任务详情
         TaskListDetailVO detailVO = taskListMapper.selectTaskDetailById(taskId);
         if (detailVO == null) {
             throw new TaskException("任务不存在");
         }
-        if (detailVO.getRecordList() != null && !detailVO.getRecordList().isEmpty()) {
-            for (TaskListDetailVO.RecordItem recordItem : detailVO.getRecordList()) {
-                if (recordItem == null || recordItem.getActionType() == null) {
-                    continue;
-                }
-                if (recordItem.getActionType() == 1) {
-                    recordItem.setActionTypeLabel("提交任务");
-                    if (detailVO.getLatestSubmitRecord() == null) {
-                        detailVO.setLatestSubmitRecord(recordItem);
-                    }
-                } else if (recordItem.getActionType() == 2) {
-                    recordItem.setActionTypeLabel("驳回任务");
-                    if (detailVO.getLatestRejectRecord() == null) {
-                        detailVO.setLatestRejectRecord(recordItem);
-                    }
-                } else if (recordItem.getActionType() == 3) {
-                    recordItem.setActionTypeLabel("审核通过");
-                } else {
-                    recordItem.setActionTypeLabel("任务操作");
-                }
+
+        // 处理任务记录列表
+        processTaskRecords(detailVO);
+
+        // 填充字典标签
+        fillDictLabels(detailVO);
+
+        return detailVO;
+    }
+
+    /**
+     * 处理任务记录列表
+     * - 填充操作类型标签
+     * - 提取最新的提交记录和驳回记录
+     *
+     * @param detailVO 任务详情VO
+     */
+    private void processTaskRecords(TaskListDetailVO detailVO) {
+        List<TaskListDetailVO.RecordItem> recordList = detailVO.getRecordList();
+        if (recordList == null || recordList.isEmpty()) {
+            return;
+        }
+
+        TaskListDetailVO.RecordItem latestSubmitRecord = null;
+        TaskListDetailVO.RecordItem latestRejectRecord = null;
+
+        // 遍历记录列表（假设已按时间倒序排列）
+        for (TaskListDetailVO.RecordItem record : recordList) {
+            if (record == null || record.getActionType() == null) {
+                continue;
+            }
+
+            // 使用枚举获取操作类型标签
+            String actionTypeLabel = TaskRecordActionType.getLabelByValue(record.getActionType());
+            record.setActionTypeLabel(actionTypeLabel);
+
+            // 提取最新的提交记录（只取第一条）
+            if (TaskRecordActionType.SUBMIT.getValue().equals(record.getActionType()) && latestSubmitRecord == null) {
+                latestSubmitRecord = record;
+            }
+
+            // 提取最新的驳回记录（只取第一条）
+            if (TaskRecordActionType.REJECT.getValue().equals(record.getActionType()) && latestRejectRecord == null) {
+                latestRejectRecord = record;
+            }
+
+            // 如果两个记录都找到了，可以提前退出循环
+            if (latestSubmitRecord != null && latestRejectRecord != null) {
+                break;
             }
         }
-        return detailVO;
+
+        // 设置最新记录
+        detailVO.setLatestSubmitRecord(latestSubmitRecord);
+        detailVO.setLatestRejectRecord(latestRejectRecord);
+    }
+
+    /**
+     * 填充字典标签（状态、优先级等）
+     *
+     * @param detailVO 任务详情VO
+     */
+    private void fillDictLabels(TaskListDetailVO detailVO) {
+        // 填充状态标签
+        if (detailVO.getStatus() != null) {
+            Map<String, SysDictDataVO> statusMap = buildDictMap("task_status");
+            SysDictDataVO statusDict = statusMap.get(String.valueOf(detailVO.getStatus()));
+            if (statusDict != null) {
+                detailVO.setStatusLabel(statusDict.getDictLabel());
+                detailVO.setStatusType(statusDict.getListClass());
+            }
+        }
+
+        // 填充优先级标签
+        if (detailVO.getPriority() != null) {
+            Map<String, SysDictDataVO> priorityMap = buildDictMap("task_priority");
+            SysDictDataVO priorityDict = priorityMap.get(String.valueOf(detailVO.getPriority()));
+            if (priorityDict != null) {
+                detailVO.setPriorityLabel(priorityDict.getDictLabel());
+                detailVO.setPriorityType(priorityDict.getListClass());
+            }
+        }
     }
 
     /**

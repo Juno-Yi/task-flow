@@ -307,15 +307,15 @@ const initForm = () => {
       priority: props.taskData.priority ?? 1,
       ownerUserId: props.taskData.ownerUser?.userId,
       userIds: props.taskData.taskUserList?.map(item => item.userId) || [],
-      planStartTime: props.taskData.startTime,
-      planEndTime: props.taskData.dueTime,
+      planStartTime: props.taskData.planStartTime,
+      planEndTime: props.taskData.planEndTime,
       remark: props.taskData.remark || ''
     })
 
     // 计算小时数
-    if (props.taskData.startTime && props.taskData.dueTime) {
-      const start = new Date(props.taskData.startTime)
-      const end = new Date(props.taskData.dueTime)
+    if (props.taskData.planStartTime && props.taskData.planEndTime) {
+      const start = new Date(props.taskData.planStartTime)
+      const end = new Date(props.taskData.planEndTime)
       const diffMs = end.getTime() - start.getTime()
       const diffHours = diffMs / (1000 * 60 * 60)
       if (diffHours > 0) {
