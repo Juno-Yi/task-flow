@@ -1,6 +1,7 @@
 package com.junoyi.task.service;
 
 import com.junoyi.task.domain.vo.TaskItemVO;
+import com.junoyi.task.domain.vo.TaskListDetailVO;
 
 import java.util.List;
 
@@ -16,4 +17,12 @@ public interface IMyTaskService {
      * @return 任务列表
      */
     List<TaskItemVO> getCurrentMonthMyTask(Long userId);
+
+    /**
+     * 获取我的任务详情
+     * @param taskId 任务ID
+     * @param userId 用户ID
+     * @return 任务详情
+     */
+    TaskListDetailVO getMyTaskDetail(Long taskId, Long userId);
 }

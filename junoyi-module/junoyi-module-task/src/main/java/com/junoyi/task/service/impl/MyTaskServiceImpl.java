@@ -2,6 +2,7 @@ package com.junoyi.task.service.impl;
 
 import com.junoyi.framework.core.domain.module.R;
 import com.junoyi.task.domain.vo.TaskItemVO;
+import com.junoyi.task.domain.vo.TaskListDetailVO;
 import com.junoyi.task.exception.TaskException;
 import com.junoyi.task.mapper.TaskMapper;
 import com.junoyi.task.mapper.TaskUserMapper;
@@ -59,5 +60,16 @@ public class MyTaskServiceImpl implements IMyTaskService {
 
         // 返回结果（如果为空返回空列表）
         return taskList != null ? taskList : List.of();
+    }
+
+    /**
+     * 获取我的任务详情
+     * @param taskId 任务ID
+     * @param userId 用户ID
+     * @return 任务详情
+     */
+    @Override
+    public TaskListDetailVO getMyTaskDetail(Long taskId, Long userId) {
+        return null;
     }
 }
