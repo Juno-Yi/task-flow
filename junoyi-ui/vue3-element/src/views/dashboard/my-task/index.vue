@@ -59,8 +59,8 @@
                   {{ currentTaskDetail.isOverdue ? '已逾期' : '未逾期' }}
                 </ElTag>
               </ElDescriptionsItem>
-              <ElDescriptionsItem label="执行人" :span="2">{{ getUserNames(currentTaskDetail.taskUserList) }}</ElDescriptionsItem>
-              <ElDescriptionsItem label="备注" :span="2">{{ currentTaskDetail.remark || '-' }}</ElDescriptionsItem>
+              <ElDescriptionsItem label="协作人" :span="2">{{ getUserNames(currentTaskDetail.taskUserList) }}</ElDescriptionsItem>
+              <ElDescriptionsItem label="备注" :span="2">{{ currentTaskDetail.remark || '无' }}</ElDescriptionsItem>
             </ElDescriptions>
 
             <ElCard v-if="currentTaskDetail.latestRejectRecord" shadow="never" class="reject-record-card">
@@ -512,7 +512,7 @@ const getPriorityLabel = (priority?: number) => {
       return '-'
   }
 }
-const getUserNames = (users?: Api.Task.TaskUser[]) => users?.map(item => item.nickName || `用户${item.userId}`).join('、') || '-'
+const getUserNames = (users?: Api.Task.TaskUser[]) => users?.map(item => item.nickName || `用户${item.userId}`).join('、') || '无'
 
 onMounted(loadTasks)
 </script>
