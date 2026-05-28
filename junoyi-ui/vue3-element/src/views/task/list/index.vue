@@ -579,6 +579,14 @@ const {
         }
       },
       {
+        prop: 'estimatedHours',
+        label: '预计工时',
+        width: 110,
+        align: 'center',
+        headerAlign: 'center',
+        formatter: (row: TaskListVO) => calculateHours(row.planStartTime, row.planEndTime)
+      },
+      {
         prop: 'realPeriod',
         label: '实际时间',
         width: 250,
