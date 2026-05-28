@@ -120,11 +120,11 @@ declare namespace Api.Task {
     title: string
     description?: string
     priority?: number
-    dueTime?: string
+    planStartTime?: string
+    planEndTime?: string
     userIds?: number[]
     ownerUserId?: number
     remark?: string
-    syncSchedule?: boolean
   }
 
   interface TaskSubmitAttachment {

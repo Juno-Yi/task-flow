@@ -227,7 +227,8 @@ public class TaskListServiceImpl implements ITaskListService {
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
         task.setPriority(dto.getPriority());
-//        task.setDueTime(dto.getDueTime());
+        task.setPlanStartTime(dto.getPlanStartTime());
+        task.setPlanEndTime(dto.getPlanEndTime());
         task.setRemark(dto.getRemark());
 
         // 默认值
@@ -245,10 +246,11 @@ public class TaskListServiceImpl implements ITaskListService {
         TaskUser ownerRel = new TaskUser();
         ownerRel.setTaskId(task.getId());
         ownerRel.setUserId(dto.getOwnerUserId());
-        ownerRel.setTaskRole(2);
+        // 负责人状态为1
+        ownerRel.setTaskRole(1);
         ownerRel.setCreateTime(now);
         taskUserMapper.insert(ownerRel);
-        // 再插入执行员（去重，避免重复）
+        // 再插入协作人（去重，避免重复）
         if (dto.getUserIds() != null && !dto.getUserIds().isEmpty()) {
             for (Long userId : dto.getUserIds()) {
                 if (userId == null) {
@@ -261,7 +263,8 @@ public class TaskListServiceImpl implements ITaskListService {
                 TaskUser executorRel = new TaskUser();
                 executorRel.setTaskId(task.getId());
                 executorRel.setUserId(userId);
-                executorRel.setTaskRole(1);
+                // 协作人状态为2
+                executorRel.setTaskRole(2);
                 executorRel.setCreateTime(now);
                 taskUserMapper.insert(executorRel);
             }

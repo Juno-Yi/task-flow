@@ -83,11 +83,11 @@
             </if>
             <!-- 创建时间起始 -->
             <if test="query != null and query.startTime != null">
-                AND t.create_time &gt;= #{query.startTime}
+                AND t.start_time &gt;= #{query.startTime}
             </if>
             <!-- 计划结束时间截止 -->
             <if test="query != null and query.endTime != null">
-                AND t.plan_end_time &lt;= #{query.endTime}
+                AND t.end_time &lt;= #{query.endTime}
             </if>
         </where>
         ORDER BY t.create_time DESC

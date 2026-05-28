@@ -34,17 +34,22 @@ public class TaskListDTO {
     private Integer priority;
 
     /**
-     * 截止时间
+     * 计划开始时间
      */
-    private Date dueTime;
+    private Date planStartTime;
 
     /**
-     * 执行人ID列表
+     * 计划结束时间
+     */
+    private Date planEndTime;
+
+    /**
+     * 协作人ID列表
      */
     private List<Long> userIds;
 
     /**
-     * 项目负责人
+     * 任务负责人
      */
     private Long ownerUserId;
 
@@ -53,8 +58,4 @@ public class TaskListDTO {
      */
     private String remark;
 
-    /**
-     * 是否同步企业微信日程
-     */
-    private Boolean syncSchedule;
 }
