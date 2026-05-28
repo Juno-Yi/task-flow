@@ -256,7 +256,7 @@
                     select="selectItemTaskUsersByTaskId"/>
     </resultMap>
 
-    <!-- 查询当前月份与任务时间区间有交集的任务列表 -->
+    <!-- 查询当前月份与任务时间区间有交集的任务列表（查询所有未完成任务 + 当月已完成任务） -->
     <select id="selectCurrentMonthTaskList" resultMap="TaskItemVOResultMap">
         SELECT
         t.id,
@@ -290,22 +290,23 @@
         WHERE tu.task_id = t.id
         AND tu.user_id = #{userId}
         )
-        -- 任务的计划时间与当前月份有交集
-        -- 交集条件：任务开始时间 = 月末 AND 任务结束时间 >= 月初
+        -- 优化查询逻辑：显示所有未完成任务 + 当月已完成的任务
         AND (
-        (t.plan_start_time IS NOT NULL AND t.plan_end_time IS NOT NULL
-        AND t.plan_start_time &lt;= #{monthEnd}
-        AND t.plan_end_time &gt;= #{monthStart})
+        -- 未完成的任务（状态 0,1,2,3）全部显示
+        t.status IN (0, 1, 2, 3)
         OR
-        -- 如果只有开始时间，判断开始时间在当前月内
-        (t.plan_start_time IS NOT NULL AND t.plan_end_time IS NULL
-        AND t.plan_start_time BETWEEN #{monthStart} AND #{monthEnd})
-        OR
-        -- 如果只有结束时间，判断结束时间在当前月内
-        (t.plan_start_time IS NULL AND t.plan_end_time IS NOT NULL
-        AND t.plan_end_time BETWEEN #{monthStart} AND #{monthEnd})
+        -- 已完成的任务（状态 4）只显示当月完成的
+        (t.status = 4 AND t.update_time BETWEEN #{monthStart} AND #{monthEnd})
         )
-        ORDER BY t.plan_start_time ASC, t.create_time DESC
+        ORDER BY
+        -- 优先级排序：未完成任务在前，已完成任务在后
+        CASE WHEN t.status = 4 THEN 1 ELSE 0 END ASC,
+        -- 按优先级降序（紧急优先）
+        t.priority DESC,
+        -- 按计划开始时间升序
+        t.plan_start_time ASC,
+        -- 最后按创建时间降序
+        t.create_time DESC
     </select>
 
     <!-- 根据任务ID查询TaskItem协作人列表 -->
