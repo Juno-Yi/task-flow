@@ -1,6 +1,5 @@
 package com.junoyi.task.service.impl;
 
-import com.junoyi.framework.core.domain.module.R;
 import com.junoyi.task.domain.vo.TaskItemVO;
 import com.junoyi.task.domain.vo.TaskListDetailVO;
 import com.junoyi.task.exception.TaskException;
@@ -64,12 +63,34 @@ public class MyTaskServiceImpl implements IMyTaskService {
 
     /**
      * 获取我的任务详情
+     *
      * @param taskId 任务ID
      * @param userId 用户ID
      * @return 任务详情
      */
     @Override
     public TaskListDetailVO getMyTaskDetail(Long taskId, Long userId) {
-        return null;
+        //  参数校验
+        if (taskId == null || taskId <= 0) {
+            throw new TaskException("任务ID不能为空");
+        }
+        if (userId == null || userId <= 0) {
+            throw new TaskException("用户ID不能为空");
+        }
+
+        // 验证用户是否有权限查看该任务（是负责人或协作人）
+        Long relationCount = taskMapper.countTaskUserRelation(taskId, userId);
+        if (relationCount == null || relationCount == 0) {
+            throw new TaskException("无权限查看该任务");
+        }
+
+        // 查询任务详情
+        TaskListDetailVO detailVO = taskMapper.selectTaskDetailById(taskId);
+        if (detailVO == null) {
+            throw new TaskException("任务不存在");
+        }
+
+        // 4. 返回任务详情
+        return detailVO;
     }
 }
