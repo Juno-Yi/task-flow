@@ -321,4 +321,12 @@
           AND tu.task_role = 2
         ORDER BY tu.create_time ASC
     </select>
+
+    <!-- 统计用户与任务的关联关系（用于权限验证） -->
+    <select id="countTaskUserRelation" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM task_user tu
+        WHERE tu.task_id = #{taskId}
+          AND tu.user_id = #{userId}
+    </select>
 </mapper>
