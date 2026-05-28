@@ -7,30 +7,27 @@ import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
 import com.junoyi.project.domain.vo.ProjectListVO;
-import com.junoyi.project.service.IProjectActiveService;
+import com.junoyi.project.service.IProjectAcceptanceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 活跃项目控制器
+ * 项目结项控制器
  *
  * @author Fan
  */
 @RestController
-@RequestMapping("/project/active")
+@RequestMapping("/project/acceptance")
 @RequiredArgsConstructor
-public class ProjectActiveController extends BaseController {
+public class ProjectAcceptanceController extends BaseController {
 
-    private final IProjectActiveService projectActiveService;
+    private final IProjectAcceptanceService projectAcceptanceService;
 
-    /**
-     * 获取活跃项目列表（分页）
-     */
     @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
-    public R<PageResult<ProjectListVO>> getActiveList(ProjectListQueryDTO queryDTO){
-        return R.ok(projectActiveService.getActiveList(queryDTO,buildPage()));
+    public R<PageResult<ProjectListVO>> getProjectAcceptanceList(ProjectListQueryDTO queryDTO){
+        return R.ok(projectAcceptanceService.getAcceptanceList(queryDTO,buildPage()));
     }
 }

@@ -34,12 +34,12 @@ declare namespace Api.Task {
     priority: number
     priorityLabel?: string
     priorityType?: string
-    taskUserList?: TaskUser[]
     ownerUser?: OwnerUser
+    taskUserList?: TaskUser[]
+    planStartTime?: string
+    planEndTime?: string
     startTime?: string
-    dueTime?: string
-    DueTime?: string
-    finishTime?: string
+    endTime?: string
     isOverdue?: boolean
     latestSubmitTime?: string
   }
@@ -70,11 +70,17 @@ declare namespace Api.Task {
     title: string
     description?: string
     status?: number
+    statusLabel?: string
+    statusType?: string
     priority: number
+    priorityLabel?: string
+    priorityType?: string
     taskUserList?: TaskUser[]
     ownerUser?: OwnerUser
+    planStartTime?: string
+    planEndTime?: string
     startTime?: string
-    dueTime?: string
+    endTime?: string
     remark?: string
     isOverdue?: boolean
     projectId?: number
@@ -120,11 +126,11 @@ declare namespace Api.Task {
     title: string
     description?: string
     priority?: number
-    dueTime?: string
+    planStartTime?: string
+    planEndTime?: string
     userIds?: number[]
     ownerUserId?: number
     remark?: string
-    syncSchedule?: boolean
   }
 
   interface TaskSubmitAttachment {

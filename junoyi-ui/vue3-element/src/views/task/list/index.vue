@@ -45,31 +45,193 @@
     <ElDrawer v-model="detailVisible" title="任务详情" size="760px" destroy-on-close class="task-detail-drawer">
       <ElSkeleton :loading="detailLoading" animated>
         <template #default>
-          <div v-if="currentTaskDetail" class="space-y-4">
-            <ElDescriptions :column="2" border>
-              <ElDescriptionsItem label="任务标题" :span="2">{{ currentTaskDetail.title || '-' }}</ElDescriptionsItem>
-              <ElDescriptionsItem label="任务描述" :span="2">{{ currentTaskDetail.description || '-' }}</ElDescriptionsItem>
-              <ElDescriptionsItem label="负责人">{{ currentTaskDetail.ownerUser?.nickName || '-' }}</ElDescriptionsItem>
-              <ElDescriptionsItem label="截止时间">{{ formatTime(currentTaskDetail.dueTime) }}</ElDescriptionsItem>
-              <ElDescriptionsItem label="执行人" :span="2">{{ getUserNames(currentTaskDetail.taskUserList) }}</ElDescriptionsItem>
-              <ElDescriptionsItem label="备注" :span="2">{{ currentTaskDetail.remark || '-' }}</ElDescriptionsItem>
-            </ElDescriptions>
+          <div v-if="currentTaskDetail" class="task-detail-content">
+            <!-- 基本信息 -->
+            <ElCard shadow="never" class="detail-card">
+              <template #header>
+                <div class="card-header">
+                  <span class="card-title">基本信息</span>
+                </div>
+              </template>
+              <ElDescriptions :column="2" border>
+                <ElDescriptionsItem label="任务标题" :span="2">
+                  <span class="font-medium">{{ currentTaskDetail.title || '-' }}</span>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="任务描述" :span="2">
+                  <div class="task-description">{{ currentTaskDetail.description || '-' }}</div>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="任务状态">
+                  <ElTag :type="currentTaskDetail.statusType as any" size="default">
+                    {{ currentTaskDetail.statusLabel || '-' }}
+                  </ElTag>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="优先级">
+                  <ElTag :type="currentTaskDetail.priorityType as any" size="default">
+                    {{ currentTaskDetail.priorityLabel || '-' }}
+                  </ElTag>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="是否逾期">
+                  <ElTag :type="currentTaskDetail.isOverdue ? 'danger' : 'success'" size="default">
+                    {{ currentTaskDetail.isOverdue ? '已逾期' : '未逾期' }}
+                  </ElTag>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="所属项目">
+                  {{ currentTaskDetail.projectId ? `项目 #${currentTaskDetail.projectId}` : '普通任务' }}
+                </ElDescriptionsItem>
+              </ElDescriptions>
+            </ElCard>
 
-            <ElCard v-if="currentTaskDetail.recordList?.length" shadow="never">
-              <template #header><div class="font-medium">操作记录</div></template>
-              <ElTimeline>
-                <ElTimelineItem v-for="record in currentTaskDetail.recordList" :key="record.id" :timestamp="formatTime(record.createTime)" placement="top">
-                  <div class="space-y-1">
-                    <div class="font-medium">{{ record.actionTypeLabel || '任务操作' }}</div>
-                    <div class="text-sm text-gray-600">操作人：{{ record.operatorName || '-' }}</div>
-                    <div class="text-sm text-gray-600">说明：{{ record.remark || '-' }}</div>
-                    <div v-if="record.attachments?.length" class="flex flex-wrap gap-2 pt-1">
-                      <ElLink v-for="item in record.attachments" :key="`${item.id}-${item.fileUrl}`" :href="getFileUrl(item.fileUrl)" target="_blank" type="primary">{{ item.fileName || '附件' }}</ElLink>
+            <!-- 人员信息 -->
+            <ElCard shadow="never" class="detail-card">
+              <template #header>
+                <div class="card-header">
+                  <span class="card-title">人员信息</span>
+                </div>
+              </template>
+              <ElDescriptions :column="2" border>
+                <ElDescriptionsItem label="负责人">
+                  <div v-if="currentTaskDetail.ownerUser" class="user-info">
+                    <ElAvatar :size="32" :src="currentTaskDetail.ownerUser.avatar">
+                      {{ currentTaskDetail.ownerUser.nickName?.slice(0, 1) || 'U' }}
+                    </ElAvatar>
+                    <span class="user-name">{{ currentTaskDetail.ownerUser.nickName || '-' }}</span>
+                  </div>
+                  <span v-else>-</span>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="协作人" :span="2">
+                  <div v-if="currentTaskDetail.taskUserList?.length" class="user-list">
+                    <div v-for="user in currentTaskDetail.taskUserList" :key="user.userId" class="user-info">
+                      <ElAvatar :size="32" :src="user.avatar">
+                        {{ user.nickName?.slice(0, 1) || 'U' }}
+                      </ElAvatar>
+                      <span class="user-name">{{ user.nickName || '-' }}</span>
                     </div>
                   </div>
+                  <span v-else>-</span>
+                </ElDescriptionsItem>
+              </ElDescriptions>
+            </ElCard>
+
+            <!-- 时间信息 -->
+            <ElCard shadow="never" class="detail-card">
+              <template #header>
+                <div class="card-header">
+                  <span class="card-title">时间信息</span>
+                </div>
+              </template>
+              <ElDescriptions :column="2" border>
+                <ElDescriptionsItem label="计划开始时间">
+                  <div class="time-info">
+                    <ElIcon class="time-icon"><Clock /></ElIcon>
+                    <span>{{ formatTime(currentTaskDetail.planStartTime) }}</span>
+                  </div>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="计划结束时间">
+                  <div class="time-info">
+                    <ElIcon class="time-icon"><Clock /></ElIcon>
+                    <span>{{ formatTime(currentTaskDetail.planEndTime) }}</span>
+                  </div>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="实际开始时间">
+                  <div class="time-info">
+                    <ElIcon class="time-icon"><VideoPlay /></ElIcon>
+                    <span>{{ formatTime(currentTaskDetail.startTime) }}</span>
+                  </div>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="实际结束时间">
+                  <div class="time-info">
+                    <ElIcon class="time-icon"><CircleCheck /></ElIcon>
+                    <span>{{ formatTime(currentTaskDetail.endTime) }}</span>
+                  </div>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="计划工时" :span="2">
+                  <div class="time-info">
+                    <ElIcon class="time-icon"><Timer /></ElIcon>
+                    <span>{{ calculateHours(currentTaskDetail.planStartTime, currentTaskDetail.planEndTime) }}</span>
+                  </div>
+                </ElDescriptionsItem>
+              </ElDescriptions>
+            </ElCard>
+
+            <!-- 其他信息 -->
+            <ElCard shadow="never" class="detail-card">
+              <template #header>
+                <div class="card-header">
+                  <span class="card-title">其他信息</span>
+                </div>
+              </template>
+              <ElDescriptions :column="2" border>
+                <ElDescriptionsItem label="创建人">
+                  {{ currentTaskDetail.createBy || '-' }}
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="创建时间">
+                  {{ formatTime(currentTaskDetail.createTime) }}
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="更新人">
+                  {{ currentTaskDetail.updateBy || '-' }}
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="更新时间">
+                  {{ formatTime(currentTaskDetail.updateTime) }}
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="备注" :span="2">
+                  <div class="task-remark">{{ currentTaskDetail.remark || '-' }}</div>
+                </ElDescriptionsItem>
+              </ElDescriptions>
+            </ElCard>
+
+            <!-- 操作记录 -->
+            <ElCard v-if="currentTaskDetail.recordList?.length" shadow="never" class="detail-card">
+              <template #header>
+                <div class="card-header">
+                  <span class="card-title">操作记录</span>
+                  <ElTag size="small" type="info">{{ currentTaskDetail.recordList.length }} 条记录</ElTag>
+                </div>
+              </template>
+              <ElTimeline>
+                <ElTimelineItem
+                  v-for="record in currentTaskDetail.recordList"
+                  :key="record.id"
+                  :timestamp="formatTime(record.createTime)"
+                  placement="top"
+                >
+                  <ElCard shadow="hover" class="record-card">
+                    <div class="record-header">
+                      <ElTag :type="getActionTypeTag(record.actionType)" size="small">
+                        {{ record.actionTypeLabel || '任务操作' }}
+                      </ElTag>
+                      <div class="record-operator">
+                        <ElAvatar :size="24" :src="record.operatorAvatar">
+                          {{ record.operatorName?.slice(0, 1) || 'U' }}
+                        </ElAvatar>
+                        <span class="operator-name">{{ record.operatorName || '-' }}</span>
+                      </div>
+                    </div>
+                    <div v-if="record.remark" class="record-remark">
+                      {{ record.remark }}
+                    </div>
+                    <div v-if="record.attachments?.length" class="record-attachments">
+                      <div class="attachments-title">附件：</div>
+                      <div class="attachments-list">
+                        <ElLink
+                          v-for="item in record.attachments"
+                          :key="`${item.id}-${item.fileUrl}`"
+                          :href="getFileUrl(item.fileUrl)"
+                          target="_blank"
+                          type="primary"
+                          class="attachment-link"
+                        >
+                          <ElIcon><Document /></ElIcon>
+                          <span>{{ item.fileName || '附件' }}</span>
+                        </ElLink>
+                      </div>
+                    </div>
+                  </ElCard>
                 </ElTimelineItem>
               </ElTimeline>
             </ElCard>
+
+            <!-- 空状态 -->
+            <ElEmpty v-else description="暂无操作记录" />
           </div>
         </template>
       </ElSkeleton>
@@ -78,7 +240,8 @@
 </template>
 
 <script setup lang="ts">
-import { ElAvatar, ElMessage, ElMessageBox, ElTag, ElTooltip } from 'element-plus'
+import { ElAvatar, ElMessage, ElMessageBox, ElTag, ElTooltip, ElIcon } from 'element-plus'
+import { Clock, VideoPlay, CircleCheck, Timer, Document } from '@element-plus/icons-vue'
 import ArtButtonMore, { ButtonMoreItem } from '@/components/core/forms/art-button-more/index.vue'
 import { usePermission } from '@/hooks/core/usePermission'
 import { useTable } from '@/hooks/core/useTable'
@@ -91,7 +254,6 @@ import TaskDialog from './modules/task-dialog.vue'
 defineOptions({ name: 'TaskList' })
 
 type TaskListVO = Api.Task.TaskListVO
-type TaskFormData = Api.Task.TaskFormData
 type TaskActionKey = 'detail' | 'edit' | 'delete' | 'remind'
 
 const { hasPermission } = usePermission()
@@ -141,7 +303,7 @@ const showDialog = async (type: 'add' | 'edit', row?: TaskListVO) => {
   }
 }
 
-const handleDialogSuccess = async (formData: TaskFormData) => {
+const handleDialogSuccess = async (formData: any) => {
   const payload: Api.Task.TaskListDTO = {
     id: formData.id,
     title: formData.title,
@@ -149,9 +311,9 @@ const handleDialogSuccess = async (formData: TaskFormData) => {
     priority: formData.priority,
     ownerUserId: formData.ownerUserId,
     userIds: formData.userIds,
-    dueTime: formData.dueTime,
-    remark: formData.remark,
-    syncSchedule: formData.syncSchedule
+    planStartTime: formData.planStartTime,
+    planEndTime: formData.planEndTime,
+    remark: formData.remark
   }
 
   if (dialogType.value === 'edit') {
@@ -164,6 +326,60 @@ const handleDialogSuccess = async (formData: TaskFormData) => {
   await fetchAddTask(payload)
   ElMessage.success('新增任务成功')
   refreshData()
+}
+
+/**
+ * 计算两个时间之间的小时数
+ */
+const calculateHours = (startTime?: string, endTime?: string) => {
+  if (!startTime || !endTime) return '-'
+
+  const start = new Date(startTime)
+  const end = new Date(endTime)
+  const diffMs = end.getTime() - start.getTime()
+  const diffHours = diffMs / (1000 * 60 * 60)
+
+  if (diffHours <= 0) return '-'
+
+  // 如果小于1小时，显示分钟
+  if (diffHours < 1) {
+    const minutes = Math.round(diffHours * 60)
+    return `${minutes} 分钟`
+  }
+
+  // 如果小于24小时，显示小时
+  if (diffHours < 24) {
+    return `${diffHours.toFixed(1)} 小时`
+  }
+
+  // 如果大于24小时，显示天数和小时
+  const days = Math.floor(diffHours / 24)
+  const hours = Math.round(diffHours % 24)
+  return hours > 0 ? `${days} 天 ${hours} 小时` : `${days} 天`
+}
+
+/**
+ * 根据操作类型获取标签类型
+ */
+const getActionTypeTag = (actionType?: number): 'success' | 'info' | 'warning' | 'danger' => {
+  switch (actionType) {
+    case 1: // 提交任务
+      return 'success'
+    case 2: // 驳回任务
+      return 'danger'
+    case 3: // 审核通过
+      return 'success'
+    case 4: // 创建任务
+      return 'info'
+    case 5: // 更新任务
+      return 'warning'
+    case 7: // 开始任务
+      return 'success'
+    case 8: // 完成任务
+      return 'success'
+    default:
+      return 'info'
+  }
 }
 
 const loadTaskDict = async () => {
@@ -219,8 +435,6 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: TaskListVO) => {
       break
   }
 }
-
-const getUserNames = (users?: Api.Task.TaskUser[]) => users?.map(item => item.nickName || `用户${item.userId}`).join('、') || '-'
 
 const renderAssignees = (users?: Api.Task.TaskUser[]) => {
   if (!users?.length) return '-'
@@ -292,7 +506,7 @@ const {
     columnsFactory: () => [
       {
         prop: 'title',
-        label: '任务标题',
+        label: '任务',
         align: 'center',
         headerAlign: 'center',
         minWidth: 220,
@@ -331,13 +545,6 @@ const {
         }
       },
       {
-        prop: 'taskUserList',
-        label: '执行人',
-        headerAlign: 'center',
-        minWidth: 180,
-        formatter: (row: TaskListVO) => renderAssignees(row.taskUserList)
-      },
-      {
         prop: 'ownerUser.nickName',
         label: '负责人',
         align: 'center',
@@ -346,25 +553,49 @@ const {
         formatter: (row: TaskListVO) => row.ownerUser?.nickName || '-'
       },
       {
-        prop: 'startTime',
-        label: '开始时间',
+        prop: 'taskUserList',
+        label: '协助人',
         headerAlign: 'center',
-        width: 180,
-        formatter: (row: TaskListVO) => formatTime(row.startTime)
+        minWidth: 180,
+        formatter: (row: TaskListVO) => renderAssignees(row.taskUserList)
       },
       {
-        prop: 'dueTime',
-        label: '截止时间',
+        prop: 'planPeriod',
+        label: '计划时间',
+        width: 250,
+        align: 'center',
         headerAlign: 'center',
-        width: 180,
-        formatter: (row: TaskListVO) => formatTime(row.dueTime || row.DueTime)
+        formatter: (row: TaskListVO) => {
+          if (row.planStartTime && row.planEndTime) {
+            const startDate = formatTime(row.planStartTime as any)
+            const endDate = formatTime(row.planEndTime as any)
+            return `${startDate} ~ ${endDate}`
+          } else if (row.planStartTime) {
+            return `${formatTime(row.planStartTime as any)} ~ 未设置`
+          } else if (row.planEndTime) {
+            return `未设置 ~ ${formatTime(row.planEndTime as any)}`
+          }
+          return '未设置'
+        }
       },
       {
-        prop: 'finishTime',
-        label: '完成时间',
+        prop: 'realPeriod',
+        label: '实际时间',
+        width: 250,
+        align: 'center',
         headerAlign: 'center',
-        width: 180,
-        formatter: (row: TaskListVO) => formatTime(row.finishTime)
+        formatter: (row: TaskListVO) => {
+          if (row.startTime && row.endTime) {
+            const startDate = formatTime(row.startTime as any)
+            const endDate = formatTime(row.endTime as any)
+            return `${startDate} ~ ${endDate}`
+          } else if (row.startTime) {
+            return `${formatTime(row.startTime as any)} ~ 未结束`
+          } else if (row.endTime) {
+            return `无 ~ ${formatTime(row.planEndTime as any)}`
+          }
+          return '无'
+        }
       },
       {
         prop: 'isOverdue',
@@ -523,8 +754,169 @@ const getTaskPriorityType = (priority?: number) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+/* 任务详情抽屉样式 */
 :deep(.task-detail-drawer .el-drawer__body) {
   overflow-y: auto;
+  padding: 0;
+  background-color: var(--el-bg-color-page);
+}
+
+.task-detail-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-card {
+  border-radius: 8px;
+
+  :deep(.el-card__header) {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+  }
+
+  :deep(.el-card__body) {
+    padding: 20px;
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+  }
+}
+
+.task-description,
+.task-remark {
+  line-height: 1.6;
+  color: var(--el-text-color-regular);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .user-name {
+    font-size: 14px;
+    color: var(--el-text-color-primary);
+  }
+}
+
+.user-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.time-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .time-icon {
+    color: var(--el-color-primary);
+    font-size: 16px;
+  }
+}
+
+/* 操作记录样式 */
+:deep(.el-timeline) {
+  padding-left: 0;
+}
+
+:deep(.el-timeline-item__timestamp) {
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+}
+
+.record-card {
+  margin-top: 8px;
+  border-radius: 6px;
+
+  :deep(.el-card__body) {
+    padding: 16px;
+  }
+}
+
+.record-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.record-operator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .operator-name {
+    font-size: 14px;
+    color: var(--el-text-color-regular);
+  }
+}
+
+.record-remark {
+  padding: 12px;
+  background-color: var(--el-fill-color-light);
+  border-radius: 4px;
+  line-height: 1.6;
+  color: var(--el-text-color-regular);
+  margin-bottom: 12px;
+}
+
+.record-attachments {
+  .attachments-title {
+    font-size: 13px;
+    color: var(--el-text-color-secondary);
+    margin-bottom: 8px;
+  }
+
+  .attachments-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .attachment-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background-color: var(--el-fill-color-lighter);
+    border-radius: 4px;
+    transition: all 0.3s;
+
+    &:hover {
+      background-color: var(--el-color-primary-light-9);
+    }
+
+    .el-icon {
+      font-size: 14px;
+    }
+  }
+}
+
+/* 描述列表样式优化 */
+:deep(.el-descriptions) {
+  .el-descriptions__label {
+    font-weight: 500;
+    color: var(--el-text-color-secondary);
+  }
+
+  .el-descriptions__content {
+    color: var(--el-text-color-primary);
+  }
 }
 </style>

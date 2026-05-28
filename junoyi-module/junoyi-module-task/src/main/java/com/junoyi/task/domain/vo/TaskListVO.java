@@ -42,29 +42,34 @@ public class TaskListVO {
     private String priorityType;
 
     /**
-     * 任务执行人列表
-     */
-    private List<TaskUser> taskUserList;
-
-    /**
-     * 项目负责人
+     * 任务负责人
      */
     private OwnerUser ownerUser;
 
     /**
-     * 开始时间
+     * 任务协助人列表
+     */
+    private List<TaskUser> taskUserList;
+
+    /**
+     * 计划开始时间
+     */
+    private Date planStartTime;
+
+    /**
+     * 计划结束时间
+     */
+    private Date planEndTime;
+
+    /**
+     * 实际开始时间
      */
     private Date startTime;
 
     /**
-     * 截止时间
+     * 实际结束时间
      */
-    private Date DueTime;
-
-    /**
-     * 完成时间
-     */
-    private Date finishTime;
+    private Date endTime;
 
     /**
      * 是否逾期（计算字段，非数据库存储）
@@ -91,11 +96,8 @@ public class TaskListVO {
      */
     @Data
     public static class TaskUser {
-
         private Long userId;
-
         private String avatar;
-
         private String nickName;
     }
 }

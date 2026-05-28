@@ -11,12 +11,12 @@ import com.junoyi.project.domain.vo.ProjectListVO;
  *
  * @author Fan
  */
-public interface IProjectActiveService {
+public interface IProjectExecutionService {
 
     /**
-     * 获取活跃项目列表
+     * 获取项目执行中列表
      * @param queryDTO 查询数据
      * @return 活跃项目列表
      */
-    PageResult<ProjectListVO> getActiveList(ProjectListQueryDTO queryDTO, Page<Project> page);
+    PageResult<ProjectListVO> getExecutionList(ProjectListQueryDTO queryDTO, Page<Project> page);
 }

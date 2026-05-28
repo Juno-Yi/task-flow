@@ -12,7 +12,7 @@ import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
 import com.junoyi.project.mapper.ProjectMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
-import com.junoyi.project.service.IProjectActiveService;
+import com.junoyi.project.service.IProjectEndService;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
@@ -28,13 +28,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 活跃项目业务接口实现
+ * 项目节后业务接口实现
  *
  * @author Fan
  */
 @Service
 @RequiredArgsConstructor
-public class ProjectActiveServiceImpl implements IProjectActiveService {
+public class ProjectEndServiceImpl implements IProjectEndService {
 
     private final ProjectMapper projectMapper;
     private final ProjectMemberMapper projectMemberMapper;
@@ -42,12 +42,13 @@ public class ProjectActiveServiceImpl implements IProjectActiveService {
     private final SysDictApi sysDictApi;
 
     /**
-     * 获取活跃项目列表
-     * @param queryDTO 查询数据
-     * @return 活跃项目列表
+     * 获取项目结后列表
+     * @param queryDTO 查询参数
+     * @param page 分页
+     * @return 结后列表
      */
     @Override
-    public PageResult<ProjectListVO> getActiveList(ProjectListQueryDTO queryDTO, Page<Project> page) {
+    public PageResult<ProjectListVO> getEndList(ProjectListQueryDTO queryDTO, Page<Project> page) {
         // 获取当前用户ID
         Long currentUserId = SecurityUtils.getUserId();
 
@@ -84,13 +85,13 @@ public class ProjectActiveServiceImpl implements IProjectActiveService {
                 .like(StringUtils.isNotBlank(queryDTO.getName()), Project::getName, queryDTO.getName())
                 .eq(queryDTO.getType() != null, Project::getType, queryDTO.getType())
                 .eq(Project::isDelFlag, false)
-                // 核心：只查询活跃状态（1-进行中、3-已暂停、6-已延期）
-                .in(Project::getStatus, 1, 3, 6);
+                .in(Project::getStatus, 4,5);
 
         // 如果没有查看所有项目的权限，添加项目ID过滤条件
         if (!hasAllDataPermission && accessibleProjectIds != null) {
             wrapper.in(Project::getId, accessibleProjectIds);
         }
+
 
         wrapper.orderByDesc(Project::getCreateTime);
 
@@ -117,7 +118,6 @@ public class ProjectActiveServiceImpl implements IProjectActiveService {
                 .eq(ProjectMember::getStatus, 1); // 只统计在职成员
         List<ProjectMember> members = projectMemberMapper.selectList(memberWrapper);
 
-
         // 按项目ID分组统计成员数量
         Map<Long, Long> memberCountMap = members.stream()
                 .collect(Collectors.groupingBy(ProjectMember::getProjectId, Collectors.counting()));
@@ -135,7 +135,6 @@ public class ProjectActiveServiceImpl implements IProjectActiveService {
             leaderNameMap = sysUserMapper.selectBatchIds(leaderIds).stream()
                     .collect(Collectors.toMap(SysUser::getUserId, SysUser::getNickName));
         }
-
         // 批量查询项目任务统计
 //        Map<Long, TaskStatistics> taskStatisticsMap = calculateTaskStatistics(projectIds);
 
@@ -205,7 +204,6 @@ public class ProjectActiveServiceImpl implements IProjectActiveService {
 
             voList.add(vo);
         }
-
         // 返回分页结果
         return PageResult.of(
                 voList,
@@ -214,5 +212,4 @@ public class ProjectActiveServiceImpl implements IProjectActiveService {
                 (int) resultPage.getSize()
         );
     }
-
 }

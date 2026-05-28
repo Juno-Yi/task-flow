@@ -1,9 +1,11 @@
 package com.junoyi.task.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageQuery;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.task.domain.dto.TaskListDTO;
 import com.junoyi.task.domain.dto.TaskListQueryDTO;
+import com.junoyi.task.domain.po.Task;
 import com.junoyi.task.domain.vo.TaskListDetailVO;
 import com.junoyi.task.domain.vo.TaskListVO;
 
@@ -18,10 +20,10 @@ public interface ITaskListService {
      * 分页查询任务列表
      *
      * @param queryDTO 查询条件
-     * @param pageQuery 分页参数
+     * @param page 分页参数
      * @return 分页结果
      */
-    PageResult<TaskListVO> getTaskList(TaskListQueryDTO queryDTO, PageQuery pageQuery);
+    PageResult<TaskListVO> getTaskList(TaskListQueryDTO queryDTO, Page<Task> page);
 
     /**
      * 获取任务详情
