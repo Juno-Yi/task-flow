@@ -244,10 +244,10 @@ const sortTasks = (taskList: MyTask[]) => {
 
       score += priorityScore
 
-      // TODO: 截止时间紧迫度分数（最高60分）
-      const dueTime = null
-      if (dueTime) {
-        const dueTimeMs = new Date(dueTime).getTime()
+      // 计划结束时间紧迫度分数（最高60分）
+      const planEndTime = task.planEndTime
+      if (planEndTime) {
+        const dueTimeMs = new Date(planEndTime).getTime()
         const timeLeft = dueTimeMs - now
         const hoursLeft = timeLeft / (1000 * 60 * 60)
 
@@ -283,20 +283,17 @@ const sortTasks = (taskList: MyTask[]) => {
       return scoreB - scoreA
     }
 
-    // 分数相同时，按截止时间早的在前
-    // const aDueTime = a.DueTime || a.dueTime
-    // const bDueTime = b.DueTime || b.dueTime
+    // 分数相同时，按计划结束时间早的在前
+    const aPlanEndTime = a.planEndTime
+    const bPlanEndTime = b.planEndTime
 
-    const aDueTime = null
-    const bDueTime = null
-
-    if (aDueTime && bDueTime) {
-      return new Date(aDueTime).getTime() - new Date(bDueTime).getTime()
+    if (aPlanEndTime && bPlanEndTime) {
+      return new Date(aPlanEndTime).getTime() - new Date(bPlanEndTime).getTime()
     }
 
-    // 有截止时间的排在前面
-    if (aDueTime && !bDueTime) return -1
-    if (!aDueTime && bDueTime) return 1
+    // 有计划结束时间的排在前面
+    if (aPlanEndTime && !bPlanEndTime) return -1
+    if (!aPlanEndTime && bPlanEndTime) return 1
 
     return 0
   })
