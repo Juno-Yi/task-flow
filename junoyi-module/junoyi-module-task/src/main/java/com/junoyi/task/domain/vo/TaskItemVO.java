@@ -49,14 +49,14 @@ public class TaskItemVO {
     private List<TaskUser> taskUserList;
 
     /**
-     * 开始时间
+     * 计划开始时间
      */
-    private Date startTime;
+    private Date planStartTime;
 
     /**
-     * 截止时间
+     * 计划结束时间
      */
-    private Date DueTime;
+    private Date planEndTime;
 
     /**
      * 是否逾期（计算字段，非数据库存储）
@@ -79,15 +79,12 @@ public class TaskItemVO {
     }
 
     /**
-     * 任务执行人
+     * 任务协助人
      */
     @Data
     public static class TaskUser {
-
         private Long userId;
-
         private String avatar;
-
         private String nickName;
     }
 

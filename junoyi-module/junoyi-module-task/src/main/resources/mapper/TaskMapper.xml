@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.junoyi.task.mapper.TaskListMapper">
+<mapper namespace="com.junoyi.task.mapper.TaskMapper">
 
     <!-- TaskListVO 结果映射 -->
     <resultMap id="TaskListVOResultMap" type="com.junoyi.task.domain.vo.TaskListVO">
@@ -225,9 +225,108 @@
             record_id AS recordId,
             file_name AS fileName,
             file_url AS fileUrl
-        FROM task_record_attachment
+        FROM task_attachment
         WHERE record_id = #{id}
         ORDER BY create_time ASC
     </select>
 
+    <!-- TaskItemVO 结果映射 -->
+    <resultMap id="TaskItemVOResultMap" type="com.junoyi.task.domain.vo.TaskItemVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="priority" column="priority"/>
+        <result property="planStartTime" column="plan_start_time"/>
+        <result property="planEndTime" column="plan_end_time"/>
+        <result property="isOverdue" column="is_overdue"/>
+        <result property="remark" column="remark"/>
+
+        <!-- 负责人信息 -->
+        <association property="ownerUser" javaType="com.junoyi.task.domain.vo.TaskItemVO$OwnerUser">
+            <result property="userId" column="owner_user_id"/>
+            <result property="avatar" column="owner_avatar"/>
+            <result property="nickName" column="owner_nick_name"/>
+        </association>
+
+        <!-- 协作人列表 -->
+        <collection property="taskUserList"
+                    ofType="com.junoyi.task.domain.vo.TaskItemVO$TaskUser"
+                    column="id"
+                    select="selectItemTaskUsersByTaskId"/>
+    </resultMap>
+
+    <!-- 查询当前月份与任务时间区间有交集的任务列表（查询所有未完成任务 + 当月已完成任务） -->
+    <select id="selectCurrentMonthTaskList" resultMap="TaskItemVOResultMap">
+        SELECT
+        t.id,
+        t.title,
+        t.description,
+        t.status,
+        t.priority,
+        t.plan_start_time,
+        t.plan_end_time,
+        -- 计算是否逾期：已完成不算逾期，未完成且超过计划结束时间算逾期
+        CASE
+        WHEN t.status = 4 THEN FALSE
+        WHEN t.plan_end_time IS NULL THEN FALSE
+        WHEN NOW() > t.plan_end_time THEN TRUE
+        ELSE FALSE
+        END AS is_overdue,
+        t.remark,
+        -- 负责人信息（taskRole = 1 表示负责人）
+        owner_su.user_id AS owner_user_id,
+        owner_su.avatar AS owner_avatar,
+        owner_su.nick_name AS owner_nick_name
+        FROM task t
+        -- 关联负责人
+        LEFT JOIN task_user owner_tu ON owner_tu.task_id = t.id AND owner_tu.task_role = 1
+        LEFT JOIN sys_user owner_su ON owner_su.user_id = owner_tu.user_id AND owner_su.del_flag = 0
+        WHERE t.del_flag = 0
+        -- 用户是任务的参与者（负责人或协作人）
+        AND EXISTS (
+        SELECT 1
+        FROM task_user tu
+        WHERE tu.task_id = t.id
+        AND tu.user_id = #{userId}
+        )
+        -- 优化查询逻辑：显示所有未完成任务 + 当月已完成的任务
+        AND (
+        -- 未完成的任务（状态 0,1,2,3）全部显示
+        t.status IN (0, 1, 2, 3)
+        OR
+        -- 已完成的任务（状态 4）只显示当月完成的
+        (t.status = 4 AND t.update_time BETWEEN #{monthStart} AND #{monthEnd})
+        )
+        ORDER BY
+        -- 优先级排序：未完成任务在前，已完成任务在后
+        CASE WHEN t.status = 4 THEN 1 ELSE 0 END ASC,
+        -- 按优先级降序（紧急优先）
+        t.priority DESC,
+        -- 按计划开始时间升序
+        t.plan_start_time ASC,
+        -- 最后按创建时间降序
+        t.create_time DESC
+    </select>
+
+    <!-- 根据任务ID查询TaskItem协作人列表 -->
+    <select id="selectItemTaskUsersByTaskId" resultType="com.junoyi.task.domain.vo.TaskItemVO$TaskUser">
+        SELECT
+            su.user_id AS userId,
+            su.avatar AS avatar,
+            su.nick_name AS nickName
+        FROM task_user tu
+                 INNER JOIN sys_user su ON su.user_id = tu.user_id AND su.del_flag = 0
+        WHERE tu.task_id = #{id}
+          AND tu.task_role = 2
+        ORDER BY tu.create_time ASC
+    </select>
+
+    <!-- 统计用户与任务的关联关系（用于权限验证） -->
+    <select id="countTaskUserRelation" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM task_user tu
+        WHERE tu.task_id = #{taskId}
+          AND tu.user_id = #{userId}
+    </select>
 </mapper>

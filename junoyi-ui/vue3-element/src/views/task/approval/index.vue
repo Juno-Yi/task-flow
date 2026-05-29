@@ -19,9 +19,7 @@
         @refresh="refreshData"
       >
         <template #left>
-          <ElSpace wrap>
-            <ElButton  @click="showDialog('add')"  v-permission="'task.ui.list.add.button'" v-ripple>新增任务</ElButton>
-          </ElSpace>
+
         </template>
       </ArtTableHeader>
 
@@ -34,38 +32,231 @@
         @pagination:current-change="handleCurrentChange"
       />
     </ElCard>
-    <TaskDialog
-      v-model="dialogVisible"
-      :dialog-type="dialogType"
-      :task-data="currentTaskData"
-      :loading="dialogLoading"
-      @success="handleDialogSuccess"
-    />
 
-    <!-- 任务详情抽屉 -->
-    <TaskDetailDrawer
-      v-model="detailVisible"
-      :task-detail="currentTaskDetail"
-      :loading="detailLoading"
+    <ElDrawer v-model="detailVisible" title="任务详情" size="760px" destroy-on-close class="task-detail-drawer">
+      <ElSkeleton :loading="detailLoading" animated>
+        <template #default>
+          <div v-if="currentTaskDetail" class="task-detail-content">
+            <!-- 基本信息 -->
+            <ElCard shadow="never" class="detail-card">
+              <template #header>
+                <div class="card-header">
+                  <span class="card-title">基本信息</span>
+                </div>
+              </template>
+              <ElDescriptions :column="2" border>
+                <ElDescriptionsItem label="任务标题" :span="2">
+                  <span class="font-medium">{{ currentTaskDetail.title || '-' }}</span>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="任务描述" :span="2">
+                  <div class="task-description">{{ currentTaskDetail.description || '-' }}</div>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="任务状态">
+                  <ElTag :type="currentTaskDetail.statusType as any" size="default">
+                    {{ currentTaskDetail.statusLabel || '-' }}
+                  </ElTag>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="优先级">
+                  <ElTag :type="currentTaskDetail.priorityType as any" size="default">
+                    {{ currentTaskDetail.priorityLabel || '-' }}
+                  </ElTag>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="是否逾期">
+                  <ElTag :type="currentTaskDetail.isOverdue ? 'danger' : 'success'" size="default">
+                    {{ currentTaskDetail.isOverdue ? '已逾期' : '未逾期' }}
+                  </ElTag>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="所属项目">
+                  {{ currentTaskDetail.projectId ? `项目 #${currentTaskDetail.projectId}` : '普通任务' }}
+                </ElDescriptionsItem>
+              </ElDescriptions>
+            </ElCard>
+
+            <!-- 人员信息 -->
+            <ElCard shadow="never" class="detail-card">
+              <template #header>
+                <div class="card-header">
+                  <span class="card-title">人员信息</span>
+                </div>
+              </template>
+              <ElDescriptions :column="2" border>
+                <ElDescriptionsItem label="负责人">
+                  <div v-if="currentTaskDetail.ownerUser" class="user-info">
+                    <ElAvatar :size="32" :src="currentTaskDetail.ownerUser.avatar">
+                      {{ currentTaskDetail.ownerUser.nickName?.slice(0, 1) || 'U' }}
+                    </ElAvatar>
+                    <span class="user-name">{{ currentTaskDetail.ownerUser.nickName || '-' }}</span>
+                  </div>
+                  <span v-else>-</span>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="协作人" :span="2">
+                  <div v-if="currentTaskDetail.taskUserList?.length" class="user-list">
+                    <div v-for="user in currentTaskDetail.taskUserList" :key="user.userId" class="user-info">
+                      <ElAvatar :size="32" :src="user.avatar">
+                        {{ user.nickName?.slice(0, 1) || 'U' }}
+                      </ElAvatar>
+                      <span class="user-name">{{ user.nickName || '-' }}</span>
+                    </div>
+                  </div>
+                  <span v-else>-</span>
+                </ElDescriptionsItem>
+              </ElDescriptions>
+            </ElCard>
+
+            <!-- 时间信息 -->
+            <ElCard shadow="never" class="detail-card">
+              <template #header>
+                <div class="card-header">
+                  <span class="card-title">时间信息</span>
+                </div>
+              </template>
+              <ElDescriptions :column="2" border>
+                <ElDescriptionsItem label="计划开始时间">
+                  <div class="time-info">
+                    <ElIcon class="time-icon"><Clock /></ElIcon>
+                    <span>{{ formatTime(currentTaskDetail.planStartTime) }}</span>
+                  </div>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="计划结束时间">
+                  <div class="time-info">
+                    <ElIcon class="time-icon"><Clock /></ElIcon>
+                    <span>{{ formatTime(currentTaskDetail.planEndTime) }}</span>
+                  </div>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="实际开始时间">
+                  <div class="time-info">
+                    <ElIcon class="time-icon"><VideoPlay /></ElIcon>
+                    <span>{{ formatTime(currentTaskDetail.startTime) }}</span>
+                  </div>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="实际结束时间">
+                  <div class="time-info">
+                    <ElIcon class="time-icon"><CircleCheck /></ElIcon>
+                    <span>{{ formatTime(currentTaskDetail.endTime) }}</span>
+                  </div>
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="计划工时" :span="2">
+                  <div class="time-info">
+                    <ElIcon class="time-icon"><Timer /></ElIcon>
+                    <span>{{ calculateHours(currentTaskDetail.planStartTime, currentTaskDetail.planEndTime) }}</span>
+                  </div>
+                </ElDescriptionsItem>
+              </ElDescriptions>
+            </ElCard>
+
+            <!-- 其他信息 -->
+            <ElCard shadow="never" class="detail-card">
+              <template #header>
+                <div class="card-header">
+                  <span class="card-title">其他信息</span>
+                </div>
+              </template>
+              <ElDescriptions :column="2" border>
+                <ElDescriptionsItem label="创建人">
+                  {{ currentTaskDetail.createBy || '-' }}
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="创建时间">
+                  {{ formatTime(currentTaskDetail.createTime) }}
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="更新人">
+                  {{ currentTaskDetail.updateBy || '-' }}
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="更新时间">
+                  {{ formatTime(currentTaskDetail.updateTime) }}
+                </ElDescriptionsItem>
+                <ElDescriptionsItem label="备注" :span="2">
+                  <div class="task-remark">{{ currentTaskDetail.remark || '-' }}</div>
+                </ElDescriptionsItem>
+              </ElDescriptions>
+            </ElCard>
+
+            <!-- 操作记录 -->
+            <ElCard v-if="currentTaskDetail.recordList?.length" shadow="never" class="detail-card">
+              <template #header>
+                <div class="card-header">
+                  <span class="card-title">操作记录</span>
+                  <ElTag size="small" type="info">{{ currentTaskDetail.recordList.length }} 条记录</ElTag>
+                </div>
+              </template>
+              <ElTimeline>
+                <ElTimelineItem
+                  v-for="record in currentTaskDetail.recordList"
+                  :key="record.id"
+                  :timestamp="formatTime(record.createTime)"
+                  placement="top"
+                >
+                  <ElCard shadow="hover" class="record-card">
+                    <div class="record-header">
+                      <ElTag :type="getActionTypeTag(record.actionType)" size="small">
+                        {{ record.actionTypeLabel || '任务操作' }}
+                      </ElTag>
+                      <div class="record-operator">
+                        <ElAvatar :size="24" :src="record.operatorAvatar">
+                          {{ record.operatorName?.slice(0, 1) || 'U' }}
+                        </ElAvatar>
+                        <span class="operator-name">{{ record.operatorName || '-' }}</span>
+                      </div>
+                    </div>
+                    <div v-if="record.remark" class="record-remark">
+                      {{ record.remark }}
+                    </div>
+                    <div v-if="record.attachments?.length" class="record-attachments">
+                      <div class="attachments-title">附件：</div>
+                      <div class="attachments-list">
+                        <ElLink
+                          v-for="item in record.attachments"
+                          :key="`${item.id}-${item.fileUrl}`"
+                          :href="getFileUrl(item.fileUrl)"
+                          target="_blank"
+                          type="primary"
+                          class="attachment-link"
+                        >
+                          <ElIcon><Document /></ElIcon>
+                          <span>{{ item.fileName || '附件' }}</span>
+                        </ElLink>
+                      </div>
+                    </div>
+                  </ElCard>
+                </ElTimelineItem>
+              </ElTimeline>
+            </ElCard>
+
+            <!-- 空状态 -->
+            <ElEmpty v-else description="暂无操作记录" />
+          </div>
+        </template>
+      </ElSkeleton>
+    </ElDrawer>
+
+    <!-- 审核对话框 -->
+    <ApprovalDialog
+      v-model="approvalVisible"
+      :dialog-type="approvalType"
+      :task-id="currentTaskId"
+      :loading="approvalLoading"
+      @submit="handleApprovalSubmit"
+      @cancel="approvalVisible = false"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ElAvatar, ElMessage, ElMessageBox, ElTag, ElTooltip } from 'element-plus'
+import { ElAvatar, ElMessage, ElMessageBox, ElTag, ElTooltip, ElIcon } from 'element-plus'
+import { Clock, VideoPlay, CircleCheck, Timer, Document } from '@element-plus/icons-vue'
 import ArtButtonMore, { ButtonMoreItem } from '@/components/core/forms/art-button-more/index.vue'
 import { usePermission } from '@/hooks/core/usePermission'
 import { useTable } from '@/hooks/core/useTable'
-import { fetchAddTask, fetchGetTaskDetail, fetchGetTaskList, fetchRemindTask, fetchUpdateTask } from '@/api/task/list'
+import { fetchGetTaskApprovalList, fetchPassTaskApproval, fetchRejectTaskApproval } from "@/api/task/approval";
 import { fetchGetDictDataByType } from '@/api/system/dict'
+import { getFileUrl } from '@/utils/file'
 import TaskSearch from './modules/task-search.vue'
-import TaskDialog from './modules/task-dialog.vue'
-import TaskDetailDrawer from './modules/task-detail-drawer.vue'
+import ApprovalDialog from './modules/approval-dialog.vue'
+import { fetchGetTaskDetail} from "@/api/task/list";
 
-defineOptions({ name: 'TaskList' })
+defineOptions({ name: 'TaskApproval' })
 
 type TaskListVO = Api.Task.TaskListVO
-type TaskActionKey = 'detail' | 'edit' | 'delete' | 'remind'
+type TaskActionKey = 'detail' | 'pass' | 'reject'
 
 const { hasPermission } = usePermission()
 const statusDict = ref<Api.System.DictDataVO[]>([])
@@ -82,62 +273,16 @@ const searchForm = ref<Api.Task.TaskListQueryDTO & { timeRange?: string[] }>({
 })
 
 const showSearchBar = ref(true)
-const dialogVisible = ref(false)
 const detailVisible = ref(false)
-const dialogType = ref<'add' | 'edit'>('add')
-const dialogLoading = ref(false)
 const detailLoading = ref(false)
-const currentTaskData = ref<Api.Task.TaskListDetailVO | undefined>(undefined)
 const currentTaskDetail = ref<Api.Task.TaskListDetailVO | undefined>(undefined)
 
+// 审核相关状态
+const approvalVisible = ref(false)
+const approvalLoading = ref(false)
+const approvalType = ref<'pass' | 'reject'>('pass')
+const currentTaskId = ref(0)
 
-const showDialog = async (type: 'add' | 'edit', row?: TaskListVO) => {
-  dialogType.value = type
-
-  if (type === 'add') {
-    currentTaskData.value = undefined
-    dialogVisible.value = true
-    return
-  }
-
-  if (!row?.id) {
-    ElMessage.warning('任务ID不能为空')
-    return
-  }
-
-  dialogLoading.value = true
-  try {
-    currentTaskData.value = await fetchGetTaskDetail(row.id)
-    dialogVisible.value = true
-  } finally {
-    dialogLoading.value = false
-  }
-}
-
-const handleDialogSuccess = async (formData: any) => {
-  const payload: Api.Task.TaskListDTO = {
-    id: formData.id,
-    title: formData.title,
-    description: formData.description,
-    priority: formData.priority,
-    ownerUserId: formData.ownerUserId,
-    userIds: formData.userIds,
-    planStartTime: formData.planStartTime,
-    planEndTime: formData.planEndTime,
-    remark: formData.remark
-  }
-
-  if (dialogType.value === 'edit') {
-    await fetchUpdateTask(payload)
-    ElMessage.success('修改任务成功')
-    refreshData()
-    return
-  }
-
-  await fetchAddTask(payload)
-  ElMessage.success('新增任务成功')
-  refreshData()
-}
 
 /**
  * 计算两个时间之间的小时数
@@ -169,6 +314,30 @@ const calculateHours = (startTime?: string, endTime?: string) => {
   return hours > 0 ? `${days} 天 ${hours} 小时` : `${days} 天`
 }
 
+/**
+ * 根据操作类型获取标签类型
+ */
+const getActionTypeTag = (actionType?: number): 'success' | 'info' | 'warning' | 'danger' => {
+  switch (actionType) {
+    case 1: // 提交任务
+      return 'success'
+    case 2: // 驳回任务
+      return 'danger'
+    case 3: // 审核通过
+      return 'success'
+    case 4: // 创建任务
+      return 'info'
+    case 5: // 更新任务
+      return 'warning'
+    case 7: // 开始任务
+      return 'success'
+    case 8: // 完成任务
+      return 'success'
+    default:
+      return 'info'
+  }
+}
+
 const loadTaskDict = async () => {
   const [statusRes, priorityRes] = await Promise.all([
     fetchGetDictDataByType('task_status'),
@@ -192,33 +361,58 @@ const openDetailDrawer = async (row: TaskListVO) => {
   }
 }
 
-const handleRemindTask = async (row: TaskListVO) => {
+/**
+ * 打开审核对话框
+ */
+const openApprovalDialog = (type: 'pass' | 'reject', row: TaskListVO) => {
   if (!row?.id) {
     ElMessage.warning('任务ID不能为空')
     return
   }
-  await ElMessageBox.confirm(`确认向任务“${row.title || row.id}”的关联人员发送催办通知吗？`, '催办确认', {
-    type: 'warning',
-    confirmButtonText: '确认催办',
-    cancelButtonText: '取消'
-  })
-  await fetchRemindTask(row.id)
-  ElMessage.success('催办通知已发送')
+  approvalType.value = type
+  currentTaskId.value = row.id
+  approvalVisible.value = true
 }
 
+/**
+ * 提交审核
+ */
+const handleApprovalSubmit = async (data: { taskId: number; remark: string }) => {
+  if (approvalLoading.value) return
+
+  approvalLoading.value = true
+  try {
+    if (approvalType.value === 'pass') {
+      await fetchPassTaskApproval(data)
+      ElMessage.success('任务审核通过')
+    } else {
+      await fetchRejectTaskApproval(data)
+      ElMessage.success('任务已驳回')
+    }
+    approvalVisible.value = false
+    refreshData()
+  } catch (error) {
+    console.error('审核失败:', error)
+  } finally {
+    approvalLoading.value = false
+  }
+}
+
+/**
+ * 监听按钮被点击
+ * @param item 按钮物品
+ * @param row 行数据
+ */
 const handleButtonMoreClick = (item: ButtonMoreItem, row: TaskListVO) => {
   switch (String(item.key) as TaskActionKey) {
     case 'detail':
       openDetailDrawer(row)
       break
-    case 'edit':
-      showDialog('edit', row)
+    case 'pass':
+      openApprovalDialog('pass', row)
       break
-    case 'remind':
-      handleRemindTask(row)
-      break
-    case 'delete':
-      ElMessage.warning(`请接入删除接口：${row.title}`)
+    case 'reject':
+      openApprovalDialog('reject', row)
       break
   }
 }
@@ -285,7 +479,7 @@ const {
   refreshData
 } = useTable({
   core: {
-    apiFn: fetchGetTaskList,
+    apiFn: fetchGetTaskApprovalList,
     apiParams: {
       current: 1,
       size: 20
@@ -414,16 +608,8 @@ const {
         formatter: (row: TaskListVO) => {
           const list: ButtonMoreItem[] = [
             { key: 'detail', label: '查看详情', icon: 'ri:eye-line' },
-            {
-              key: 'edit',
-              label: '编辑任务',
-              icon: 'ri:edit-2-line',
-              auth: 'task.ui.list.edit.button'
-            },
-            ...(row.status !== 4
-              ? [{ key: 'remind', label: '催办任务', icon: 'ri:alarm-warning-line', auth: 'task.ui.list.edit.button' } as ButtonMoreItem]
-              : [])
-            // { key: 'delete', label: '删除任务', icon: 'ri:delete-bin-4-line', color: '#f56c6c' }
+            { key: 'pass', label: '通过', icon: 'ri:check-line', color: '#0ec911', auth: 'task.ui.approval.pass.button' },
+            { key: 'reject', label: '驳回', icon: 'ri:close-line', color: '#f56c6c', auth: 'task.ui.approval.reject.button' }
           ]
           const visibleList = list.filter(item => !item.auth || hasPermission(item.auth))
           return visibleList.length
