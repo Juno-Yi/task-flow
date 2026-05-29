@@ -228,24 +228,20 @@
       </ElSkeleton>
     </ElDrawer>
 
-    <ElDialog v-model="approvalVisible" :title="approvalType === 'pass' ? '审核通过' : '驳回任务'" width="520px">
-      <ElForm ref="approvalFormRef" :model="approvalForm" :rules="approvalRules" label-width="90px">
-        <ElFormItem :label="approvalType === 'pass' ? '通过说明' : '驳回原因'" prop="remark">
-          <ElInput v-model="approvalForm.remark" type="textarea" :rows="5" :placeholder="approvalType === 'pass' ? '请输入通过说明' : '请输入驳回原因'" maxlength="500" show-word-limit />
-        </ElFormItem>
-      </ElForm>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <ElButton :disabled="approvalLoading" @click="approvalVisible = false">取消</ElButton>
-          <ElButton :type="approvalType === 'pass' ? 'success' : 'danger'" :loading="approvalLoading" @click="handleApprovalSubmit">{{ approvalType === 'pass' ? '确认通过' : '确认驳回' }}</ElButton>
-        </div>
-      </template>
-    </ElDialog>
+    <!-- 审核对话框 -->
+    <ApprovalDialog
+      v-model="approvalVisible"
+      :dialog-type="approvalType"
+      :task-id="currentTaskId"
+      :loading="approvalLoading"
+      @submit="handleApprovalSubmit"
+      @cancel="approvalVisible = false"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ElAvatar, ElMessage, ElMessageBox, ElTag, ElTooltip, ElIcon, type FormInstance, type FormRules } from 'element-plus'
+import { ElAvatar, ElMessage, ElMessageBox, ElTag, ElTooltip, ElIcon } from 'element-plus'
 import { Clock, VideoPlay, CircleCheck, Timer, Document } from '@element-plus/icons-vue'
 import ArtButtonMore, { ButtonMoreItem } from '@/components/core/forms/art-button-more/index.vue'
 import { usePermission } from '@/hooks/core/usePermission'
@@ -254,6 +250,7 @@ import { fetchGetTaskApprovalList, fetchPassTaskApproval, fetchRejectTaskApprova
 import { fetchGetDictDataByType } from '@/api/system/dict'
 import { getFileUrl } from '@/utils/file'
 import TaskSearch from './modules/task-search.vue'
+import ApprovalDialog from './modules/approval-dialog.vue'
 import { fetchGetTaskDetail} from "@/api/task/list";
 
 defineOptions({ name: 'TaskApproval' })
@@ -284,17 +281,7 @@ const currentTaskDetail = ref<Api.Task.TaskListDetailVO | undefined>(undefined)
 const approvalVisible = ref(false)
 const approvalLoading = ref(false)
 const approvalType = ref<'pass' | 'reject'>('pass')
-const approvalFormRef = ref<FormInstance>()
-const approvalForm = reactive<Api.Task.TaskApprovalDTO>({
-  taskId: 0,
-  remark: ''
-})
-const approvalRules: FormRules = {
-  remark: [
-    { required: true, message: '请填写审核说明', trigger: 'blur' },
-    { min: 2, max: 500, message: '长度在 2 到 500 个字符', trigger: 'blur' }
-  ]
-}
+const currentTaskId = ref(0)
 
 
 /**
@@ -383,27 +370,23 @@ const openApprovalDialog = (type: 'pass' | 'reject', row: TaskListVO) => {
     return
   }
   approvalType.value = type
-  approvalForm.taskId = row.id
-  approvalForm.remark = ''
+  currentTaskId.value = row.id
   approvalVisible.value = true
 }
 
 /**
  * 提交审核
  */
-const handleApprovalSubmit = async () => {
-  if (!approvalFormRef.value || approvalLoading.value) return
-
-  const valid = await approvalFormRef.value.validate().catch(() => false)
-  if (!valid) return
+const handleApprovalSubmit = async (data: { taskId: number; remark: string }) => {
+  if (approvalLoading.value) return
 
   approvalLoading.value = true
   try {
     if (approvalType.value === 'pass') {
-      await fetchPassTaskApproval(approvalForm)
+      await fetchPassTaskApproval(data)
       ElMessage.success('任务审核通过')
     } else {
-      await fetchRejectTaskApproval(approvalForm)
+      await fetchRejectTaskApproval(data)
       ElMessage.success('任务已驳回')
     }
     approvalVisible.value = false

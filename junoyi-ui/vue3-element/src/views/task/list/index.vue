@@ -42,214 +42,25 @@
       @success="handleDialogSuccess"
     />
 
-    <ElDrawer v-model="detailVisible" title="任务详情" size="760px" destroy-on-close class="task-detail-drawer">
-      <ElSkeleton :loading="detailLoading" animated>
-        <template #default>
-          <div v-if="currentTaskDetail" class="task-detail-content">
-            <!-- 基本信息 -->
-            <ElCard shadow="never" class="detail-card">
-              <template #header>
-                <div class="card-header">
-                  <span class="card-title">基本信息</span>
-                </div>
-              </template>
-              <ElDescriptions :column="2" border>
-                <ElDescriptionsItem label="任务标题" :span="2">
-                  <span class="font-medium">{{ currentTaskDetail.title || '-' }}</span>
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="任务描述" :span="2">
-                  <div class="task-description">{{ currentTaskDetail.description || '-' }}</div>
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="任务状态">
-                  <ElTag :type="currentTaskDetail.statusType as any" size="default">
-                    {{ currentTaskDetail.statusLabel || '-' }}
-                  </ElTag>
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="优先级">
-                  <ElTag :type="currentTaskDetail.priorityType as any" size="default">
-                    {{ currentTaskDetail.priorityLabel || '-' }}
-                  </ElTag>
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="是否逾期">
-                  <ElTag :type="currentTaskDetail.isOverdue ? 'danger' : 'success'" size="default">
-                    {{ currentTaskDetail.isOverdue ? '已逾期' : '未逾期' }}
-                  </ElTag>
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="所属项目">
-                  {{ currentTaskDetail.projectId ? `项目 #${currentTaskDetail.projectId}` : '普通任务' }}
-                </ElDescriptionsItem>
-              </ElDescriptions>
-            </ElCard>
-
-            <!-- 人员信息 -->
-            <ElCard shadow="never" class="detail-card">
-              <template #header>
-                <div class="card-header">
-                  <span class="card-title">人员信息</span>
-                </div>
-              </template>
-              <ElDescriptions :column="2" border>
-                <ElDescriptionsItem label="负责人">
-                  <div v-if="currentTaskDetail.ownerUser" class="user-info">
-                    <ElAvatar :size="32" :src="currentTaskDetail.ownerUser.avatar">
-                      {{ currentTaskDetail.ownerUser.nickName?.slice(0, 1) || 'U' }}
-                    </ElAvatar>
-                    <span class="user-name">{{ currentTaskDetail.ownerUser.nickName || '-' }}</span>
-                  </div>
-                  <span v-else>-</span>
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="协作人" :span="2">
-                  <div v-if="currentTaskDetail.taskUserList?.length" class="user-list">
-                    <div v-for="user in currentTaskDetail.taskUserList" :key="user.userId" class="user-info">
-                      <ElAvatar :size="32" :src="user.avatar">
-                        {{ user.nickName?.slice(0, 1) || 'U' }}
-                      </ElAvatar>
-                      <span class="user-name">{{ user.nickName || '-' }}</span>
-                    </div>
-                  </div>
-                  <span v-else>-</span>
-                </ElDescriptionsItem>
-              </ElDescriptions>
-            </ElCard>
-
-            <!-- 时间信息 -->
-            <ElCard shadow="never" class="detail-card">
-              <template #header>
-                <div class="card-header">
-                  <span class="card-title">时间信息</span>
-                </div>
-              </template>
-              <ElDescriptions :column="2" border>
-                <ElDescriptionsItem label="计划开始时间">
-                  <div class="time-info">
-                    <ElIcon class="time-icon"><Clock /></ElIcon>
-                    <span>{{ formatTime(currentTaskDetail.planStartTime) }}</span>
-                  </div>
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="计划结束时间">
-                  <div class="time-info">
-                    <ElIcon class="time-icon"><Clock /></ElIcon>
-                    <span>{{ formatTime(currentTaskDetail.planEndTime) }}</span>
-                  </div>
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="实际开始时间">
-                  <div class="time-info">
-                    <ElIcon class="time-icon"><VideoPlay /></ElIcon>
-                    <span>{{ formatTime(currentTaskDetail.startTime) }}</span>
-                  </div>
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="实际结束时间">
-                  <div class="time-info">
-                    <ElIcon class="time-icon"><CircleCheck /></ElIcon>
-                    <span>{{ formatTime(currentTaskDetail.endTime) }}</span>
-                  </div>
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="计划工时" :span="2">
-                  <div class="time-info">
-                    <ElIcon class="time-icon"><Timer /></ElIcon>
-                    <span>{{ calculateHours(currentTaskDetail.planStartTime, currentTaskDetail.planEndTime) }}</span>
-                  </div>
-                </ElDescriptionsItem>
-              </ElDescriptions>
-            </ElCard>
-
-            <!-- 其他信息 -->
-            <ElCard shadow="never" class="detail-card">
-              <template #header>
-                <div class="card-header">
-                  <span class="card-title">其他信息</span>
-                </div>
-              </template>
-              <ElDescriptions :column="2" border>
-                <ElDescriptionsItem label="创建人">
-                  {{ currentTaskDetail.createBy || '-' }}
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="创建时间">
-                  {{ formatTime(currentTaskDetail.createTime) }}
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="更新人">
-                  {{ currentTaskDetail.updateBy || '-' }}
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="更新时间">
-                  {{ formatTime(currentTaskDetail.updateTime) }}
-                </ElDescriptionsItem>
-                <ElDescriptionsItem label="备注" :span="2">
-                  <div class="task-remark">{{ currentTaskDetail.remark || '-' }}</div>
-                </ElDescriptionsItem>
-              </ElDescriptions>
-            </ElCard>
-
-            <!-- 操作记录 -->
-            <ElCard v-if="currentTaskDetail.recordList?.length" shadow="never" class="detail-card">
-              <template #header>
-                <div class="card-header">
-                  <span class="card-title">操作记录</span>
-                  <ElTag size="small" type="info">{{ currentTaskDetail.recordList.length }} 条记录</ElTag>
-                </div>
-              </template>
-              <ElTimeline>
-                <ElTimelineItem
-                  v-for="record in currentTaskDetail.recordList"
-                  :key="record.id"
-                  :timestamp="formatTime(record.createTime)"
-                  placement="top"
-                >
-                  <ElCard shadow="hover" class="record-card">
-                    <div class="record-header">
-                      <ElTag :type="getActionTypeTag(record.actionType)" size="small">
-                        {{ record.actionTypeLabel || '任务操作' }}
-                      </ElTag>
-                      <div class="record-operator">
-                        <ElAvatar :size="24" :src="record.operatorAvatar">
-                          {{ record.operatorName?.slice(0, 1) || 'U' }}
-                        </ElAvatar>
-                        <span class="operator-name">{{ record.operatorName || '-' }}</span>
-                      </div>
-                    </div>
-                    <div v-if="record.remark" class="record-remark">
-                      {{ record.remark }}
-                    </div>
-                    <div v-if="record.attachments?.length" class="record-attachments">
-                      <div class="attachments-title">附件：</div>
-                      <div class="attachments-list">
-                        <ElLink
-                          v-for="item in record.attachments"
-                          :key="`${item.id}-${item.fileUrl}`"
-                          :href="getFileUrl(item.fileUrl)"
-                          target="_blank"
-                          type="primary"
-                          class="attachment-link"
-                        >
-                          <ElIcon><Document /></ElIcon>
-                          <span>{{ item.fileName || '附件' }}</span>
-                        </ElLink>
-                      </div>
-                    </div>
-                  </ElCard>
-                </ElTimelineItem>
-              </ElTimeline>
-            </ElCard>
-
-            <!-- 空状态 -->
-            <ElEmpty v-else description="暂无操作记录" />
-          </div>
-        </template>
-      </ElSkeleton>
-    </ElDrawer>
+    <!-- 任务详情抽屉 -->
+    <TaskDetailDrawer
+      v-model="detailVisible"
+      :task-detail="currentTaskDetail"
+      :loading="detailLoading"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ElAvatar, ElMessage, ElMessageBox, ElTag, ElTooltip, ElIcon } from 'element-plus'
-import { Clock, VideoPlay, CircleCheck, Timer, Document } from '@element-plus/icons-vue'
+import { ElAvatar, ElMessage, ElMessageBox, ElTag, ElTooltip } from 'element-plus'
 import ArtButtonMore, { ButtonMoreItem } from '@/components/core/forms/art-button-more/index.vue'
 import { usePermission } from '@/hooks/core/usePermission'
 import { useTable } from '@/hooks/core/useTable'
 import { fetchAddTask, fetchGetTaskDetail, fetchGetTaskList, fetchRemindTask, fetchUpdateTask } from '@/api/task/list'
 import { fetchGetDictDataByType } from '@/api/system/dict'
-import { getFileUrl } from '@/utils/file'
 import TaskSearch from './modules/task-search.vue'
 import TaskDialog from './modules/task-dialog.vue'
+import TaskDetailDrawer from './modules/task-detail-drawer.vue'
 
 defineOptions({ name: 'TaskList' })
 
@@ -356,30 +167,6 @@ const calculateHours = (startTime?: string, endTime?: string) => {
   const days = Math.floor(diffHours / 24)
   const hours = Math.round(diffHours % 24)
   return hours > 0 ? `${days} 天 ${hours} 小时` : `${days} 天`
-}
-
-/**
- * 根据操作类型获取标签类型
- */
-const getActionTypeTag = (actionType?: number): 'success' | 'info' | 'warning' | 'danger' => {
-  switch (actionType) {
-    case 1: // 提交任务
-      return 'success'
-    case 2: // 驳回任务
-      return 'danger'
-    case 3: // 审核通过
-      return 'success'
-    case 4: // 创建任务
-      return 'info'
-    case 5: // 更新任务
-      return 'warning'
-    case 7: // 开始任务
-      return 'success'
-    case 8: // 完成任务
-      return 'success'
-    default:
-      return 'info'
-  }
 }
 
 const loadTaskDict = async () => {
