@@ -398,19 +398,6 @@ const handleApprovalSubmit = async (data: { taskId: number; remark: string }) =>
   }
 }
 
-const handleRemindTask = async (row: TaskListVO) => {
-  if (!row?.id) {
-    ElMessage.warning('任务ID不能为空')
-    return
-  }
-  await ElMessageBox.confirm(`确认向任务“${row.title || row.id}”的关联人员发送催办通知吗？`, '催办确认', {
-    type: 'warning',
-    confirmButtonText: '确认催办',
-    cancelButtonText: '取消'
-  })
-  ElMessage.success('催办通知已发送')
-}
-
 const handleButtonMoreClick = (item: ButtonMoreItem, row: TaskListVO) => {
   switch (String(item.key) as TaskActionKey) {
     case 'detail':
