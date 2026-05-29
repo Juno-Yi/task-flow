@@ -329,4 +329,89 @@
         WHERE tu.task_id = #{taskId}
           AND tu.user_id = #{userId}
     </select>
+
+    <!-- ProjectTaskItemVO 结果映射 -->
+    <resultMap id="ProjectTaskItemVOResultMap" type="com.junoyi.task.domain.vo.ProjectTaskItemVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="priority" column="priority"/>
+        <result property="planStartTime" column="plan_start_time"/>
+        <result property="planEndTime" column="plan_end_time"/>
+        <result property="isOverdue" column="is_overdue"/>
+        <result property="remark" column="remark"/>
+
+        <!-- 负责人信息 -->
+        <association property="ownerUser" javaType="com.junoyi.task.domain.vo.ProjectTaskItemVO$OwnerUser">
+            <result property="userId" column="owner_user_id"/>
+            <result property="avatar" column="owner_avatar"/>
+            <result property="nickName" column="owner_nick_name"/>
+        </association>
+
+        <!-- 协作人列表 -->
+        <collection property="taskUserList"
+                    ofType="com.junoyi.task.domain.vo.ProjectTaskItemVO$TaskUser"
+                    column="id"
+                    select="selectProjectTaskUsersByTaskId"/>
+    </resultMap>
+
+    <!-- 查询项目任务列表 -->
+    <select id="selectProjectTaskList" resultMap="ProjectTaskItemVOResultMap">
+        SELECT
+            t.id,
+            t.title,
+            t.description,
+            t.status,
+            t.priority,
+            t.plan_start_time,
+            t.plan_end_time,
+            -- 计算是否逾期：
+            -- 1. 没有计划结束时间：不算逾期
+            -- 2. 已完成（status=4）：比较实际完成时间(end_time)和计划结束时间
+            -- 3. 未完成：比较当前时间和计划结束时间
+            CASE
+                WHEN t.plan_end_time IS NULL THEN FALSE
+                WHEN t.status = 4 THEN
+                    CASE
+                        WHEN t.end_time IS NOT NULL AND t.end_time > t.plan_end_time THEN TRUE
+                        ELSE FALSE
+                    END
+                WHEN NOW() > t.plan_end_time THEN TRUE
+                ELSE FALSE
+            END AS is_overdue,
+            t.remark,
+            -- 负责人信息（taskRole = 1 表示负责人）
+            owner_su.user_id AS owner_user_id,
+            owner_su.avatar AS owner_avatar,
+            owner_su.nick_name AS owner_nick_name
+        FROM task t
+        -- 关联负责人
+        LEFT JOIN task_user owner_tu ON owner_tu.task_id = t.id AND owner_tu.task_role = 1
+        LEFT JOIN sys_user owner_su ON owner_su.user_id = owner_tu.user_id AND owner_su.del_flag = 0
+        WHERE t.project_id = #{projectId}
+          AND t.del_flag = 0
+        ORDER BY
+            -- 按状态排序：未完成任务在前
+            CASE WHEN t.status = 4 THEN 1 ELSE 0 END ASC,
+            -- 按优先级降序（紧急优先）
+            t.priority DESC,
+            -- 按计划开始时间升序
+            t.plan_start_time ASC,
+            -- 最后按创建时间降序
+            t.create_time DESC
+    </select>
+
+    <!-- 根据任务ID查询项目任务协作人列表 -->
+    <select id="selectProjectTaskUsersByTaskId" resultType="com.junoyi.task.domain.vo.ProjectTaskItemVO$TaskUser">
+        SELECT
+            su.user_id AS userId,
+            su.avatar AS avatar,
+            su.nick_name AS nickName
+        FROM task_user tu
+        INNER JOIN sys_user su ON su.user_id = tu.user_id AND su.del_flag = 0
+        WHERE tu.task_id = #{id}
+          AND tu.task_role = 2
+        ORDER BY tu.create_time ASC
+    </select>
 </mapper>
