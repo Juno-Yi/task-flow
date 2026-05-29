@@ -24,6 +24,7 @@ import com.junoyi.task.mapper.TaskUserMapper;
 import com.junoyi.task.service.ITaskApprovalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -174,6 +175,7 @@ public class TaskApprovalServiceImpl implements ITaskApprovalService {
      * @param bo 业务数据对象
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void passTask(TaskActionBO bo) {
         TaskApprovalDTO dto = validateApprovalAction(bo);
         // 获取任务最后一次提交的时间
@@ -189,6 +191,24 @@ public class TaskApprovalServiceImpl implements ITaskApprovalService {
             throw new TaskException("审核通过失败，任务数据未更新");
         }
         saveTaskRecord(dto.getTaskId(), bo.getUserId(), bo.getTaskActionType(), dto.getRemark());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void rejectTask(TaskActionBO bo) {
+        TaskApprovalDTO dto = validateApprovalAction(bo);
+        Task updateTask = new Task();
+        updateTask.setId(dto.getTaskId());
+        updateTask.setStatus(3);
+        updateTask.setUpdateBy(SecurityUtils.getUserName());
+        updateTask.setUpdateTime(DateUtils.getNowDate());
+        int rows = taskMapper.updateById(updateTask);
+        if (rows <= 0) {
+            throw new TaskException("驳回任务失败，任务数据未更新");
+        }
+        saveTaskRecord(dto.getTaskId(), bo.getUserId(), bo.getTaskActionType(), dto.getRemark());
+
+        // TODO: 任务驳回时候发送通知给用户
     }
 
     /**

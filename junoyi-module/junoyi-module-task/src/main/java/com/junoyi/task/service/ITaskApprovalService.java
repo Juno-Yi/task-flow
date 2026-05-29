@@ -29,4 +29,12 @@ public interface ITaskApprovalService {
      * @param bo 业务数据对象
      */
     void passTask(TaskActionBO bo);
+
+    /**
+     * 任务审核驳回
+     *
+     * 任务审核驳回后将状态设置为驳回
+     * @param bo 业务数据对象
+     */
+    void rejectTask(TaskActionBO bo);
 }

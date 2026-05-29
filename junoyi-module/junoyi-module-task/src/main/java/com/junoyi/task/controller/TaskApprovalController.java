@@ -56,7 +56,7 @@ public class TaskApprovalController extends BaseController {
                 .taskActionType(2)
                 .dto(dto)
                 .build();
-//        taskApprovalService.rejectTask(bo);
+        taskApprovalService.rejectTask(bo);
         return R.ok();
     }
 
