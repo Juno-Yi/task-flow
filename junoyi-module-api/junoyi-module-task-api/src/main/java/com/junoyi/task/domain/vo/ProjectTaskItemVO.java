@@ -39,24 +39,24 @@ public class ProjectTaskItemVO {
     private Integer priority;
 
     /**
-     * 项目负责人
+     * 任务负责人
      */
     private OwnerUser ownerUser;
 
     /**
-     * 任务执行人列表
+     * 任务协作人列表
      */
     private List<TaskUser> taskUserList;
 
     /**
-     * 开始时间
+     * 计划开始时间
      */
-    private Date startTime;
+    private Date planStartTime;
 
     /**
-     * 截止时间
+     * 计划结束时间
      */
-    private Date DueTime;
+    private Date planEndTime;
 
     /**
      * 是否逾期（计算字段，非数据库存储）
@@ -74,21 +74,18 @@ public class ProjectTaskItemVO {
      */
     @Data
     public static class OwnerUser {
-        private  Long userId;
+        private Long userId;
         private String avatar;
         private String nickName;
     }
 
     /**
-     * 任务执行人
+     * 任务协作人
      */
     @Data
     public static class TaskUser {
-
         private Long userId;
-
         private String avatar;
-
         private String nickName;
     }
 
