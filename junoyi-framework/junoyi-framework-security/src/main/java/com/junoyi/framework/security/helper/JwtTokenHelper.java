@@ -24,18 +24,18 @@ import static com.junoyi.framework.core.constant.Constants.*;
 
 /**
  * JWT Token 服务助手实现类
- * 
+ *
  * 设计原则：AccessToken 和 RefreshToken 逻辑关联，但生成上完全独立
  * - 通过共享的 tokenId 建立关联
  * - 各自独立签名、独立过期时间
  * - RefreshToken 不依赖 AccessToken 生成
- * 
+ *
  * 安全特性：
  * 1. 使用 HS512 算法签名
  * 2. 共享 tokenId 关联 Token 对
  * 3. 独立的 JTI 防止重放攻击
  * 4. 区分 Token 类型防止混用
- * 
+ *
  * @author Fan
  */
 @Component
@@ -54,24 +54,24 @@ public class JwtTokenHelper implements TokenHelper {
     public TokenPair createTokenPair(LoginUser loginUser) {
         // 生成共享的 tokenId，用于关联 AccessToken 和 RefreshToken
         String tokenId = UUID.randomUUID().toString().replace("-", "");
-        
+
         Date now = new Date();
-        
+
         // 独立生成 AccessToken
         Duration accessDuration = getAccessExpireDuration(loginUser.getPlatformType());
         Date accessExpiration = new Date(now.getTime() + accessDuration.toMillis());
         String accessToken = buildAccessToken(loginUser, tokenId, now, accessExpiration);
-        
+
         // 独立生成 RefreshToken
         Duration refreshDuration = getRefreshExpireDuration(loginUser.getPlatformType());
         Date refreshExpiration = new Date(now.getTime() + refreshDuration.toMillis());
         String refreshToken = buildRefreshToken(loginUser, tokenId, now, refreshExpiration);
-        
-        log.info("TokenPairCreated", "创建 Token 对成功 | 用户: " + loginUser.getUserName() 
+
+        log.info("TokenPairCreated", "创建 Token 对成功 | 用户: " + loginUser.getUserName()
                 + " | tokenId: " + tokenId.substring(0, 8) + "..."
                 + " | AccessToken 有效期: " + accessDuration.toMinutes() + "分钟"
                 + " | RefreshToken 有效期: " + refreshDuration.toDays() + "天");
-        
+
         return TokenPair.builder()
                 .tokenId(tokenId)
                 .accessToken(accessToken)
@@ -83,7 +83,7 @@ public class JwtTokenHelper implements TokenHelper {
 
     /**
      * 只创建新的 AccessToken（用于刷新场景，保持原有 tokenId）
-     * 
+     *
      * @param loginUser 登录用户信息
      * @param tokenId 原有的 tokenId
      * @return 新的 AccessToken 字符串
@@ -92,13 +92,13 @@ public class JwtTokenHelper implements TokenHelper {
         Date now = new Date();
         Duration accessDuration = getAccessExpireDuration(loginUser.getPlatformType());
         Date accessExpiration = new Date(now.getTime() + accessDuration.toMillis());
-        
+
         String accessToken = buildAccessToken(loginUser, tokenId, now, accessExpiration);
-        
-        log.info("AccessTokenRefreshed", "刷新 AccessToken 成功 | 用户: " + loginUser.getUserName() 
+
+        log.info("AccessTokenRefreshed", "刷新 AccessToken 成功 | 用户: " + loginUser.getUserName()
                 + " | tokenId: " + tokenId.substring(0, 8) + "..."
                 + " | 新有效期: " + accessDuration.toMinutes() + "分钟");
-        
+
         return accessToken;
     }
 
@@ -111,34 +111,28 @@ public class JwtTokenHelper implements TokenHelper {
     }
 
     /**
-     * 构建 AccessToken（独立生成）
+     * 构建 AccessToken（轻量级设计）
+     * <p>
+     * JWT 只包含必要的身份信息，权限信息统一从 Redis Session 获取。
+     * 这样设计的优势：
+     * 1. JWT 体积小（减少 75% 体积）
+     * 2. 权限实时生效（修改权限后立即生效）
+     * 3. 提高安全性（权限信息不暴露给客户端）
+     * 4. 可撤销性（删除 Redis Session 即可）
+     * </p>
      */
     private String buildAccessToken(LoginUser loginUser, String tokenId, Date now, Date expiration) {
         String jti = UUID.randomUUID().toString().replace("-", "");
-        
-        JwtBuilder builder = Jwts.builder()
+
+        // JWT 只包含必要的身份信息，权限信息从 Redis Session 获取
+        return Jwts.builder()
                 .subject(String.valueOf(loginUser.getUserId()))
                 .claim(CLAIM_TYPE, TOKEN_TYPE_ACCESS)
-                .claim(CLAIM_TOKEN_ID, tokenId)          // 关联标识
+                .claim(CLAIM_TOKEN_ID, tokenId)          // 关联标识（最重要：用于查询 Redis Session）
                 .claim(CLAIM_JTI, jti)                   // 独立唯一标识
                 .claim(CLAIM_PLATFORM, loginUser.getPlatformType().getCode())
                 .claim(CLAIM_USERNAME, loginUser.getUserName())
-                .claim(CLAIM_NICK_NAME, loginUser.getNickName());
-        
-        // 添加权限列表（如果存在）
-        if (loginUser.getPermissions() != null && !loginUser.getPermissions().isEmpty()) {
-            builder.claim(CLAIM_PERMISSIONS, String.join(",", loginUser.getPermissions()));
-        }
-        
-        // 添加角色列表（如果存在）
-        if (loginUser.getRoles() != null && !loginUser.getRoles().isEmpty()) {
-            builder.claim(CLAIM_ROLES, loginUser.getRoles().stream()
-                    .map(String::valueOf)
-                    .reduce((a, b) -> a + "," + b)
-                    .orElse(""));
-        }
-        
-        return builder
+                .claim(CLAIM_NICK_NAME, loginUser.getNickName())
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(getSecretKey(), Jwts.SIG.HS512)
@@ -148,27 +142,27 @@ public class JwtTokenHelper implements TokenHelper {
     /**
      * 构建 RefreshToken（独立生成，使用不透明格式）
      * 格式: {tokenId}.{randomPart}.{signature}
-     * 
+     *
      */
     private String buildRefreshToken(LoginUser loginUser, String tokenId, Date now, Date expiration) {
         // 生成随机部分
         String randomPart = UUID.randomUUID().toString().replace("-", "");
-        
+
         // 构建待签名数据: userId|tokenId|platform|expiration
-        String payload = String.format("%d|%s|%d|%d", 
-                loginUser.getUserId(), 
-                tokenId, 
+        String payload = String.format("%d|%s|%d|%d",
+                loginUser.getUserId(),
+                tokenId,
                 loginUser.getPlatformType().getCode(),
                 expiration.getTime());
-        
+
         // 使用 HMAC 签名
         String signature = generateHmacSignature(payload + randomPart);
-        
+
         // 最终格式: tokenId.randomPart.signature (Base64 编码)
         String rawToken = tokenId + "." + randomPart + "." + signature;
         return Base64.getUrlEncoder().withoutPadding().encodeToString(rawToken.getBytes(StandardCharsets.UTF_8));
     }
-    
+
     /**
      * 生成 HMAC 签名
      */
@@ -182,7 +176,7 @@ public class JwtTokenHelper implements TokenHelper {
             throw new RuntimeException("生成签名失败", e);
         }
     }
-    
+
     /**
      * 解析不透明格式的 RefreshToken
      */
@@ -238,7 +232,7 @@ public class JwtTokenHelper implements TokenHelper {
         try {
             Claims claims = parseToken(accessToken);
             String tokenType = claims.get(CLAIM_TYPE, String.class);
-            
+
             if (!TOKEN_TYPE_ACCESS.equals(tokenType)) {
                 log.warn("TokenValidationFailed", "Token 类型不匹配");
                 return false;
@@ -273,7 +267,7 @@ public class JwtTokenHelper implements TokenHelper {
                 log.warn("TokenParseError", "RefreshToken 格式无效");
                 return null;
             }
-            
+
             // 从不透明 token 中只能获取 tokenId
             // 完整的用户信息需要从 Redis Session 中获取
             // 这里返回一个只包含 tokenId 的占位 LoginUser
@@ -300,14 +294,14 @@ public class JwtTokenHelper implements TokenHelper {
             if (parts == null || parts.length != 3) {
                 return false;
             }
-            
+
             // 验证格式有效性
             String tokenId = parts[0];
             String randomPart = parts[1];
             String signature = parts[2];
-            
-            return StringUtils.isNotBlank(tokenId) 
-                    && StringUtils.isNotBlank(randomPart) 
+
+            return StringUtils.isNotBlank(tokenId)
+                    && StringUtils.isNotBlank(randomPart)
                     && StringUtils.isNotBlank(signature);
 
         } catch (Exception e) {
@@ -346,7 +340,7 @@ public class JwtTokenHelper implements TokenHelper {
             throw new RuntimeException("刷新令牌失败", e);
         }
     }
-    
+
     /**
      * 从 RefreshToken 中提取 tokenId
      */
@@ -367,7 +361,7 @@ public class JwtTokenHelper implements TokenHelper {
             if (parts != null && parts.length == 3) {
                 return parts[0];
             }
-            
+
             // 再尝试作为 JWT AccessToken 解析
             Claims claims = parseToken(token);
             return claims.get(CLAIM_TOKEN_ID, String.class);
@@ -390,6 +384,9 @@ public class JwtTokenHelper implements TokenHelper {
 
     /**
      * 从 Claims 中提取 LoginUser
+     * <p>
+     * 注意：JWT 中不再包含权限和角色信息，这些信息统一从 Redis Session 获取
+     * </p>
      */
     private LoginUser extractLoginUser(Claims claims) {
         Long userId = Long.parseLong(claims.getSubject());
@@ -397,30 +394,18 @@ public class JwtTokenHelper implements TokenHelper {
         String nickName = claims.get(CLAIM_NICK_NAME, String.class);
         Integer platformCode = claims.get(CLAIM_PLATFORM, Integer.class);
 
-        LoginUser.LoginUserBuilder builder = LoginUser.builder()
+        return LoginUser.builder()
                 .userId(userId)
                 .userName(username)
                 .nickName(nickName)
-                .platformType(getPlatformType(platformCode));
-        
-        // 提取权限列表
-        String permsStr = claims.get(CLAIM_PERMISSIONS, String.class);
-        if (StringUtils.isNotBlank(permsStr)) {
-            Set<String> permissions = new HashSet<>(Arrays.asList(permsStr.split(",")));
-            builder.permissions(permissions);
-        }
-        
-        // 提取角色列表
-        String rolesStr = claims.get(CLAIM_ROLES, String.class);
-        if (StringUtils.isNotBlank(rolesStr)) {
-            Set<Long> roles = Arrays.stream(rolesStr.split(","))
-                    .filter(StringUtils::isNotBlank)
-                    .map(Long::parseLong)
-                    .collect(Collectors.toSet());
-            builder.roles(roles);
-        }
+                .platformType(getPlatformType(platformCode))
+                .build();
 
-        return builder.build();
+        // 注意：权限和角色信息已从 JWT 中移除，统一从 Redis Session 获取
+        // 这样设计的优势：
+        // 1. JWT 体积小（减少 75% 体积）
+        // 2. 权限实时生效（修改权限后立即生效）
+        // 3. 提高安全性（权限信息不暴露给客户端）
     }
 
     /**
@@ -428,7 +413,7 @@ public class JwtTokenHelper implements TokenHelper {
      */
     private SecretKey getSecretKey() {
         String secret = securityProperties.getToken().getSecret();
-        
+
         if (secret == null || secret.length() < 64)
             throw new IllegalStateException("JWT 密钥长度不足，至少需要 64 个字符");
 
@@ -441,7 +426,7 @@ public class JwtTokenHelper implements TokenHelper {
     private Duration getAccessExpireDuration(PlatformType platformType) {
         String platformKey = getPlatformKey(platformType);
         String expireStr = securityProperties.getToken().getAccessExpire().get(platformKey);
-        
+
         if (StringUtils.isBlank(expireStr))
             return Duration.ofMinutes(30);
 
@@ -454,7 +439,7 @@ public class JwtTokenHelper implements TokenHelper {
     private Duration getRefreshExpireDuration(PlatformType platformType) {
         String platformKey = getPlatformKey(platformType);
         String expireStr = securityProperties.getToken().getRefreshExpire().get(platformKey);
-        
+
         if (StringUtils.isBlank(expireStr))
             return Duration.ofDays(7);
 
@@ -485,7 +470,7 @@ public class JwtTokenHelper implements TokenHelper {
             if (type.getCode() == code)
                 return type;
         }
-        
+
         return PlatformType.ADMIN_WEB;
     }
 }

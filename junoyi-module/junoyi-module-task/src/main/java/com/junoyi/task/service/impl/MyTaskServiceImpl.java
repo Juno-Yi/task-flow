@@ -2,15 +2,22 @@ package com.junoyi.task.service.impl;
 
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
+import com.junoyi.task.domain.bo.TaskActionBO;
+import com.junoyi.task.domain.dto.TaskSubmitDTO;
 import com.junoyi.task.domain.po.Task;
+import com.junoyi.task.domain.po.TaskAttachment;
+import com.junoyi.task.domain.po.TaskRecord;
 import com.junoyi.task.domain.vo.TaskItemVO;
 import com.junoyi.task.domain.vo.TaskListDetailVO;
 import com.junoyi.task.exception.TaskException;
+import com.junoyi.task.mapper.TaskAttachmentMapper;
 import com.junoyi.task.mapper.TaskMapper;
+import com.junoyi.task.mapper.TaskRecordMapper;
 import com.junoyi.task.mapper.TaskUserMapper;
 import com.junoyi.task.service.IMyTaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +36,8 @@ import java.util.List;
 public class MyTaskServiceImpl implements IMyTaskService {
 
     private final TaskMapper taskMapper;
+    private final TaskRecordMapper taskRecordMapper;
+    private final TaskAttachmentMapper taskAttachmentMapper;
     private final TaskUserMapper taskUserMapper;
 
 
@@ -126,5 +135,79 @@ public class MyTaskServiceImpl implements IMyTaskService {
         updateTask.setUpdateBy(SecurityUtils.getUserName());
         updateTask.setUpdateTime(DateUtils.getNowDate());
         taskMapper.updateById(updateTask);
+    }
+
+    /**
+     * 提交任务
+     *
+     * @param bo 任务操作BO
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void submitTask(TaskActionBO bo) {
+        if (bo == null) {
+            throw new TaskException("提交参数不能为空");
+        }
+        if (bo.getUserId() == null || bo.getUserId() <= 0) {
+            throw new TaskException("提交用户不能为空");
+        }
+        TaskSubmitDTO dto = (TaskSubmitDTO) bo.getDto();
+        if (dto == null) {
+            throw new TaskException("任务提交数据不能为空");
+        }
+        if (dto.getTaskId() == null || dto.getTaskId() <= 0) {
+            throw new TaskException("任务ID不能为空");
+        }
+
+        Task existTask = taskMapper.selectById(dto.getTaskId());
+        if (existTask == null || Boolean.TRUE.equals(existTask.getDelFlag())) {
+            throw new TaskException("任务不存在");
+        }
+        if (existTask.getStatus() == null) {
+            throw new TaskException("任务状态异常");
+        }
+        if (!Integer.valueOf(1).equals(existTask.getStatus()) && !Integer.valueOf(3).equals(existTask.getStatus())) {
+            throw new TaskException("当前任务不是进行中或已驳回状态，无法提交");
+        }
+
+        Task updateTask = new Task();
+        updateTask.setId(dto.getTaskId());
+        updateTask.setStatus(2);
+        updateTask.setUpdateBy(SecurityUtils.getUserName());
+        updateTask.setUpdateTime(DateUtils.getNowDate());
+        int rows = taskMapper.updateById(updateTask);
+        if (rows <= 0) {
+            throw new TaskException("提交任务失败，任务数据未更新");
+        }
+
+        TaskRecord record = new TaskRecord();
+        record.setTaskId(dto.getTaskId());
+        record.setOperatorId(bo.getUserId());
+        record.setActionType(bo.getTaskActionType());
+        record.setRemark(dto.getRemark());
+        record.setCreateTime(DateUtils.getNowDate());
+        int recordRows = taskRecordMapper.insert(record);
+        if (recordRows <= 0 || record.getId() == null) {
+            throw new TaskException("提交任务失败，任务记录保存失败");
+        }
+        if (dto.getAttachments() != null && !dto.getAttachments().isEmpty()) {
+            for (TaskSubmitDTO.Attachment attachmentDTO : dto.getAttachments()) {
+                if (attachmentDTO == null) {
+                    continue;
+                }
+                TaskAttachment attachment = new TaskAttachment();
+                attachment.setTaskId(dto.getTaskId());
+                attachment.setRecordId(record.getId());
+                attachment.setFileName(attachmentDTO.getFileName());
+                attachment.setFileUrl(attachmentDTO.getFileUrl());
+                attachment.setUploadUser(bo.getUserId());
+                attachment.setCreateTime(DateUtils.getNowDate());
+                int attachmentRows = taskAttachmentMapper.insert(attachment);
+                if (attachmentRows <= 0) {
+                    throw new TaskException("提交任务失败，附件保存失败");
+                }
+            }
+        }
+
     }
 }

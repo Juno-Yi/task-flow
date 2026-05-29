@@ -4,6 +4,8 @@ import com.junoyi.framework.core.domain.module.R;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
+import com.junoyi.task.domain.bo.TaskActionBO;
+import com.junoyi.task.domain.dto.TaskSubmitDTO;
 import com.junoyi.task.domain.vo.TaskItemVO;
 import com.junoyi.task.domain.vo.TaskListDetailVO;
 import com.junoyi.task.service.IMyTaskService;
@@ -57,6 +59,26 @@ public class MyTaskController extends BaseController {
     @PlatformScope(PlatformType.ADMIN_WEB)
     public R<Void> startTask(@PathVariable("taskId") Long taskId){
         myTaskService.startTask(taskId);
+        return R.ok();
+    }
+
+    /**
+     * 提交任务
+     */
+    @PostMapping("/commit")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<Void> submitTask(@RequestBody TaskSubmitDTO dto){
+        Long userId = getUserId();
+        if (userId == null || userId == 0){
+            return R.ok("请先登录");
+        }
+        TaskActionBO bo = TaskActionBO.builder()
+                .userId(userId)
+                // 任务操作类型为提交任务 1
+                .taskActionType(1)
+                .dto(dto)
+                .build();
+        myTaskService.submitTask(bo);
         return R.ok();
     }
 }

@@ -1,5 +1,6 @@
 package com.junoyi.task.service;
 
+import com.junoyi.task.domain.bo.TaskActionBO;
 import com.junoyi.task.domain.vo.TaskItemVO;
 import com.junoyi.task.domain.vo.TaskListDetailVO;
 
@@ -31,4 +32,11 @@ public interface IMyTaskService {
      * @param taskId 任务ID
      */
     void startTask(Long taskId);
+
+    /**
+     * 提交任务
+     *
+     * @param bo 任务操作BO
+     */
+    void submitTask(TaskActionBO bo);
 }
