@@ -4,21 +4,29 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.framework.core.utils.DateUtils;
+import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
 import com.junoyi.system.mapper.SysUserMapper;
+import com.junoyi.task.domain.bo.TaskActionBO;
+import com.junoyi.task.domain.dto.TaskApprovalDTO;
 import com.junoyi.task.domain.dto.TaskListQueryDTO;
 import com.junoyi.task.domain.po.Task;
+import com.junoyi.task.domain.po.TaskRecord;
 import com.junoyi.task.domain.po.TaskUser;
 import com.junoyi.task.domain.vo.TaskListVO;
+import com.junoyi.task.exception.TaskException;
 import com.junoyi.task.mapper.TaskMapper;
+import com.junoyi.task.mapper.TaskRecordMapper;
 import com.junoyi.task.mapper.TaskUserMapper;
 import com.junoyi.task.service.ITaskApprovalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +44,7 @@ public class TaskApprovalServiceImpl implements ITaskApprovalService {
     private final TaskUserMapper taskUserMapper;
     private final SysDictApi sysDictApi;
     private final SysUserMapper sysUserMapper;
+    private final TaskRecordMapper taskRecordMapper;
 
     /**
      * 获取任务审核列表
@@ -156,5 +165,95 @@ public class TaskApprovalServiceImpl implements ITaskApprovalService {
         List<SysDictDataVO> dictList = sysDictApi.getDictDataByType(dictType);
         return dictList.stream()
                 .collect(Collectors.toMap(SysDictDataVO::getDictValue, dict -> dict, (v1, v2) -> v1));
+    }
+
+    /**
+     * 通过任务审核
+     *
+     * 通过任务审核后，将最后一次提交的时间，设置为实际完成时间
+     * @param bo 业务数据对象
+     */
+    @Override
+    public void passTask(TaskActionBO bo) {
+        TaskApprovalDTO dto = validateApprovalAction(bo);
+        // 获取任务最后一次提交的时间
+        Date latestSubmitTime = getLatestSubmitTime(dto.getTaskId());
+        Task updateTask = new Task();
+        updateTask.setId(dto.getTaskId());
+        updateTask.setStatus(4);
+        updateTask.setEndTime(latestSubmitTime == null ? DateUtils.getNowDate() : latestSubmitTime);
+        updateTask.setUpdateBy(SecurityUtils.getUserName());
+        updateTask.setUpdateTime(DateUtils.getNowDate());
+        int rows = taskMapper.updateById(updateTask);
+        if (rows <= 0) {
+            throw new TaskException("审核通过失败，任务数据未更新");
+        }
+        saveTaskRecord(dto.getTaskId(), bo.getUserId(), bo.getTaskActionType(), dto.getRemark());
+    }
+
+    /**
+     * 验证审核操作参数
+     * @param bo 业务数据
+     * @return 返回审核DTO
+     */
+    private TaskApprovalDTO validateApprovalAction(TaskActionBO bo) {
+        if (bo == null) {
+            throw new TaskException("审核参数不能为空");
+        }
+        if (bo.getUserId() == null || bo.getUserId() <= 0) {
+            throw new TaskException("审核用户不能为空");
+        }
+        if (!(bo.getDto() instanceof TaskApprovalDTO dto)) {
+            throw new TaskException("审核数据不能为空");
+        }
+        if (dto.getTaskId() == null || dto.getTaskId() <= 0) {
+            throw new TaskException("任务ID不能为空");
+        }
+        Task existTask = taskMapper.selectById(dto.getTaskId());
+        if (existTask == null || Boolean.TRUE.equals(existTask.getDelFlag())) {
+            throw new TaskException("任务不存在");
+        }
+        if (existTask.getStatus() == null) {
+            throw new TaskException("任务状态异常");
+        }
+        if (!Integer.valueOf(2).equals(existTask.getStatus())) {
+            throw new TaskException("当前任务不是待验收状态，无法审核");
+        }
+        return dto;
+    }
+
+    /**
+     * 获取任务最后一次提交的时间
+     * @param taskId 任务ID
+     * @return 最后一次提交的时间
+     */
+    private Date getLatestSubmitTime(Long taskId) {
+        TaskRecord latestSubmitRecord = taskRecordMapper.selectOne(new LambdaQueryWrapper<TaskRecord>()
+                .eq(TaskRecord::getTaskId, taskId)
+                // 类型1为提交任务
+                .eq(TaskRecord::getActionType, 1)
+                .orderByDesc(TaskRecord::getCreateTime)
+                .last("limit 1"));
+        return latestSubmitRecord == null ? null : latestSubmitRecord.getCreateTime();
+    }
+
+    /**
+     * 保存任务记录
+     * @param taskId 任务ID
+     * @param userId 任务操作用户ID
+     * @param actionType 操作类型
+     * @param remark 备注
+     */
+    private void saveTaskRecord(Long taskId, Long userId, Integer actionType, String remark) {
+        TaskRecord record = new TaskRecord();
+        record.setTaskId(taskId);
+        record.setOperatorId(userId);
+        record.setActionType(actionType);
+        record.setRemark(remark);
+        record.setCreateTime(DateUtils.getNowDate());
+        int recordRows = taskRecordMapper.insert(record);
+        if (recordRows <= 0) {
+            throw new TaskException("任务审核失败，任务记录保存失败");
+        }
     }
 }
