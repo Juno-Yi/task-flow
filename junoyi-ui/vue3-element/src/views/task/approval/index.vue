@@ -245,21 +245,21 @@
 </template>
 
 <script setup lang="ts">
-import { ElAvatar, ElMessage, ElMessageBox, ElTag, ElTooltip, ElIcon } from 'element-plus'
+import { ElAvatar, ElMessage, ElMessageBox, ElTag, ElTooltip, ElIcon, type FormInstance, type FormRules } from 'element-plus'
 import { Clock, VideoPlay, CircleCheck, Timer, Document } from '@element-plus/icons-vue'
 import ArtButtonMore, { ButtonMoreItem } from '@/components/core/forms/art-button-more/index.vue'
 import { usePermission } from '@/hooks/core/usePermission'
 import { useTable } from '@/hooks/core/useTable'
-import { fetchGetTaskApprovalList} from "@/api/task/my-task";
+import { fetchGetTaskApprovalList, fetchPassTaskApproval, fetchRejectTaskApproval } from "@/api/task/approval";
 import { fetchGetDictDataByType } from '@/api/system/dict'
 import { getFileUrl } from '@/utils/file'
 import TaskSearch from './modules/task-search.vue'
 import { fetchGetTaskDetail} from "@/api/task/list";
 
-defineOptions({ name: 'TaskList' })
+defineOptions({ name: 'TaskApproval' })
 
 type TaskListVO = Api.Task.TaskListVO
-type TaskActionKey = 'detail' | 'edit' | 'delete' | 'remind'
+type TaskActionKey = 'detail' | 'pass' | 'reject'
 
 const { hasPermission } = usePermission()
 const statusDict = ref<Api.System.DictDataVO[]>([])
@@ -279,6 +279,22 @@ const showSearchBar = ref(true)
 const detailVisible = ref(false)
 const detailLoading = ref(false)
 const currentTaskDetail = ref<Api.Task.TaskListDetailVO | undefined>(undefined)
+
+// 审核相关状态
+const approvalVisible = ref(false)
+const approvalLoading = ref(false)
+const approvalType = ref<'pass' | 'reject'>('pass')
+const approvalFormRef = ref<FormInstance>()
+const approvalForm = reactive<Api.Task.TaskApprovalDTO>({
+  taskId: 0,
+  remark: ''
+})
+const approvalRules: FormRules = {
+  remark: [
+    { required: true, message: '请填写审核说明', trigger: 'blur' },
+    { min: 2, max: 500, message: '长度在 2 到 500 个字符', trigger: 'blur' }
+  ]
+}
 
 
 /**
@@ -358,6 +374,47 @@ const openDetailDrawer = async (row: TaskListVO) => {
   }
 }
 
+/**
+ * 打开审核对话框
+ */
+const openApprovalDialog = (type: 'pass' | 'reject', row: TaskListVO) => {
+  if (!row?.id) {
+    ElMessage.warning('任务ID不能为空')
+    return
+  }
+  approvalType.value = type
+  approvalForm.taskId = row.id
+  approvalForm.remark = ''
+  approvalVisible.value = true
+}
+
+/**
+ * 提交审核
+ */
+const handleApprovalSubmit = async () => {
+  if (!approvalFormRef.value || approvalLoading.value) return
+
+  const valid = await approvalFormRef.value.validate().catch(() => false)
+  if (!valid) return
+
+  approvalLoading.value = true
+  try {
+    if (approvalType.value === 'pass') {
+      await fetchPassTaskApproval(approvalForm)
+      ElMessage.success('任务审核通过')
+    } else {
+      await fetchRejectTaskApproval(approvalForm)
+      ElMessage.success('任务已驳回')
+    }
+    approvalVisible.value = false
+    refreshData()
+  } catch (error) {
+    console.error('审核失败:', error)
+  } finally {
+    approvalLoading.value = false
+  }
+}
+
 const handleRemindTask = async (row: TaskListVO) => {
   if (!row?.id) {
     ElMessage.warning('任务ID不能为空')
@@ -376,8 +433,11 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: TaskListVO) => {
     case 'detail':
       openDetailDrawer(row)
       break
-    case 'remind':
-      handleRemindTask(row)
+    case 'pass':
+      openApprovalDialog('pass', row)
+      break
+    case 'reject':
+      openApprovalDialog('reject', row)
       break
   }
 }

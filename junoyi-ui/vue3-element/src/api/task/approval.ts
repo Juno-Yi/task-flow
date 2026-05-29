@@ -20,3 +20,13 @@ export function fetchPassTaskApproval(data: Api.Task.TaskApprovalDTO) {
         data
     })
 }
+
+/**
+ * 驳回任务
+ */
+export function fetchRejectTaskApproval(data: Api.Task.TaskApprovalDTO) {
+    return request.post<void>({
+        url: '/task/approval/reject',
+        data
+    })
+}
