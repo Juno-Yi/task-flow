@@ -227,6 +227,20 @@
         </template>
       </ElSkeleton>
     </ElDrawer>
+
+    <ElDialog v-model="approvalVisible" :title="approvalType === 'pass' ? '审核通过' : '驳回任务'" width="520px">
+      <ElForm ref="approvalFormRef" :model="approvalForm" :rules="approvalRules" label-width="90px">
+        <ElFormItem :label="approvalType === 'pass' ? '通过说明' : '驳回原因'" prop="remark">
+          <ElInput v-model="approvalForm.remark" type="textarea" :rows="5" :placeholder="approvalType === 'pass' ? '请输入通过说明' : '请输入驳回原因'" maxlength="500" show-word-limit />
+        </ElFormItem>
+      </ElForm>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <ElButton :disabled="approvalLoading" @click="approvalVisible = false">取消</ElButton>
+          <ElButton :type="approvalType === 'pass' ? 'success' : 'danger'" :loading="approvalLoading" @click="handleApprovalSubmit">{{ approvalType === 'pass' ? '确认通过' : '确认驳回' }}</ElButton>
+        </div>
+      </template>
+    </ElDialog>
   </div>
 </template>
 
@@ -265,7 +279,6 @@ const showSearchBar = ref(true)
 const detailVisible = ref(false)
 const detailLoading = ref(false)
 const currentTaskDetail = ref<Api.Task.TaskListDetailVO | undefined>(undefined)
-
 
 
 /**
@@ -560,16 +573,8 @@ const {
         formatter: (row: TaskListVO) => {
           const list: ButtonMoreItem[] = [
             { key: 'detail', label: '查看详情', icon: 'ri:eye-line' },
-            {
-              key: 'edit',
-              label: '编辑任务',
-              icon: 'ri:edit-2-line',
-              auth: 'task.ui.list.edit.button'
-            },
-            ...(row.status !== 4
-              ? [{ key: 'remind', label: '催办任务', icon: 'ri:alarm-warning-line', auth: 'task.ui.list.edit.button' } as ButtonMoreItem]
-              : [])
-            // { key: 'delete', label: '删除任务', icon: 'ri:delete-bin-4-line', color: '#f56c6c' }
+            { key: 'pass', label: '通过', icon: 'ri:check-line', color: '#0ec911', auth: 'task.ui.approval.pass.button' },
+            { key: 'reject', label: '驳回', icon: 'ri:close-line', color: '#f56c6c', auth: 'task.ui.approval.reject.button' }
           ]
           const visibleList = list.filter(item => !item.auth || hasPermission(item.auth))
           return visibleList.length

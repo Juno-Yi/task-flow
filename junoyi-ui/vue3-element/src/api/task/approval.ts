@@ -10,3 +10,13 @@ export function fetchGetTaskApprovalList(params?: Api.Task.TaskListQueryDTO) {
         params
     })
 }
+
+/**
+ * 审核通过任务
+ */
+export function fetchPassTaskApproval(data: Api.Task.TaskApprovalDTO) {
+    return request.post<void>({
+        url: '/task/approval/pass',
+        data
+    })
+}
