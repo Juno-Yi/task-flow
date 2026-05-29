@@ -60,21 +60,17 @@ public class TaskServiceApiImpl implements ITaskServiceApi {
     public void createProjectTask(ProjectTaskCreateDTO projectTaskCreateDTO) {
         // 参数校验
         validateProjectTaskCreateDTO(projectTaskCreateDTO);
-
         // 构建任务实体
         Task task = buildTaskFromDTO(projectTaskCreateDTO);
-
         // 插入任务记录
         taskMapper.insert(task);
-
         // 插入任务负责人关联
         insertOwnerUser(task.getId(), projectTaskCreateDTO.getOwnerUserId());
-
         // 插入任务协作人关联
         insertTaskUsers(task.getId(), projectTaskCreateDTO.getUserIds(), projectTaskCreateDTO.getOwnerUserId());
 
         // 插入任务创建记录
-        insertTaskRecord(task.getId(), TaskRecordActionType.CREATE, "创建项目任务");
+//        insertTaskRecord(task.getId(), TaskRecordActionType.CREATE, "创建项目任务");
     }
 
     /**
