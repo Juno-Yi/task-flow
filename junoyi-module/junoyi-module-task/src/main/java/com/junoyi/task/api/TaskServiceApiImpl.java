@@ -202,18 +202,124 @@ public class TaskServiceApiImpl implements ITaskServiceApi {
      * @param projectTaskUpdateDTO 项目任务更新数据传递对象
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateProjectTask(ProjectTaskUpdateDTO projectTaskUpdateDTO) {
+        // 参数校验
+        validateProjectTaskUpdateDTO(projectTaskUpdateDTO);
 
+        // 检查任务是否存在
+        checkTaskExists(projectTaskUpdateDTO.getId());
+
+        // 更新任务基本信息
+        updateTaskInfo(projectTaskUpdateDTO);
+
+        // 更新任务人员关联（先删除后新增）
+        updateTaskUserRelations(projectTaskUpdateDTO.getId(),
+                                projectTaskUpdateDTO.getOwnerUserId(),
+                                projectTaskUpdateDTO.getUserIds());
+
+        // 插入任务更新记录
+//        insertTaskRecord(projectTaskUpdateDTO.getId(), TaskRecordActionType.UPDATE, "更新项目任务");
     }
 
     /**
-     * TODO 根据任务ID获取项目ID
+     * 校验项目任务更新DTO
+     *
+     * @param dto 项目任务更新DTO
+     */
+    private void validateProjectTaskUpdateDTO(ProjectTaskUpdateDTO dto) {
+        if (dto == null) {
+            throw new TaskException("任务数据不能为空");
+        }
+        if (dto.getId() == null) {
+            throw new TaskException("任务ID不能为空");
+        }
+        if (!StringUtils.hasText(dto.getTitle())) {
+            throw new TaskException("任务标题不能为空");
+        }
+        if (dto.getOwnerUserId() == null) {
+            throw new TaskException("任务负责人不能为空");
+        }
+    }
+
+    /**
+     * 检查任务是否存在
+     *
+     * @param taskId 任务ID
+     * @return 任务实体
+     */
+    private Task checkTaskExists(Long taskId) {
+        Task task = taskMapper.selectById(taskId);
+        if (task == null || Boolean.TRUE.equals(task.getDelFlag())) {
+            throw new TaskException("任务不存在");
+        }
+        // 检查是否为项目任务
+        if (task.getProjectId() == null) {
+            throw new TaskException("该任务不是项目任务");
+        }
+        return task;
+    }
+
+    /**
+     * 更新任务基本信息
+     *
+     * @param dto 项目任务更新DTO
+     */
+    private void updateTaskInfo(ProjectTaskUpdateDTO dto) {
+        Date now = DateUtils.getNowDate();
+        String currentUserName = SecurityUtils.getUserName();
+
+        Task task = new Task();
+        task.setId(dto.getId());
+        task.setTitle(dto.getTitle());
+        task.setDescription(dto.getDescription());
+        task.setPriority(dto.getPriority());
+        task.setPlanStartTime(dto.getPlanStartTime());
+        task.setPlanEndTime(dto.getPlanEndTime());
+        task.setRemark(dto.getRemark());
+        task.setUpdateBy(currentUserName);
+        task.setUpdateTime(now);
+
+        taskMapper.updateById(task);
+    }
+
+    /**
+     * 更新任务人员关联（先删除后新增）
+     *
+     * @param taskId 任务ID
+     * @param ownerUserId 负责人ID
+     * @param userIds 协作人ID列表
+     */
+    private void updateTaskUserRelations(Long taskId, Long ownerUserId, List<Long> userIds) {
+        // 删除原有的所有人员关联
+        LambdaQueryWrapper<TaskUser> removeWrapper = new LambdaQueryWrapper<>();
+        removeWrapper.eq(TaskUser::getTaskId, taskId);
+        taskUserMapper.delete(removeWrapper);
+
+        // 重新插入负责人
+        insertOwnerUser(taskId, ownerUserId);
+
+        // 重新插入协作人
+        insertTaskUsers(taskId, userIds, ownerUserId);
+    }
+
+    /**
+     * 根据任务ID获取项目ID
      * @param taskId 任务ID
      * @return 项目ID，如果任务不存在或不是项目任务则返回null
      */
     @Override
     public Long getProjectIdByTaskId(Long taskId) {
-        return 0L;
+        if (taskId == null) {
+            return null;
+        }
+
+        Task task = taskMapper.selectById(taskId);
+        if (task == null || Boolean.TRUE.equals(task.getDelFlag())) {
+            return null;
+        }
+
+        return task.getProjectId();
     }
 
     /**
