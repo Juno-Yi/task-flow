@@ -85,6 +85,7 @@
                 class="plan-time-picker"
                 :disabled-date="disabledEndDate"
                 :disabled-hours="disabledEndHours"
+                @change="handleEndTimeChange"
               />
 
               <!-- 小时数输入 -->
@@ -262,6 +263,31 @@ const handleStartTimeChange = () => {
     const diffHours = diffMs / (1000 * 60 * 60)
     if (diffHours > 0) {
       planHours.value = Math.round(diffHours * 10) / 10 // 保留1位小数
+    } else {
+      // 如果结束时间早于开始时间，清空结束时间
+      form.planEndTime = undefined
+      ElMessage.warning('结束时间不能早于开始时间')
+    }
+  }
+}
+
+/**
+ * 结束时间变化时，计算小时数
+ */
+const handleEndTimeChange = () => {
+  planHours.value = undefined
+  // 如果有开始时间和结束时间，计算小时数
+  if (form.planStartTime && form.planEndTime) {
+    const start = new Date(form.planStartTime)
+    const end = new Date(form.planEndTime)
+    const diffMs = end.getTime() - start.getTime()
+    const diffHours = diffMs / (1000 * 60 * 60)
+    if (diffHours > 0) {
+      planHours.value = Math.round(diffHours * 10) / 10 // 保留1位小数
+    } else {
+      // 如果结束时间早于开始时间，清空结束时间并提示
+      form.planEndTime = undefined
+      ElMessage.warning('结束时间不能早于开始时间')
     }
   }
 }

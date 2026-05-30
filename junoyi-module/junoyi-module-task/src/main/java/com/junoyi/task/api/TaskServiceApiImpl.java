@@ -1,5 +1,6 @@
 package com.junoyi.task.api;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.task.domain.dto.ProjectTaskCreateDTO;
@@ -29,7 +30,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class TaskServiceApiImpl implements ITaskServiceApi {
+public class TaskServiceApiImpl implements TaskServiceApi {
 
     private final TaskMapper taskMapper;
     private final TaskUserMapper taskUserMapper;
@@ -60,21 +61,17 @@ public class TaskServiceApiImpl implements ITaskServiceApi {
     public void createProjectTask(ProjectTaskCreateDTO projectTaskCreateDTO) {
         // 参数校验
         validateProjectTaskCreateDTO(projectTaskCreateDTO);
-
         // 构建任务实体
         Task task = buildTaskFromDTO(projectTaskCreateDTO);
-
         // 插入任务记录
         taskMapper.insert(task);
-
         // 插入任务负责人关联
         insertOwnerUser(task.getId(), projectTaskCreateDTO.getOwnerUserId());
-
         // 插入任务协作人关联
         insertTaskUsers(task.getId(), projectTaskCreateDTO.getUserIds(), projectTaskCreateDTO.getOwnerUserId());
 
         // 插入任务创建记录
-        insertTaskRecord(task.getId(), TaskRecordActionType.CREATE, "创建项目任务");
+//        insertTaskRecord(task.getId(), TaskRecordActionType.CREATE, "创建项目任务");
     }
 
     /**
@@ -114,14 +111,8 @@ public class TaskServiceApiImpl implements ITaskServiceApi {
         task.setDescription(dto.getDescription());
         task.setPriority(dto.getPriority() != null ? dto.getPriority() : 0);
         task.setRemark(dto.getRemark());
-
-        // 设置计划时间
-        // 如果有截止时间，设置为计划结束时间
-        if (dto.getDueTime() != null) {
-            task.setPlanEndTime(dto.getDueTime());
-            // 计划开始时间默认为当前时间
-            task.setPlanStartTime(now);
-        }
+        task.setPlanStartTime(dto.getPlanStartTime());
+        task.setPlanEndTime(dto.getPlanEndTime());
 
         // 设置默认值
         task.setStatus(0);          // 待开始
@@ -211,8 +202,105 @@ public class TaskServiceApiImpl implements ITaskServiceApi {
      * @param projectTaskUpdateDTO 项目任务更新数据传递对象
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateProjectTask(ProjectTaskUpdateDTO projectTaskUpdateDTO) {
+        // 参数校验
+        validateProjectTaskUpdateDTO(projectTaskUpdateDTO);
 
+        // 检查任务是否存在
+        checkTaskExists(projectTaskUpdateDTO.getId());
+
+        // 更新任务基本信息
+        updateTaskInfo(projectTaskUpdateDTO);
+
+        // 更新任务人员关联（先删除后新增）
+        updateTaskUserRelations(projectTaskUpdateDTO.getId(),
+                                projectTaskUpdateDTO.getOwnerUserId(),
+                                projectTaskUpdateDTO.getUserIds());
+
+        // 插入任务更新记录
+//        insertTaskRecord(projectTaskUpdateDTO.getId(), TaskRecordActionType.UPDATE, "更新项目任务");
+    }
+
+    /**
+     * 校验项目任务更新DTO
+     *
+     * @param dto 项目任务更新DTO
+     */
+    private void validateProjectTaskUpdateDTO(ProjectTaskUpdateDTO dto) {
+        if (dto == null) {
+            throw new TaskException("任务数据不能为空");
+        }
+        if (dto.getId() == null) {
+            throw new TaskException("任务ID不能为空");
+        }
+        if (!StringUtils.hasText(dto.getTitle())) {
+            throw new TaskException("任务标题不能为空");
+        }
+        if (dto.getOwnerUserId() == null) {
+            throw new TaskException("任务负责人不能为空");
+        }
+    }
+
+    /**
+     * 检查任务是否存在
+     *
+     * @param taskId 任务ID
+     * @return 任务实体
+     */
+    private Task checkTaskExists(Long taskId) {
+        Task task = taskMapper.selectById(taskId);
+        if (task == null || Boolean.TRUE.equals(task.getDelFlag())) {
+            throw new TaskException("任务不存在");
+        }
+        // 检查是否为项目任务
+        if (task.getProjectId() == null) {
+            throw new TaskException("该任务不是项目任务");
+        }
+        return task;
+    }
+
+    /**
+     * 更新任务基本信息
+     *
+     * @param dto 项目任务更新DTO
+     */
+    private void updateTaskInfo(ProjectTaskUpdateDTO dto) {
+        Date now = DateUtils.getNowDate();
+        String currentUserName = SecurityUtils.getUserName();
+
+        Task task = new Task();
+        task.setId(dto.getId());
+        task.setTitle(dto.getTitle());
+        task.setDescription(dto.getDescription());
+        task.setPriority(dto.getPriority());
+        task.setPlanStartTime(dto.getPlanStartTime());
+        task.setPlanEndTime(dto.getPlanEndTime());
+        task.setRemark(dto.getRemark());
+        task.setUpdateBy(currentUserName);
+        task.setUpdateTime(now);
+
+        taskMapper.updateById(task);
+    }
+
+    /**
+     * 更新任务人员关联（先删除后新增）
+     *
+     * @param taskId 任务ID
+     * @param ownerUserId 负责人ID
+     * @param userIds 协作人ID列表
+     */
+    private void updateTaskUserRelations(Long taskId, Long ownerUserId, List<Long> userIds) {
+        // 删除原有的所有人员关联
+        LambdaQueryWrapper<TaskUser> removeWrapper = new LambdaQueryWrapper<>();
+        removeWrapper.eq(TaskUser::getTaskId, taskId);
+        taskUserMapper.delete(removeWrapper);
+
+        // 重新插入负责人
+        insertOwnerUser(taskId, ownerUserId);
+
+        // 重新插入协作人
+        insertTaskUsers(taskId, userIds, ownerUserId);
     }
 
     /**
@@ -222,6 +310,56 @@ public class TaskServiceApiImpl implements ITaskServiceApi {
      */
     @Override
     public Long getProjectIdByTaskId(Long taskId) {
-        return 0L;
+        if (taskId == null) {
+            return null;
+        }
+
+        Task task = taskMapper.selectById(taskId);
+        if (task == null || Boolean.TRUE.equals(task.getDelFlag())) {
+            return null;
+        }
+
+        return task.getProjectId();
+    }
+
+    /**
+     * 获取项目任务总数量
+     * @param projectId 项目ID
+     * @return 任务总数
+     */
+    @Override
+    public Long getProjectTaskCount(Long projectId) {
+        LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Task::getProjectId, projectId)
+                .eq(Task::getDelFlag, false);
+        return taskMapper.selectCount(wrapper);
+    }
+
+    /**
+     * 获取项目进行中任务总数量
+     * @param projectId 项目ID
+     * @return 进行中人数总数
+     */
+    @Override
+    public Long getProjectOngoingTaskCount(Long projectId) {
+        LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Task::getProjectId, projectId)
+                .eq(Task::getDelFlag, false)
+                .in(Task::getStatus, 1,2);
+        return taskMapper.selectCount(wrapper);
+    }
+
+    /**
+     * 获取项目未完成的任务总数量
+     * @param projectId 项目ID
+     * @return 未完成任务总数
+     */
+    @Override
+    public Long getProjectUnfinishedTaskCount(Long projectId) {
+        LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Task::getProjectId, projectId)
+                .eq(Task::getDelFlag, false)
+                .in(Task::getStatus, 0,1,2,3);
+        return taskMapper.selectCount(wrapper);
     }
 }

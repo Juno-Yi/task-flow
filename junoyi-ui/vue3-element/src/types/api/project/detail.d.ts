@@ -35,6 +35,8 @@ declare namespace Api.Project {
         priorityType?: string
         /** 项目成员数量 */
         memberCount: number
+        /** 项目任务数量 */
+        taskCount: number
         /** 里程碑数量 */
         milestoneCount: number
         /** 未完成的需求数量 */

@@ -43,7 +43,17 @@ public enum ProjectRecordType {
     /**
      * 完成里程碑
      */
-    COMPLETE_MILESTONE(7,"完成里程碑");
+    COMPLETE_MILESTONE(7,"完成里程碑"),
+
+    /**
+     * 创建任务
+     */
+    CREATE_TASK(8, "创建任务"),
+
+    /**
+     * 更新任务
+     */
+    UPDATE_TASK(9, "更新任务");
 
     private final Integer code;
 

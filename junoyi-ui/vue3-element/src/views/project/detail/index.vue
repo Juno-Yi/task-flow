@@ -58,9 +58,13 @@
               <span class="flex items-center">
                 <ArtSvgIcon icon="ri:task-line" class="mr-2" />
                 任务
-                <ElBadge v-if="projectInfo.milestoneCount > 0" :value="projectInfo.milestoneCount" class="ml-2" />
+                <ElBadge v-if="projectInfo.taskCount > 0" :value="projectInfo.taskCount" class="ml-2" />
               </span>
             </template>
+            <ProjectTaskTab
+              v-if="projectInfo.id"
+              :project-id="projectInfo.id"
+            />
           </ElTabPane>
 
           <!-- 里程碑 -->
@@ -116,6 +120,7 @@
   import { useRoute, useRouter } from 'vue-router'
   import {fetchGetProjectDetailByNo} from "@/api/project/detail";
   import RequirementTab from "@views/project/detail/tab/requirement-tab.vue";
+  import ProjectTaskTab from "@views/project/detail/tab/task-tab.vue";
 
 
   defineOptions({ name: 'ProjectDetail' })

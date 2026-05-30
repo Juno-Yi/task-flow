@@ -65,6 +65,52 @@ public class ProjectMemberServiceImpl implements IProjectMemberService {
     }
 
     /**
+     * 获取项目成员下拉选项（支持昵称模糊搜索）
+     *
+     * @param projectId 项目ID
+     * @param nickName 昵称（可选，支持模糊搜索）
+     * @return 项目成员用户列表
+     */
+    @Override
+    public List<SysUser> getMemberOptions(Long projectId, String nickName) {
+        // 查询项目成员
+        LambdaQueryWrapper<ProjectMember> memberWrapper = new LambdaQueryWrapper<>();
+        memberWrapper.eq(ProjectMember::getProjectId, projectId)
+                .eq(ProjectMember::getStatus, 1); // 只查询在职成员
+        List<ProjectMember> members = projectMemberMapper.selectList(memberWrapper);
+
+        if (members.isEmpty()) {
+            return List.of();
+        }
+
+        // 获取用户ID列表
+        List<Long> userIds = members.stream()
+                .map(ProjectMember::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 查询用户信息（支持昵称模糊搜索）
+        LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
+        userWrapper.in(SysUser::getUserId, userIds)
+                .eq(SysUser::isDelFlag, 0); // 只查询未删除的用户
+
+        // 如果提供了昵称，进行模糊搜索
+        if (nickName != null && !nickName.trim().isEmpty()) {
+            userWrapper.like(SysUser::getNickName, nickName.trim());
+        }
+
+        List<SysUser> users = sysUserMapper.selectList(userWrapper);
+
+        // 清除敏感信息
+        users.forEach(user -> {
+            user.setPassword(null);
+            user.setSalt(null);
+        });
+
+        return users;
+    }
+
+    /**
      * 添加项目成员
      *
      * @param dto 添加成员DTO

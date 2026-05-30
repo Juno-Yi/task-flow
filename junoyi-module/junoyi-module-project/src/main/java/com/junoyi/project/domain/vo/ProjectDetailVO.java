@@ -94,6 +94,11 @@ public class ProjectDetailVO {
     private Integer memberCount;
 
     /**
+     * 项目任务数量
+     */
+    private Long taskCount;
+
+    /**
      * 里程碑数量
      */
     private Integer milestoneCount;
