@@ -60,4 +60,11 @@ public interface TaskServiceApi {
      * @return 未完成任务总数
      */
     Long getProjectUnfinishedTaskCount(Long projectId);
+
+    /**
+     * 获取项目已经逾期的任务总量
+     * @param projectId 项目ID
+     * @return 已经逾期的任务总量
+     */
+    Long getProjectOverdueTaskCount(Long projectId);
 }

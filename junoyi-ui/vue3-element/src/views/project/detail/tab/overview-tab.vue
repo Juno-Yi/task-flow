@@ -134,7 +134,7 @@
               <strong v-else>{{overviewData.projectKeyData.pendingRequirements}}</strong>
             </div>
             <div class="side-stat-item">
-              <span>逾期任务量</span>
+              <span>历史逾期任务</span>
               <strong v-if="overviewData.projectKeyData.overdueTasks == null">--</strong>
               <strong v-else>{{overviewData.projectKeyData.overdueTasks}}</strong>
             </div>

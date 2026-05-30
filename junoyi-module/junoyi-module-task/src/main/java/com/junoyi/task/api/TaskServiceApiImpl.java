@@ -362,4 +362,20 @@ public class TaskServiceApiImpl implements TaskServiceApi {
                 .in(Task::getStatus, 0,1,2,3);
         return taskMapper.selectCount(wrapper);
     }
+
+    /**
+     * 获取项目已经逾期的任务总量
+     * @param projectId 项目ID
+     * @return 已经逾期的任务总量
+     */
+    @Override
+    public Long getProjectOverdueTaskCount(Long projectId) {
+        Date now = DateUtils.getNowDate();
+        LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Task::getProjectId, projectId)
+                .eq(Task::getDelFlag, false)
+                .isNotNull(Task::getPlanEndTime)  // 有计划结束时间
+                .lt(Task::getPlanEndTime, now);   // 计划结束时间早于当前时间
+        return taskMapper.selectCount(wrapper);
+    }
 }

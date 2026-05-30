@@ -25,6 +25,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -228,8 +229,23 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
     private ProjectKeyDataVO getProjectKeyData(Long projectId){
         ProjectKeyDataVO projectKeyDataVO = new ProjectKeyDataVO();
 
-        // TODO: 项目完成进度统计
-        projectKeyDataVO.setProjectCompletion(new BigDecimal(0));
+        // 项目完成进度统计
+        Long projectTaskCount = taskServiceApi.getProjectTaskCount(projectId);
+        Long projectUnfinishedTaskCount = taskServiceApi.getProjectUnfinishedTaskCount(projectId);
+        // 默认完成率 0%
+        BigDecimal completionRate = BigDecimal.ZERO;
+        // 避免除零异常
+        if (projectTaskCount != null && projectTaskCount > 0) {
+            long completedTaskCount = projectTaskCount - projectUnfinishedTaskCount;
+            completionRate = BigDecimal.valueOf(completedTaskCount)
+                    .multiply(BigDecimal.valueOf(100))
+                    .divide(
+                            BigDecimal.valueOf(projectTaskCount),
+                            2,
+                            RoundingMode.HALF_UP
+                    );
+        }
+        projectKeyDataVO.setProjectCompletion(completionRate);
 
         // 项目进行中的任务量
         projectKeyDataVO.setOngoingTasks(taskServiceApi.getProjectOngoingTaskCount(projectId));
@@ -242,8 +258,9 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
         Long pendingRequirementCount = projectRequirementMapper.selectCount(projectRequirementWrapper);
         projectKeyDataVO.setPendingRequirements(pendingRequirementCount);
 
-        // TODO: 项目逾期的任务量
-        projectKeyDataVO.setOverdueTasks(0L);
+        // 项目逾期的任务量
+        Long projectOverdueTaskCount = taskServiceApi.getProjectOverdueTaskCount(projectId);
+        projectKeyDataVO.setOverdueTasks(projectOverdueTaskCount);
 
         return projectKeyDataVO;
     }
