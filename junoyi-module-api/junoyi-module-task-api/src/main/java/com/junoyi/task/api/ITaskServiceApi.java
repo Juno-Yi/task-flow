@@ -39,4 +39,18 @@ public interface ITaskServiceApi {
      * @return 项目ID，如果任务不存在或不是项目任务则返回null
      */
     Long getProjectIdByTaskId(Long taskId);
+
+    /**
+     * 获取项目任务总数量
+     * @param projectId 项目ID
+     * @return 任务总数
+     */
+    Long getProjectTaskCount(Long projectId);
+
+    /**
+     * 获取项目未完成的任务总数量
+     * @param projectId 项目ID
+     * @return 未完成任务总数
+     */
+    Long getProjectUnfinishedTaskCount(Long projectId);
 }

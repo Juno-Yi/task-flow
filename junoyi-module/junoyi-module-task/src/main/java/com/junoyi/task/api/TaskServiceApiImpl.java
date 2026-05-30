@@ -1,5 +1,6 @@
 package com.junoyi.task.api;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.task.domain.dto.ProjectTaskCreateDTO;
@@ -219,5 +220,32 @@ public class TaskServiceApiImpl implements ITaskServiceApi {
     @Override
     public Long getProjectIdByTaskId(Long taskId) {
         return 0L;
+    }
+
+    /**
+     * 获取项目任务总数量
+     * @param projectId 项目ID
+     * @return 任务总数
+     */
+    @Override
+    public Long getProjectTaskCount(Long projectId) {
+        LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Task::getProjectId, projectId)
+                .eq(Task::getDelFlag, false);
+        return taskMapper.selectCount(wrapper);
+    }
+
+    /**
+     * 获取项目未完成的任务总数量
+     * @param projectId 项目ID
+     * @return 未完成任务总数
+     */
+    @Override
+    public Long getProjectUnfinishedTaskCount(Long projectId) {
+        LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Task::getProjectId, projectId)
+                .eq(Task::getDelFlag, false)
+                .in(Task::getStatus, 0,1,2,3);
+        return taskMapper.selectCount(wrapper);
     }
 }
