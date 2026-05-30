@@ -387,7 +387,7 @@ const {
           } else if (row.startTime) {
             return `${formatTime(row.startTime as any)} ~ 未结束`
           } else if (row.endTime) {
-            return `无 ~ ${formatTime(row.planEndTime as any)}`
+            return `无 ~ ${formatTime(row.endTime as any)}`
           }
           return '无'
         }

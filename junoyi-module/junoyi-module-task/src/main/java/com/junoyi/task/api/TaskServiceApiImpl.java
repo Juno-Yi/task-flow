@@ -111,8 +111,8 @@ public class TaskServiceApiImpl implements TaskServiceApi {
         task.setDescription(dto.getDescription());
         task.setPriority(dto.getPriority() != null ? dto.getPriority() : 0);
         task.setRemark(dto.getRemark());
-        task.setPlanEndTime(dto.getPlanStartTime());
-        task.setPlanStartTime(dto.getPlanEndTime());
+        task.setPlanStartTime(dto.getPlanStartTime());
+        task.setPlanEndTime(dto.getPlanEndTime());
 
         // 设置默认值
         task.setStatus(0);          // 待开始
