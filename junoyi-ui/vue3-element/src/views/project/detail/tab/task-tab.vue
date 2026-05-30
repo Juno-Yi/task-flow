@@ -672,7 +672,7 @@ const handleSubmit = async () => {
         })
         ElMessage.success('创建任务成功')
       } else {
-        await fetchUpdateProjectTask(formData.value.id!, {
+        await fetchUpdateProjectTask(props.projectId, {
           id: formData.value.id!,
           title: formData.value.title,
           description: formData.value.description,
