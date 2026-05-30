@@ -11,6 +11,7 @@ import com.junoyi.framework.permission.helper.PermissionHelper;
 import com.junoyi.framework.security.utils.PasswordUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
+import com.junoyi.project.domain.dto.TaskStatistics;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
@@ -24,6 +25,7 @@ import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
 import com.junoyi.system.event.UserOperationEvent;
 import com.junoyi.system.mapper.SysUserMapper;
+import com.junoyi.task.api.TaskServiceApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,7 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
     private final ProjectMemberMapper projectMemberMapper;
     private final SysUserMapper sysUserMapper;
     private final SysDictApi sysDictApi;
+    private final TaskServiceApi taskServiceApi;
 
     /**
      * 获取项目回收站列表
@@ -139,8 +142,9 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
             leaderNameMap = sysUserMapper.selectBatchIds(leaderIds).stream()
                     .collect(Collectors.toMap(SysUser::getUserId, SysUser::getNickName));
         }
+
         // 批量查询项目任务统计
-//        Map<Long, TaskStatistics> taskStatisticsMap = calculateTaskStatistics(projectIds);
+        Map<Long, TaskStatistics> taskStatisticsMap = calculateTaskStatistics(projectIds);
 
         // 批量查询字典数据（避免 N+1 查询）
         List<SysDictDataVO> projectTypeDictList = sysDictApi.getDictDataByType("project_type");
@@ -168,16 +172,16 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
             vo.setMemberCount(memberCountMap.getOrDefault(project.getId(), 0L).intValue());
 
             // 设置任务统计和进度
-//            TaskStatistics taskStats = taskStatisticsMap.get(project.getId());
-//            if (taskStats != null) {
-//                vo.setTotalTasks(taskStats.getTotalTasks());
-//                vo.setCompletedTasks(taskStats.getCompletedTasks());
-//                vo.setProgress(taskStats.getProgress());
-//            } else {
-//                vo.setTotalTasks(0);
-//                vo.setCompletedTasks(0);
-//                vo.setProgress(0);
-//            }
+            TaskStatistics taskStats = taskStatisticsMap.get(project.getId());
+            if (taskStats != null) {
+                vo.setTotalTasks(taskStats.getTotalTasks());
+                vo.setCompletedTasks(taskStats.getCompletedTasks());
+                vo.setProgress(taskStats.getProgress());
+            } else {
+                vo.setTotalTasks(0);
+                vo.setCompletedTasks(0);
+                vo.setProgress(0);
+            }
 
             // 字典翻译 - 项目类型（使用预加载的字典数据）
             if (project.getType() != null) {
@@ -216,6 +220,47 @@ public class ProjectRecycleServiceImpl implements IProjectRecycleService {
                 (int) resultPage.getSize()
         );
     }
+
+    /**
+     * 批量计算项目任务统计信息
+     * @param projectIds 项目ID列表
+     * @return 项目任务统计信息Map，key为项目ID，value为任务统计信息
+     */
+    private Map<Long, TaskStatistics> calculateTaskStatistics(List<Long> projectIds) {
+        Map<Long, TaskStatistics> statisticsMap = new HashMap<>();
+
+        for (Long projectId : projectIds) {
+            // 获取项目任务列表
+            List<com.junoyi.task.domain.vo.ProjectTaskItemVO> taskList = taskServiceApi.getProjectTaskList(projectId);
+
+            // 统计任务数量
+            int totalTasks = taskList.size();
+            int completedTasks = 0;
+
+            // 统计已完成任务数量（状态为4表示已完成）
+            for (com.junoyi.task.domain.vo.ProjectTaskItemVO task : taskList) {
+                if (task.getStatus() != null && task.getStatus() == 4) {
+                    completedTasks++;
+                }
+            }
+
+            // 计算进度百分比
+            int progress = 0;
+            if (totalTasks > 0) {
+                progress = (int) Math.round((double) completedTasks / totalTasks * 100);
+            }
+
+            TaskStatistics statistics = new TaskStatistics();
+            statistics.setTotalTasks(totalTasks);
+            statistics.setCompletedTasks(completedTasks);
+            statistics.setProgress(progress);
+
+            statisticsMap.put(projectId, statistics);
+        }
+
+        return statisticsMap;
+    }
+
 
     /**
      * 恢复已删除项目
