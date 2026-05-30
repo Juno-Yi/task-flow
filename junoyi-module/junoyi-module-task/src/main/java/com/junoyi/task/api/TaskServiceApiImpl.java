@@ -111,14 +111,8 @@ public class TaskServiceApiImpl implements ITaskServiceApi {
         task.setDescription(dto.getDescription());
         task.setPriority(dto.getPriority() != null ? dto.getPriority() : 0);
         task.setRemark(dto.getRemark());
-
-        // 设置计划时间
-        // 如果有截止时间，设置为计划结束时间
-        if (dto.getDueTime() != null) {
-            task.setPlanEndTime(dto.getDueTime());
-            // 计划开始时间默认为当前时间
-            task.setPlanStartTime(now);
-        }
+        task.setPlanEndTime(dto.getPlanStartTime());
+        task.setPlanStartTime(dto.getPlanEndTime());
 
         // 设置默认值
         task.setStatus(0);          // 待开始
