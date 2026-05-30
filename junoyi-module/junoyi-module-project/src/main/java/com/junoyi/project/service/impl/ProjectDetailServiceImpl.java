@@ -368,4 +368,35 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
     private LocalDate convertToLocalDate(Date date) {
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
+
+    /**
+     * 通过项目ID获取项目信息
+     * @param projectId 项目ID
+     * @return 项目信息
+     */
+    @Override
+    public ProjectInfoVO getProjectInfo(Long projectId) {
+        LambdaQueryWrapper<Project> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Project::getId, projectId)
+                .eq(Project::isDelFlag, false);
+        Project project = projectMapper.selectOne(wrapper);
+
+        if (project == null) {
+            throw new ProjectNotFoundException("项目不存在");
+        }
+
+        ProjectInfoVO infoVO = new ProjectInfoVO();
+        BeanUtils.copyProperties(project, infoVO);
+
+        // 字典翻译 - 项目类型
+        if (project.getType() != null) {
+            SysDictDataVO typeDict = sysDictApi.getDictItem("project_type", String.valueOf(project.getType()));
+            if (typeDict != null) {
+                infoVO.setTypeLabel(typeDict.getDictLabel());
+                infoVO.setTypeLabelType(typeDict.getListClass());
+            }
+        }
+
+        return infoVO;
+    }
 }

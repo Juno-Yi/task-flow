@@ -1,6 +1,7 @@
 package com.junoyi.project.service;
 
 import com.junoyi.project.domain.vo.ProjectDetailVO;
+import com.junoyi.project.domain.vo.ProjectInfoVO;
 import com.junoyi.project.domain.vo.ProjectOverviewVO;
 
 /**
@@ -23,4 +24,11 @@ public interface IProjectDetailService {
      * @return 项目概览数据
      */
     ProjectOverviewVO getProjectOverview(String projectNo);
+
+    /**
+     * 通过项目ID获取项目信息
+     * @param projectId 项目ID
+     * @return 项目信息
+     */
+    ProjectInfoVO getProjectInfo(Long projectId);
 }
