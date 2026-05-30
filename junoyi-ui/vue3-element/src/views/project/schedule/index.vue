@@ -2,6 +2,7 @@
 <template>
   <div class="art-full-height">
     <div class="flex flex-col h-full">
+      <!-- 搜索栏和视图切换 -->
       <ElCard shadow="never" class="mb-4 flex-shrink-0 filter-card">
         <div class="filter-content">
           <div class="filter-item">
@@ -21,18 +22,19 @@
             <ElButton type="primary" :icon="Search" @click="handleSearch">查询</ElButton>
             <ElButton :icon="Refresh" @click="handleReset">重置</ElButton>
           </div>
+          <!-- 视图切换 -->
+          <div class="filter-item ml-auto">
+            <ElRadioGroup v-model="viewMode" size="default" @change="handleViewModeChange">
+              <ElRadioButton value="Day">日</ElRadioButton>
+              <ElRadioButton value="Week">周</ElRadioButton>
+              <ElRadioButton value="Month">月</ElRadioButton>
+              <ElRadioButton value="Year">年</ElRadioButton>
+            </ElRadioGroup>
+          </div>
         </div>
       </ElCard>
-      <ElCard shadow="never" class="mb-4 flex-shrink-0">
-        <div class="view-mode-selector">
-          <ElRadioGroup v-model="viewMode" @change="handleViewModeChange">
-            <ElRadioButton value="Day">日视图</ElRadioButton>
-            <ElRadioButton value="Week">周视图</ElRadioButton>
-            <ElRadioButton value="Month">月视图</ElRadioButton>
-            <ElRadioButton value="Quarter">季度视图</ElRadioButton>
-          </ElRadioGroup>
-        </div>
-      </ElCard>
+
+      <!-- 甘特图 -->
       <ElCard shadow="never" class="flex-1 min-h-0 art-table-card">
         <div v-loading="loading" class="gantt-container">
           <div v-if="projectList.length === 0 && !loading" class="empty-state">
@@ -56,12 +58,12 @@ import Gantt from 'frappe-gantt'
 
 const queryParams = ref({ projectTitle: '', leader: undefined })
 const showCompletedProjects = ref(false)
-const viewMode = ref('Month')
+const viewMode = ref<'Day' | 'Week' | 'Month' | 'Year'>('Month')
 const loading = ref(false)
-const projectList = ref([])
-const leaderOptions = ref([])
-const ganttChartRef = ref(null)
-let ganttInstance = null
+const projectList = ref<Api.Project.ProjectGanttVO[]>([])
+const leaderOptions = ref<Array<{ userId: number; nickName: string }>>([])
+const ganttChartRef = ref<HTMLElement | null>(null)
+let ganttInstance: any = null
 
 const fetchProjectList = async () => {
   loading.value = true
@@ -89,30 +91,76 @@ const renderGanttChart = () => {
     ganttChartRef.value.innerHTML = ''
     ganttInstance = null
   }
+
+  // 打印数据用于调试
+  console.log('项目列表数据:', projectList.value)
+
   const tasks = projectList.value.map(project => ({
     id: `project-${project.projectId}`,
     name: project.projectTitle,
     start: (project.planStartTime ? new Date(project.planStartTime) : new Date()).toISOString().split('T')[0],
     end: (project.planEndTime ? new Date(project.planEndTime) : new Date()).toISOString().split('T')[0],
-    progress: project.completionRate || 0,
-    custom_class: project.isOverdue ? 'gantt-task-overdue' : ''
+    progress: Number(project.completionRate) || 0,
+    custom_class: project.overdue ? 'gantt-task-overdue' : ''  // 修改：isOverdue -> overdue
   }))
+
   try {
     ganttInstance = new Gantt(ganttChartRef.value, tasks, {
       view_mode: viewMode.value,
       language: 'zh',
-      bar_height: 30,
-      bar_corner_radius: 3,
+      bar_height: 40,
+      bar_corner_radius: 4,
       arrow_curve: 5,
-      padding: 18,
+      padding: 20,
       date_format: 'YYYY-MM-DD',
       custom_popup_html: task => {
         const project = projectList.value.find(p => `project-${p.projectId}` === task.id)
         if (!project) return ''
-        return `<div class="gantt-popup"><div class="popup-title">${project.projectTitle}</div><div class="popup-content"><div>编号: ${project.projectNo}</div><div>负责人: ${project.leaderName}</div><div>完成率: ${project.completionRate}%</div>${project.isOverdue ? '<div style="color: #f56c6c;">已逾期</div>' : ''}</div></div>`
+
+        console.log('弹窗项目数据:', project)
+
+        // 格式化时间
+        const formatDate = (dateStr: string | undefined): string => {
+          if (!dateStr) return '-'
+          if (typeof dateStr === 'string') {
+            return dateStr.split(' ')[0]
+          }
+          return dateStr
+        }
+
+        // 格式化完成率
+        const formatCompletionRate = (rate: number | undefined): string => {
+          if (!rate) return '0'
+          return Number(rate).toFixed(2)
+        }
+
+        // 构建详细信息
+        const details = []
+        details.push(`<div><strong>项目编号：</strong>${project.projectNo || '-'}</div>`)
+        details.push(`<div><strong>负责人：</strong>${project.leaderName || '-'}</div>`)
+        details.push(`<div><strong>项目状态：</strong>${project.statusLabel || '-'}</div>`)
+        details.push(`<div><strong>项目类型：</strong>${project.typeLabel || '-'}</div>`)
+        details.push(`<div><strong>优先级：</strong>${project.priorityLabel || '-'}</div>`)
+        details.push(`<div><strong>完成率：</strong>${formatCompletionRate(project.completionRate)}%</div>`)
+        details.push(`<div><strong>计划开始：</strong>${formatDate(project.planStartTime)}</div>`)
+        details.push(`<div><strong>计划结束：</strong>${formatDate(project.planEndTime)}</div>`)
+
+        if (project.overdue) {
+          details.push('<div style="color: #f56c6c; font-weight: bold; margin-top: 8px;">⚠️ 已逾期</div>')
+        }
+
+        return `
+          <div class="gantt-popup">
+            <div class="popup-title">${project.projectTitle}</div>
+            <div class="popup-content">
+              ${details.join('')}
+            </div>
+          </div>
+        `
       }
     })
   } catch (error) {
+    console.error('渲染甘特图失败:', error)
     ElMessage.error('渲染甘特图失败')
   }
 }
@@ -136,19 +184,103 @@ onMounted(() => fetchProjectList())
 </style>
 
 <style scoped lang="scss">
-.filter-card :deep(.el-card__body) { padding: 16px; }
-.filter-content { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.filter-item { display: flex; align-items: center; gap: 8px; }
-.filter-input { width: 240px; }
-.filter-select { width: 200px; }
-.view-mode-selector { display: flex; justify-content: center; }
-.gantt-container { height: 100%; overflow: auto; padding: 20px; }
-.gantt-chart { min-height: 400px; }
-.empty-state { display: flex; align-items: center; justify-content: center; height: 400px; }
-:deep(.gantt-task-overdue .bar) { fill: #f56c6c !important; }
-:deep(.gantt .bar-progress) { fill: #409eff; }
-:deep(.gantt .bar) { fill: #e4e7ed; }
-:deep(.gantt-popup) { background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15); padding: 12px; min-width: 250px; }
-:deep(.popup-title) { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #303133; }
-:deep(.popup-content div) { margin: 4px 0; font-size: 14px; color: #606266; }
+.filter-card :deep(.el-card__body) {
+  padding: 16px;
+}
+
+.filter-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-input {
+  width: 240px;
+}
+
+.filter-select {
+  width: 200px;
+}
+
+.ml-auto {
+  margin-left: auto;
+}
+
+.gantt-container {
+  height: 100%;
+  overflow: auto;
+  padding: 20px;
+
+  // 确保甘特图容器占满剩余空间
+  display: flex;
+  flex-direction: column;
+}
+
+.gantt-chart {
+  flex: 1;
+  min-height: 500px;
+  height: 100%;
+
+  // 让甘特图内容自适应高度
+  :deep(.gantt-container) {
+    height: 100% !important;
+  }
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+}
+
+// 甘特图样式优化
+:deep(.gantt-task-overdue .bar) {
+  fill: #f56c6c !important;
+}
+
+:deep(.gantt .bar-progress) {
+  fill: #409eff;
+}
+
+:deep(.gantt .bar) {
+  fill: #e4e7ed;
+}
+
+:deep(.gantt-popup) {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  min-width: 300px;
+  max-width: 400px;
+}
+
+:deep(.popup-title) {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #303133;
+  border-bottom: 1px solid #ebeef5;
+  padding-bottom: 8px;
+}
+
+:deep(.popup-content div) {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #606266;
+  line-height: 1.6;
+
+  strong {
+    color: #303133;
+    margin-right: 8px;
+  }
+}
 </style>
