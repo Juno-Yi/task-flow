@@ -34,9 +34,14 @@ public class ProjectTaskUpdateDTO {
     private Integer priority;
 
     /**
-     * 截止时间
+     * 计划开始时间
      */
-    private Date dueTime;
+    private  Date planStartTime;
+
+    /**
+     * 计划结束时间
+     */
+    private Date planEndTime;
 
     /**
      * 执行人ID列表
@@ -52,9 +57,4 @@ public class ProjectTaskUpdateDTO {
      * 任务备注
      */
     private String remark;
-
-    /**
-     * 是否同步企业微信日程
-     */
-    private Boolean syncSchedule;
 }

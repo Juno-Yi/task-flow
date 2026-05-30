@@ -32,7 +32,18 @@ declare namespace Api.Project {
         remark?: string
     }
 
+    /**
+     * 项目任务更新 DTO
+     */
     interface ProjectTaskDTO {
-
+        id: number
+        title?: string
+        description?: string
+        priority?: number
+        planStartTime?: string
+        planEndTime?: string
+        userIds?: number[]
+        ownerUserId?: number
+        remark?: string
     }
 }
