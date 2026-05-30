@@ -233,16 +233,53 @@
             </ElOption>
           </ElSelect>
         </ElFormItem>
-        <ElFormItem label="计划时间" prop="planTime">
-          <ElDatePicker
-            v-model="formData.planTime"
-            type="datetimerange"
-            range-separator="至"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            class="w-full"
-          />
+        <ElFormItem label="计划时间">
+          <div class="plan-time-wrapper">
+            <!-- 开始时间 -->
+            <ElDatePicker
+              v-model="formData.planStartTime"
+              type="datetime"
+              placeholder="开始时间"
+              format="YYYY-MM-DD HH:mm"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              class="plan-time-picker"
+              @change="handleStartTimeChange"
+            />
+
+            <span class="time-separator">~</span>
+
+            <!-- 结束时间 -->
+            <ElDatePicker
+              v-model="formData.planEndTime"
+              type="datetime"
+              placeholder="结束时间"
+              format="YYYY-MM-DD HH:mm"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              class="plan-time-picker"
+              :disabled-date="disabledEndDate"
+              :disabled-hours="disabledEndHours"
+            />
+
+            <!-- 小时数输入 -->
+            <div class="hours-input-wrapper">
+              <span class="hours-label">或</span>
+              <ElInputNumber
+                v-model="planHours"
+                :min="0.5"
+                :max="8760"
+                :step="0.5"
+                :precision="1"
+                placeholder="小时数"
+                class="hours-input"
+                controls-position="right"
+                @change="handleHoursChange"
+              />
+              <span class="hours-unit">小时</span>
+            </div>
+          </div>
+          <div class="plan-time-tip">
+            可直接选择开始和结束时间，或选择开始时间后输入小时数自动计算结束时间
+          </div>
         </ElFormItem>
         <ElFormItem label="备注" prop="remark">
           <ElInput
@@ -300,6 +337,9 @@ const currentTask = ref<Api.Project.ProjectTaskItemVO>()
 const projectMembers = ref<Api.System.SysUserVO[]>([])
 const memberLoading = ref(false)
 
+// 计划工时（小时数）
+const planHours = ref<number>()
+
 // 表单数据
 const formData = ref<{
   id?: number
@@ -308,7 +348,8 @@ const formData = ref<{
   priority: number
   ownerUserId?: number
   userIds: number[]
-  planTime: [string, string] | null
+  planStartTime: string | null
+  planEndTime: string | null
   remark: string
 }>({
   title: '',
@@ -316,7 +357,8 @@ const formData = ref<{
   priority: 2,
   ownerUserId: undefined,
   userIds: [],
-  planTime: null,
+  planStartTime: null,
+  planEndTime: null,
   remark: ''
 })
 
@@ -427,6 +469,77 @@ const handleSearchMembers = (query: string) => {
 }
 
 /**
+ * 禁用结束日期（不能早于开始日期）
+ */
+const disabledEndDate = (time: Date) => {
+  if (!formData.value.planStartTime) return false
+  const startDate = new Date(formData.value.planStartTime)
+  return time.getTime() < startDate.getTime() - 24 * 60 * 60 * 1000
+}
+
+/**
+ * 禁用结束时间的小时（如果是同一天，不能早于开始时间）
+ */
+const disabledEndHours = () => {
+  if (!formData.value.planStartTime || !formData.value.planEndTime) return []
+
+  const startTime = new Date(formData.value.planStartTime)
+  const endTime = new Date(formData.value.planEndTime)
+
+  // 如果不是同一天，不禁用任何小时
+  if (startTime.toDateString() !== endTime.toDateString()) {
+    return []
+  }
+
+  // 如果是同一天，禁用早于开始时间的小时
+  const startHour = startTime.getHours()
+  const disabledHours: number[] = []
+  for (let i = 0; i < startHour; i++) {
+    disabledHours.push(i)
+  }
+  return disabledHours
+}
+
+/**
+ * 开始时间变化时，清空小时数输入
+ */
+const handleStartTimeChange = () => {
+  planHours.value = undefined
+  // 如果有结束时间，计算小时数
+  if (formData.value.planStartTime && formData.value.planEndTime) {
+    const start = new Date(formData.value.planStartTime)
+    const end = new Date(formData.value.planEndTime)
+    const diffMs = end.getTime() - start.getTime()
+    const diffHours = diffMs / (1000 * 60 * 60)
+    if (diffHours > 0) {
+      planHours.value = Math.round(diffHours * 10) / 10 // 保留1位小数
+    }
+  }
+}
+
+/**
+ * 小时数变化时，自动计算结束时间
+ */
+const handleHoursChange = (value: number | undefined) => {
+  if (!value || !formData.value.planStartTime) {
+    return
+  }
+
+  const startDate = new Date(formData.value.planStartTime)
+  const endDate = new Date(startDate.getTime() + value * 60 * 60 * 1000)
+
+  // 格式化为 YYYY-MM-DD HH:mm:ss
+  const year = endDate.getFullYear()
+  const month = String(endDate.getMonth() + 1).padStart(2, '0')
+  const day = String(endDate.getDate()).padStart(2, '0')
+  const hours = String(endDate.getHours()).padStart(2, '0')
+  const minutes = String(endDate.getMinutes()).padStart(2, '0')
+  const seconds = String(endDate.getSeconds()).padStart(2, '0')
+
+  formData.value.planEndTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+/**
  * 处理任务点击
  */
 const handleTaskClick = (task: Api.Project.ProjectTaskItemVO) => {
@@ -445,9 +558,11 @@ const handleAddTask = () => {
     priority: 2,
     ownerUserId: undefined,
     userIds: [],
-    planTime: null,
+    planStartTime: null,
+    planEndTime: null,
     remark: ''
   }
+  planHours.value = undefined  // 重置小时数
   formVisible.value = true
 
   // 加载项目成员
@@ -466,11 +581,22 @@ const handleEditTask = (task: Api.Project.ProjectTaskItemVO) => {
     priority: task.priority || 2,
     ownerUserId: task.ownerUser?.userId,
     userIds: task.taskUserList?.map(u => u.userId) || [],
-    planTime: task.planStartTime && task.planEndTime
-      ? [task.planStartTime, task.planEndTime]
-      : null,
+    planStartTime: task.planStartTime || null,
+    planEndTime: task.planEndTime || null,
     remark: task.remark || ''
   }
+
+  // 计算小时数
+  if (task.planStartTime && task.planEndTime) {
+    const start = new Date(task.planStartTime)
+    const end = new Date(task.planEndTime)
+    const diffMs = end.getTime() - start.getTime()
+    const diffHours = diffMs / (1000 * 60 * 60)
+    planHours.value = diffHours > 0 ? Math.round(diffHours * 10) / 10 : undefined
+  } else {
+    planHours.value = undefined
+  }
+
   formVisible.value = true
 
   // 加载项目成员
@@ -506,8 +632,8 @@ const handleSubmit = async () => {
           priority: formData.value.priority,
           ownerUserId: formData.value.ownerUserId,
           userIds: formData.value.userIds,
-          planStartTime: formData.value.planTime?.[0],
-          planEndTime: formData.value.planTime?.[1],
+          planStartTime: formData.value.planStartTime || undefined,
+          planEndTime: formData.value.planEndTime || undefined,
           remark: formData.value.remark
         })
         ElMessage.success('创建任务成功')
@@ -519,8 +645,8 @@ const handleSubmit = async () => {
           priority: formData.value.priority,
           ownerUserId: formData.value.ownerUserId,
           userIds: formData.value.userIds,
-          planStartTime: formData.value.planTime?.[0],
-          planEndTime: formData.value.planTime?.[1],
+          planStartTime: formData.value.planStartTime || undefined,
+          planEndTime: formData.value.planEndTime || undefined,
           remark: formData.value.remark
         })
         ElMessage.success('更新任务成功')
@@ -612,5 +738,50 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-// 样式可以根据需要添加
+// 计划时间选择器样式
+.plan-time-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.plan-time-picker {
+  flex: 1;
+  min-width: 200px;
+}
+
+.time-separator {
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.hours-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hours-label {
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+}
+
+.hours-input {
+  width: 120px;
+}
+
+.hours-unit {
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+}
+
+.plan-time-tip {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.5;
+}
 </style>
