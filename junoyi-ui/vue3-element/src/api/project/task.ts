@@ -23,11 +23,12 @@ export function fetchAddProjectTask(data: Api.Project.ProjectTaskCreatedDTO){
 
 /**
  * 修改项目任务
- * @param projectId 项目ID
+ * @param taskId 任务ID
  * @param data 修改的数据
  */
-export function fetchUpdateProjectTask(projectId: number, data: Api.Project.ProjectTaskUpdateDTO){
+export function fetchUpdateProjectTask(taskId: number, data: Api.Project.ProjectTaskUpdateDTO){
     return request.put<void>({
-        url: `/project/task/${projectId}`
+        url: `/project/task/${taskId}`,
+        data
     })
 }

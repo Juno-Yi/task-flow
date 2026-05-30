@@ -3,6 +3,7 @@ package com.junoyi.project.service;
 import com.junoyi.project.domain.dto.ProjectMemberAddDTO;
 import com.junoyi.project.domain.dto.ProjectMemberUpdateRoleDTO;
 import com.junoyi.project.domain.vo.ProjectMemberVO;
+import com.junoyi.system.domain.po.SysUser;
 
 import java.util.List;
 
@@ -20,6 +21,15 @@ public interface IProjectMemberService {
      * @return 项目成员列表
      */
     List<ProjectMemberVO> getMemberList(Long projectId);
+
+    /**
+     * 获取项目成员下拉选项（支持昵称模糊搜索）
+     *
+     * @param projectId 项目ID
+     * @param nickName 昵称（可选，支持模糊搜索）
+     * @return 项目成员用户列表
+     */
+    List<SysUser> getMemberOptions(Long projectId, String nickName);
 
     /**
      * 添加项目成员

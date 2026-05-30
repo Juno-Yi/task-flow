@@ -10,6 +10,7 @@ import com.junoyi.project.domain.dto.ProjectMemberUpdateRoleDTO;
 import com.junoyi.project.domain.vo.ProjectMemberVO;
 import com.junoyi.project.service.IProjectMemberService;
 import com.junoyi.project.service.IProjectPermissionService;
+import com.junoyi.system.domain.po.SysUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +47,19 @@ public class ProjectMemberController extends BaseController {
             return R.fail("非法请求");
 
         return R.ok(projectMemberService.getMemberList(projectId));
+    }
+
+    /**
+     * 获取项目成员下拉列表（支持昵称模糊搜索）
+     */
+    @GetMapping("/options")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<List<SysUser>> getProjectMemberOptions(
+            @RequestParam("projectId") Long projectId,
+            @RequestParam(value = "nickName", required = false) String nickName
+    ){
+        List<SysUser> memberOptions = projectMemberService.getMemberOptions(projectId, nickName);
+        return R.ok(memberOptions);
     }
 
 
