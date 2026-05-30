@@ -47,6 +47,9 @@ importers:
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
+      frappe-gantt:
+        specifier: ^1.2.2
+        version: 1.2.2
       highlight.js:
         specifier: ^11.10.0
         version: 11.11.1
@@ -2189,6 +2192,9 @@ packages:
   frac@1.1.2:
     resolution: {integrity: sha512-w/XBfkibaTl3YDqASwfDUqkna4Z2p9cFSr1aHDt0WoMTECnRfBOv2WArlZILlqgWlmdIlALXGpM2AOhEk5W3IA==}
     engines: {node: '>=0.8'}
+
+  frappe-gantt@1.2.2:
+    resolution: {integrity: sha512-1+uPNRa92LBIeKiZCVhJMiGIifJk5ONaoerXI8eBREXWRZGGoTJR5ATpMpsnAQcyBA6Gnq5wIht4eL+e4eHMBA==}
 
   fs-extra@10.1.0:
     resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
@@ -5994,6 +6000,8 @@ snapshots:
       mime-types: 2.1.35
 
   frac@1.1.2: {}
+
+  frappe-gantt@1.2.2: {}
 
   fs-extra@10.1.0:
     dependencies:

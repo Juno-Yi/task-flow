@@ -65,6 +65,7 @@
     "echarts": "^6.0.0",
     "element-plus": "^2.11.2",
     "file-saver": "^2.0.5",
+    "frappe-gantt": "^1.2.2",
     "highlight.js": "^11.10.0",
     "marked": "^18.0.4",
     "mitt": "^3.0.1",
