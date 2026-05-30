@@ -28,7 +28,8 @@ public interface IProjectTaskService {
 
     /**
      * 更新项目任务
+     * @param projectId 项目ID
      * @param dto 更新任务传输数据
      */
-    void updateProjectTask(ProjectTaskUpdateDTO dto);
+    void updateProjectTask(Long projectId, ProjectTaskUpdateDTO dto);
 }

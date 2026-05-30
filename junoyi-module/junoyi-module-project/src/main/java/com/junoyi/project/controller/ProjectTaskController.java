@@ -92,7 +92,7 @@ public class ProjectTaskController extends BaseController {
         if (!isOwner && !isAdmin)
             return R.fail("权限不足，只有项目负责人或管理员可以修改任务");
 
-        projectTaskService.updateProjectTask(dto);
+        projectTaskService.updateProjectTask(projectId, dto);
         return R.ok();
     }
 }

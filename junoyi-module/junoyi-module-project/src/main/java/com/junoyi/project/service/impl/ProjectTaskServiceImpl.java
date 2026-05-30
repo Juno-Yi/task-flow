@@ -1,5 +1,10 @@
 package com.junoyi.project.service.impl;
 
+import com.junoyi.framework.event.core.EventBus;
+import com.junoyi.framework.security.utils.SecurityUtils;
+import com.junoyi.project.enums.ProjectRecordTargetType;
+import com.junoyi.project.enums.ProjectRecordType;
+import com.junoyi.project.event.ProjectRecordEvent;
 import com.junoyi.project.exception.ProjectException;
 import com.junoyi.project.service.IProjectTaskService;
 import com.junoyi.task.api.TaskServiceApi;
@@ -45,17 +50,36 @@ public class ProjectTaskServiceImpl implements IProjectTaskService {
             throw new ProjectException("项目ID不能为空");
         }
         taskServiceApi.createProjectTask(dto);
+
+        // 发布项目动态
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                dto.getProjectId(),
+                SecurityUtils.getUserId(),
+                ProjectRecordType.CREATE_TASK,
+                ProjectRecordTargetType.TASK,
+                "创建了任务「" + dto.getTitle() + "」"
+        ));
     }
 
     /**
      * 更新项目任务
+     * @param projectId 项目ID
      * @param dto 更新任务传输数据
      */
     @Override
-    public void updateProjectTask(ProjectTaskUpdateDTO dto) {
+    public void updateProjectTask(Long projectId, ProjectTaskUpdateDTO dto) {
         if (dto.getId() == null) {
             throw new ProjectException("任务ID不能为空");
         }
         taskServiceApi.updateProjectTask(dto);
+
+        // 发布项目动态
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(),
+                ProjectRecordType.UPDATE_TASK,
+                ProjectRecordTargetType.TASK,
+                "更新了任务「" + dto.getTitle() + "」"
+        ));
     }
 }

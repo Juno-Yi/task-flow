@@ -18,7 +18,12 @@ public enum ProjectRecordTargetType {
     /**
      * 里程碑
      */
-    MILESTONE(2,"里程碑");
+    MILESTONE(2,"里程碑"),
+
+    /**
+     * 任务
+     */
+    TASK(3,"任务");
 
     private final Integer code;
 
