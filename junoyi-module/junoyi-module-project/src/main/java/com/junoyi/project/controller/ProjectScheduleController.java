@@ -29,9 +29,9 @@ public class ProjectScheduleController extends BaseController {
     /**
      * 获取活跃中的项目日程甘特图列表
      */
-    @GetMapping("/list")
+    @GetMapping("/gantt/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
-    public R<List<ProjectGanttVO>> getActiveProjectGantList(ProjectGanttQueryDTO queryDTO){
+    public R<List<ProjectGanttVO>> getActiveProjectGanttList(ProjectGanttQueryDTO queryDTO){
         return R.ok(projectScheduleService.getActiveProjectGantList(queryDTO));
     }
 }
