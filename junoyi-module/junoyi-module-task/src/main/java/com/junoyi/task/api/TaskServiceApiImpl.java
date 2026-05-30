@@ -30,7 +30,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class TaskServiceApiImpl implements ITaskServiceApi {
+public class TaskServiceApiImpl implements TaskServiceApi {
 
     private final TaskMapper taskMapper;
     private final TaskUserMapper taskUserMapper;
@@ -332,6 +332,20 @@ public class TaskServiceApiImpl implements ITaskServiceApi {
         LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Task::getProjectId, projectId)
                 .eq(Task::getDelFlag, false);
+        return taskMapper.selectCount(wrapper);
+    }
+
+    /**
+     * 获取项目进行中任务总数量
+     * @param projectId 项目ID
+     * @return 进行中人数总数
+     */
+    @Override
+    public Long getProjectOngoingTaskCount(Long projectId) {
+        LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Task::getProjectId, projectId)
+                .eq(Task::getDelFlag, false)
+                .in(Task::getStatus, 1,2);
         return taskMapper.selectCount(wrapper);
     }
 

@@ -6,7 +6,7 @@
       <div class="flex items-center gap-3">
         <ElTag type="info" size="large">{{ totalTaskCount }} 个任务</ElTag>
         <ElTag type="danger" size="large">{{ urgentTaskCount }} 个紧急</ElTag>
-        <ElTag type="warning" size="large">{{ overdueTaskCount }} 个逾期</ElTag>
+        <ElTag type="danger" size="large">{{ overdueTaskCount }} 个逾期</ElTag>
       </div>
       <div class="flex items-center gap-2">
         <ElInput
@@ -258,6 +258,7 @@
               class="plan-time-picker"
               :disabled-date="disabledEndDate"
               :disabled-hours="disabledEndHours"
+              @change="handleEndTimeChange"
             />
 
             <!-- 小时数输入 -->
@@ -422,8 +423,16 @@ const groupedTasks = computed(() => {
 
 // 统计数据
 const totalTaskCount = computed(() => filteredTasks.value.length)
-const urgentTaskCount = computed(() => filteredTasks.value.filter(t => t.priority === 4).length)
-const overdueTaskCount = computed(() => filteredTasks.value.filter(t => t.isOverdue).length)
+
+// 紧急任务数量（排除已完成的任务）
+const urgentTaskCount = computed(() =>
+  filteredTasks.value.filter(t => t.priority === 4 && t.status !== 4).length
+)
+
+// 逾期任务数量（排除已完成的任务）
+const overdueTaskCount = computed(() =>
+  filteredTasks.value.filter(t => t.isOverdue && t.status !== 4).length
+)
 
 /**
  * 加载任务列表
@@ -513,6 +522,31 @@ const handleStartTimeChange = () => {
     const diffHours = diffMs / (1000 * 60 * 60)
     if (diffHours > 0) {
       planHours.value = Math.round(diffHours * 10) / 10 // 保留1位小数
+    } else {
+      // 如果结束时间早于开始时间，清空结束时间
+      formData.value.planEndTime = null
+      ElMessage.warning('结束时间不能早于开始时间')
+    }
+  }
+}
+
+/**
+ * 结束时间变化时，计算小时数
+ */
+const handleEndTimeChange = () => {
+  planHours.value = undefined
+  // 如果有开始时间和结束时间，计算小时数
+  if (formData.value.planStartTime && formData.value.planEndTime) {
+    const start = new Date(formData.value.planStartTime)
+    const end = new Date(formData.value.planEndTime)
+    const diffMs = end.getTime() - start.getTime()
+    const diffHours = diffMs / (1000 * 60 * 60)
+    if (diffHours > 0) {
+      planHours.value = Math.round(diffHours * 10) / 10 // 保留1位小数
+    } else {
+      // 如果结束时间早于开始时间，清空结束时间并提示
+      formData.value.planEndTime = null
+      ElMessage.warning('结束时间不能早于开始时间')
     }
   }
 }

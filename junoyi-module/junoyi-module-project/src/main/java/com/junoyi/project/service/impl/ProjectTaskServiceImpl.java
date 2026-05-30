@@ -2,7 +2,7 @@ package com.junoyi.project.service.impl;
 
 import com.junoyi.project.exception.ProjectException;
 import com.junoyi.project.service.IProjectTaskService;
-import com.junoyi.task.api.ITaskServiceApi;
+import com.junoyi.task.api.TaskServiceApi;
 import com.junoyi.task.domain.dto.ProjectTaskCreateDTO;
 import com.junoyi.task.domain.dto.ProjectTaskUpdateDTO;
 import com.junoyi.task.domain.vo.ProjectTaskItemVO;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectTaskServiceImpl implements IProjectTaskService {
 
-    private final ITaskServiceApi taskServiceApi;
+    private final TaskServiceApi taskServiceApi;
 
     /**
      * 获取项目的任务列表

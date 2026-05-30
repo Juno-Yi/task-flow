@@ -19,6 +19,7 @@ import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
 import com.junoyi.system.mapper.SysUserMapper;
+import com.junoyi.task.api.TaskServiceApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,7 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
     private final SysUserMapper sysUserMapper;
     private final ProjectMemberMapper projectMemberMapper;
     private final SysDictApi sysDictApi;
+    private final TaskServiceApi taskServiceApi;
 
 
 
@@ -94,6 +96,9 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
 
         // 统计未完成的需求数量
         detailVO.setRequirementCount(projectRequirementService.getNotCompletedRequirementCount(project.getId()));
+
+        // 统计项目未完成任务数量
+        detailVO.setTaskCount(taskServiceApi.getProjectUnfinishedTaskCount(project.getId()));
 
         // TODO: 统计里程碑数量
         detailVO.setMilestoneCount(0);
@@ -226,8 +231,8 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
         // TODO: 项目完成进度统计
         projectKeyDataVO.setProjectCompletion(new BigDecimal(0));
 
-        // TODO: 项目进行中的任务量
-        projectKeyDataVO.setOngoingTasks(0L);
+        // 项目进行中的任务量
+        projectKeyDataVO.setOngoingTasks(taskServiceApi.getProjectOngoingTaskCount(projectId));
 
         // 项目待开始的需求量
         LambdaQueryWrapper<ProjectRequirement> projectRequirementWrapper = new LambdaQueryWrapper<>();

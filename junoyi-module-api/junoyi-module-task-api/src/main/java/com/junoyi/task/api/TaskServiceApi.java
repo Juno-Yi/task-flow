@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author Fan
  */
-public interface ITaskServiceApi {
+public interface TaskServiceApi {
 
     /**
      * 获取项目任务列表
@@ -46,6 +46,13 @@ public interface ITaskServiceApi {
      * @return 任务总数
      */
     Long getProjectTaskCount(Long projectId);
+
+    /**
+     * 获取项目进行中任务总数量
+     * @param projectId 项目ID
+     * @return 进行中人数总数
+     */
+    Long getProjectOngoingTaskCount(Long projectId);
 
     /**
      * 获取项目未完成的任务总数量
