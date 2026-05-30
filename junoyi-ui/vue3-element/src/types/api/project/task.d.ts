@@ -35,7 +35,7 @@ declare namespace Api.Project {
     /**
      * 项目任务更新 DTO
      */
-    interface ProjectTaskDTO {
+    interface ProjectTaskUpdateDTO {
         id: number
         title?: string
         description?: string
