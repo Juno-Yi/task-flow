@@ -16,9 +16,6 @@
             </ElSelect>
           </div>
           <div class="filter-item">
-            <ElCheckbox v-model="showCompletedProjects" @change="handleSearch">显示已完成项目</ElCheckbox>
-          </div>
-          <div class="filter-item">
             <ElButton type="primary" :icon="Search" @click="handleSearch">查询</ElButton>
             <ElButton :icon="Refresh" @click="handleReset">重置</ElButton>
           </div>
