@@ -22,15 +22,7 @@
             <ElButton type="primary" :icon="Search" @click="handleSearch">查询</ElButton>
             <ElButton :icon="Refresh" @click="handleReset">重置</ElButton>
           </div>
-          <!-- 视图切换 -->
-          <div class="filter-item ml-auto">
-            <ElRadioGroup v-model="viewMode" size="default" @change="handleViewModeChange">
-              <ElRadioButton value="day">日</ElRadioButton>
-              <ElRadioButton value="week">周</ElRadioButton>
-              <ElRadioButton value="month">月</ElRadioButton>
-              <ElRadioButton value="year">年</ElRadioButton>
-            </ElRadioGroup>
-          </div>
+
         </div>
       </ElCard>
       
@@ -57,65 +49,11 @@ import 'dhtmlx-gantt/codebase/dhtmlxgantt.css'
 
 const queryParams = ref({ projectTitle: '', leader: undefined })
 const showCompletedProjects = ref(false)
-const viewMode = ref<'day' | 'week' | 'month' | 'year'>('month')
 const loading = ref(false)
 const projectList = ref<Api.Project.ProjectGanttVO[]>([])
 const leaderOptions = ref<Array<{ userId: number; nickName: string }>>([])
 const ganttChartRef = ref<HTMLElement | null>(null)
 let isGanttInitialized = false
-
-// 配置时间轴格式
-const configureScales = (mode: 'day' | 'week' | 'month' | 'year') => {
-  switch (mode) {
-    case 'day':
-      gantt.config.scale_unit = 'day'
-      gantt.config.date_scale = '%j月%d日'
-      gantt.config.subscales = [
-        { unit: 'hour', step: 6, date: '%H:%i' }
-      ]
-      gantt.templates.date_scale = (date: Date) => {
-        return (date.getMonth() + 1) + '月' + date.getDate() + '日'
-      }
-      break
-    case 'week':
-      gantt.config.scale_unit = 'week'
-      gantt.config.date_scale = '第%W周'
-      gantt.templates.date_scale = null as any
-      gantt.config.subscales = [
-        { unit: 'day', step: 1, date: '%j月%d日' }
-      ]
-      gantt.templates.subscale_date = (date: Date) => {
-        return (date.getMonth() + 1) + '月' + date.getDate() + '日'
-      }
-      break
-    case 'month':
-      gantt.config.scale_unit = 'month'
-      gantt.config.date_scale = '%Y年%n月'
-      gantt.templates.date_scale = (date: Date) => {
-        return date.getFullYear() + '年' + (date.getMonth() + 1) + '月'
-      }
-      gantt.config.subscales = [
-        { unit: 'day', step: 1, date: '%d日' }
-      ]
-      gantt.templates.subscale_date = (date: Date) => {
-        return date.getDate() + '日'
-      }
-      break
-    case 'year':
-      gantt.config.scale_unit = 'year'
-      gantt.config.date_scale = '%Y年'
-      gantt.templates.date_scale = (date: Date) => {
-        return date.getFullYear() + '年'
-      }
-      gantt.config.subscales = [
-        { unit: 'month', step: 1, date: '%n月' }
-      ]
-      gantt.templates.subscale_date = (date: Date) => {
-        return (date.getMonth() + 1) + '月'
-      }
-      break
-  }
-}
 
 // 初始化甘特图配置
 const initGanttConfig = () => {
@@ -123,7 +61,7 @@ const initGanttConfig = () => {
 
   // 配置列 - 调整宽度更紧凑
   gantt.config.columns = [
-    { name: 'text', label: '项目名称', tree: true, width: 180 },
+    { name: 'text', label: '项目名称', tree: true, width: 150 },
     { name: 'leader', label: '负责人', align: 'center', width: 80 },
     { name: 'status', label: '状态', align: 'center', width: 70 },
     { name: 'priority', label: '优先级', align: 'center', width: 70 },
@@ -137,11 +75,16 @@ const initGanttConfig = () => {
   gantt.config.readonly = true
   gantt.config.show_progress = true
   gantt.config.autosize = false  // 关闭自动调整大小，启用滚动
-  gantt.config.fit_tasks = false  // 不自动适应任务，启用横向滚动
+  gantt.config.fit_tasks = true  // 自动适应任务时间范围
+  gantt.config.show_tasks_outside_timescale = true  // 显示时间范围外的任务
 
-  // 配置时间轴格式 - 根据视图模式显示不同格式
-  configureScales(viewMode.value)
-  
+  // 固定使用月视图
+  gantt.config.scale_unit = 'month'
+  gantt.config.subscales = [
+    { unit: 'day', step: 1, date: '%d' }
+  ]
+
+  // 配置工具提示
   gantt.templates.tooltip_text = (_start: Date, _end: Date, task: any) => {
     const project = projectList.value.find(p => p.projectId === task.id)
     if (!project) return ''
@@ -164,6 +107,7 @@ const initGanttConfig = () => {
     return lines.join('')
   }
 
+  // 配置任务颜色
   gantt.templates.task_class = (_start: Date, _end: Date, task: any) => {
     const project = projectList.value.find(p => p.projectId === task.id)
     return project?.isOverdue ? 'gantt-task-overdue' : ''
@@ -180,9 +124,12 @@ const fetchProjectList = async () => {
       if (project.leader && project.leaderName) leaderMap.set(project.leader, project.leaderName)
     })
     leaderOptions.value = Array.from(leaderMap.entries()).map(([userId, nickName]) => ({ userId, nickName }))
-    projectList.value = showCompletedProjects.value ? allProjects : allProjects.filter(item => item.status !== 6)
+
+    // 直接使用所有数据，不筛选
+    projectList.value = allProjects
 
     console.log('项目列表数据:', projectList.value)
+    console.log('项目数量:', projectList.value.length)
 
     await nextTick()
     renderGanttChart()
@@ -195,23 +142,64 @@ const fetchProjectList = async () => {
 }
 
 const renderGanttChart = () => {
-  if (!ganttChartRef.value || projectList.value.length === 0) return
+  if (!ganttChartRef.value || projectList.value.length === 0) {
+    console.log('无法渲染甘特图:', { hasRef: !!ganttChartRef.value, projectCount: projectList.value.length })
+    return
+  }
+
+  console.log('开始渲染甘特图，项目数量:', projectList.value.length)
 
   gantt.clearAll()
 
+  // 计算所有项目的时间范围
+  let minDate: Date | null = null
+  let maxDate: Date | null = null
+
+  projectList.value.forEach(project => {
+    console.log('项目:', project.projectTitle, '开始:', project.planStartTime, '结束:', project.planEndTime)
+
+    if (project.planStartTime) {
+      const startDate = new Date(project.planStartTime)
+      if (!minDate || startDate < minDate) {
+        minDate = startDate
+      }
+    }
+    if (project.planEndTime) {
+      const endDate = new Date(project.planEndTime)
+      if (!maxDate || endDate > maxDate) {
+        maxDate = endDate
+      }
+    }
+  })
+
+  console.log('计算的时间范围:', { minDate, maxDate })
+
+  // 构建任务数据
   const tasks = {
-    data: projectList.value.map(project => ({
-      id: project.projectId,
-      text: project.projectTitle,
-      leader: project.leaderName || '-',
-      status: project.statusLabel || '-',
-      priority: project.priorityLabel || '-',
-      start_date: project.planStartTime ? project.planStartTime.split(' ')[0] : new Date().toISOString().split('T')[0],
-      end_date: project.planEndTime ? project.planEndTime.split(' ')[0] : new Date().toISOString().split('T')[0],
-      progress: Number(project.completionRate || 0) / 100,
-      duration: 0
-    }))
+    data: projectList.value.map(project => {
+      const startDate = project.planStartTime ? project.planStartTime.split(' ')[0] : new Date().toISOString().split('T')[0]
+      const endDate = project.planEndTime ? project.planEndTime.split(' ')[0] : new Date().toISOString().split('T')[0]
+
+      // 计算持续天数
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      const duration = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+
+      return {
+        id: project.projectId,
+        text: project.projectTitle,
+        leader: project.leaderName || '-',
+        status: project.statusLabel || '-',
+        priority: project.priorityLabel || '-',
+        start_date: startDate,
+        end_date: endDate,
+        progress: Number(project.completionRate || 0) / 100,
+        duration: duration > 0 ? duration : 1  // 至少1天
+      }
+    })
   }
+
+  console.log('任务数据:', tasks)
 
   if (!isGanttInitialized) {
     initGanttConfig()
@@ -219,14 +207,23 @@ const renderGanttChart = () => {
     isGanttInitialized = true
   }
 
+  // 清空并重新加载数据
+  gantt.clearAll()
   gantt.parse(tasks)
-}
 
-const handleViewModeChange = () => {
-  if (isGanttInitialized) {
-    configureScales(viewMode.value)
-    gantt.render()
-  }
+  console.log('gantt 内部任务数量:', gantt.getTaskCount())
+  console.log('gantt 所有任务:', gantt.getTaskByTime())
+
+  // 强制渲染
+  gantt.render()
+
+  console.log('甘特图渲染完成')
+  console.log('最终 gantt 配置:', {
+    start_date: gantt.config.start_date,
+    end_date: gantt.config.end_date,
+    scale_unit: gantt.config.scale_unit,
+    fit_tasks: gantt.config.fit_tasks
+  })
 }
 
 const handleSearch = () => fetchProjectList()
