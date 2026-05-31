@@ -69,31 +69,50 @@ const configureScales = (mode: 'day' | 'week' | 'month' | 'year') => {
   switch (mode) {
     case 'day':
       gantt.config.scale_unit = 'day'
-      gantt.config.date_scale = '%m月%d日'
+      gantt.config.date_scale = '%j月%d日'
       gantt.config.subscales = [
         { unit: 'hour', step: 6, date: '%H:%i' }
       ]
+      gantt.templates.date_scale = (date: Date) => {
+        return (date.getMonth() + 1) + '月' + date.getDate() + '日'
+      }
       break
     case 'week':
       gantt.config.scale_unit = 'week'
       gantt.config.date_scale = '第%W周'
+      gantt.templates.date_scale = null as any
       gantt.config.subscales = [
-        { unit: 'day', step: 1, date: '%m月%d日' }
+        { unit: 'day', step: 1, date: '%j月%d日' }
       ]
+      gantt.templates.subscale_date = (date: Date) => {
+        return (date.getMonth() + 1) + '月' + date.getDate() + '日'
+      }
       break
     case 'month':
       gantt.config.scale_unit = 'month'
-      gantt.config.date_scale = '%Y年%m月'
+      gantt.config.date_scale = '%Y年%n月'
+      gantt.templates.date_scale = (date: Date) => {
+        return date.getFullYear() + '年' + (date.getMonth() + 1) + '月'
+      }
       gantt.config.subscales = [
         { unit: 'day', step: 1, date: '%d日' }
       ]
+      gantt.templates.subscale_date = (date: Date) => {
+        return date.getDate() + '日'
+      }
       break
     case 'year':
       gantt.config.scale_unit = 'year'
       gantt.config.date_scale = '%Y年'
+      gantt.templates.date_scale = (date: Date) => {
+        return date.getFullYear() + '年'
+      }
       gantt.config.subscales = [
-        { unit: 'month', step: 1, date: '%m月' }
+        { unit: 'month', step: 1, date: '%n月' }
       ]
+      gantt.templates.subscale_date = (date: Date) => {
+        return (date.getMonth() + 1) + '月'
+      }
       break
   }
 }
@@ -138,7 +157,7 @@ const initGanttConfig = () => {
     lines.push('<div style="margin: 4px 0;"><strong>完成率：</strong>' + Number(project.completionRate || 0).toFixed(2) + '%</div>')
     lines.push('<div style="margin: 4px 0;"><strong>计划开始：</strong>' + (project.planStartTime?.split(' ')[0] || '-') + '</div>')
     lines.push('<div style="margin: 4px 0;"><strong>计划结束：</strong>' + (project.planEndTime?.split(' ')[0] || '-') + '</div>')
-    if (project.overdue) {
+    if (project.isOverdue) {
       lines.push('<div style="color: #f56c6c; font-weight: bold; margin-top: 8px;">⚠️ 已逾期</div>')
     }
     lines.push('</div>')
@@ -147,7 +166,7 @@ const initGanttConfig = () => {
 
   gantt.templates.task_class = (_start: Date, _end: Date, task: any) => {
     const project = projectList.value.find(p => p.projectId === task.id)
-    return project?.overdue ? 'gantt-task-overdue' : ''
+    return project?.isOverdue ? 'gantt-task-overdue' : ''
   }
 }
 
@@ -261,13 +280,14 @@ onBeforeUnmount(() => {
 
 .gantt-container {
   height: 100%;
-  overflow: hidden;
+  overflow: auto;  // 允许滚动
   padding: 0;
 }
 
 .gantt-chart {
   height: 100%;
   width: 100%;
+  min-height: 500px;  // 设置最小高度
 }
 
 .empty-state {
@@ -279,6 +299,7 @@ onBeforeUnmount(() => {
 </style>
 
 <style>
+/* 甘特图全局样式 */
 .gantt-task-overdue .gantt_task_progress {
   background-color: #f56c6c !important;
 }
@@ -286,6 +307,16 @@ onBeforeUnmount(() => {
 .gantt-task-overdue .gantt_task_line {
   background-color: #f56c6c !important;
   border-color: #f56c6c !important;
+}
+
+/* 确保甘特图容器可以横向滚动 */
+.gantt_container {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
+.gantt_task {
+  overflow-x: auto !important;
 }
 </style>
 
