@@ -38,6 +38,9 @@ importers:
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
+      dhtmlx-gantt:
+        specifier: ^9.1.4
+        version: 9.1.4
       echarts:
         specifier: ^6.0.0
         version: 6.0.0
@@ -47,9 +50,6 @@ importers:
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
-      frappe-gantt:
-        specifier: ^1.2.2
-        version: 1.2.2
       highlight.js:
         specifier: ^11.10.0
         version: 11.11.1
@@ -1847,6 +1847,9 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
+  dhtmlx-gantt@9.1.4:
+    resolution: {integrity: sha512-XCNA5QUiuV79Xq1ykNpH9LFNR2IVpDZMqnmBV6dsBeOkHyPMOpkyQ/gqAPCcK2GAvYHoN2nGAMYb2LldCWhMuQ==}
+
   diff-match-patch@1.0.5:
     resolution: {integrity: sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==}
 
@@ -2192,9 +2195,6 @@ packages:
   frac@1.1.2:
     resolution: {integrity: sha512-w/XBfkibaTl3YDqASwfDUqkna4Z2p9cFSr1aHDt0WoMTECnRfBOv2WArlZILlqgWlmdIlALXGpM2AOhEk5W3IA==}
     engines: {node: '>=0.8'}
-
-  frappe-gantt@1.2.2:
-    resolution: {integrity: sha512-1+uPNRa92LBIeKiZCVhJMiGIifJk5ONaoerXI8eBREXWRZGGoTJR5ATpMpsnAQcyBA6Gnq5wIht4eL+e4eHMBA==}
 
   fs-extra@10.1.0:
     resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
@@ -5566,6 +5566,8 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
+  dhtmlx-gantt@9.1.4: {}
+
   diff-match-patch@1.0.5: {}
 
   dir-glob@3.0.1:
@@ -6000,8 +6002,6 @@ snapshots:
       mime-types: 2.1.35
 
   frac@1.1.2: {}
-
-  frappe-gantt@1.2.2: {}
 
   fs-extra@10.1.0:
     dependencies:
