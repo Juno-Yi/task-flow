@@ -19,4 +19,11 @@ public interface IProjectExecutionService {
      * @return 活跃项目列表
      */
     PageResult<ProjectListVO> getExecutionList(ProjectListQueryDTO queryDTO, Page<Project> page);
+
+    /**
+     * 发起项目验收
+     * @param projectId 项目ID
+     */
+    void initiateAcceptance(Long projectId);
+
 }

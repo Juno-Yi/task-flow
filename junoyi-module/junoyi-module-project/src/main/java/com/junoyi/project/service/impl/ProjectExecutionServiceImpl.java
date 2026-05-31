@@ -3,7 +3,9 @@ package com.junoyi.project.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.core.utils.StringUtils;
+import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.permission.helper.PermissionHelper;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
@@ -11,12 +13,15 @@ import com.junoyi.project.domain.dto.TaskStatistics;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
+import com.junoyi.project.exception.ProjectException;
+import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.mapper.ProjectMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.service.IProjectExecutionService;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
+import com.junoyi.system.event.UserOperationEvent;
 import com.junoyi.system.mapper.SysUserMapper;
 import com.junoyi.task.api.TaskServiceApi;
 import lombok.RequiredArgsConstructor;
@@ -259,6 +264,44 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
         return statisticsMap;
     }
 
+    /**
+     * 发起项目验收
+     * @param projectId 项目ID
+     */
+    @Override
+    public void initiateAcceptance(Long projectId) {
+        // 检查项目是否存在
+        Project project = projectMapper.selectById(projectId);
+        if (project == null || project.isDelFlag()){
+            throw new ProjectNotFoundException("不存在的项目");
+        }
 
+        // 项目状态是否进行中（状态1表示进行中）
+        if (project.getStatus() != 1){
+            throw new ProjectException("项目状态不是进行中，无法提交验收");
+        }
 
+        // 获取当前用户ID
+        Long currentUserId = SecurityUtils.getUserId();
+
+        boolean hasPermission = PermissionHelper.isSuperAdmin()
+                || PermissionHelper.hasPermission("project.ui.execution.initiate.acceptance.button")
+                || project.getLeader().equals(currentUserId);
+
+        if (!hasPermission) {
+            throw new ProjectException("无权限启动该项目，只有项目负责人或管理员可以发起项目验收");
+        }
+
+        // 更新项目状态为待验收（状态3）
+        project.setStatus(3);
+        project.setStartTime(DateUtils.getNowDate());
+        project.setUpdateBy(SecurityUtils.getUserName());
+        project.setUpdateTime(DateUtils.getNowDate());
+        projectMapper.updateById(project);
+
+        // 发布操作日志事件
+        EventBus.get().callEvent(UserOperationEvent.of("start", "project",
+                "项目「" + project.getName() + "」（编号：" + project.getNo() + "）发起验收，等待验收",
+                String.valueOf(project.getId()), project.getName()));
+    }
 }
