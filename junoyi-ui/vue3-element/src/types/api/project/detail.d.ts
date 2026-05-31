@@ -41,6 +41,18 @@ declare namespace Api.Project {
         milestoneCount: number
         /** 未完成的需求数量 */
         requirementCount: number
+        /** 项目进度 */
+        progress?: number
+        /** 总任务数 */
+        totalTasks?: number
+        /** 已完成任务数 */
+        completedTasks?: number
+        /** 待处理任务数 */
+        pendingTasks?: number
+        /** 仓库数量 */
+        repositoryCount?: number
+        /** 文档数量 */
+        documentCount?: number
         /** 创建者 */
         createBy?: string
         /** 创建时间 */

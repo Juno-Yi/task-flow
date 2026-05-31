@@ -38,6 +38,9 @@ importers:
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
+      dhtmlx-gantt:
+        specifier: ^9.1.4
+        version: 9.1.4
       echarts:
         specifier: ^6.0.0
         version: 6.0.0
@@ -1843,6 +1846,9 @@ packages:
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
+
+  dhtmlx-gantt@9.1.4:
+    resolution: {integrity: sha512-XCNA5QUiuV79Xq1ykNpH9LFNR2IVpDZMqnmBV6dsBeOkHyPMOpkyQ/gqAPCcK2GAvYHoN2nGAMYb2LldCWhMuQ==}
 
   diff-match-patch@1.0.5:
     resolution: {integrity: sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==}
@@ -5559,6 +5565,8 @@ snapshots:
     optional: true
 
   detect-libc@2.1.2: {}
+
+  dhtmlx-gantt@9.1.4: {}
 
   diff-match-patch@1.0.5: {}
 
