@@ -42,6 +42,7 @@ public class ProjectExecutionController extends BaseController {
             value =  "project.ui.execution.initiate.acceptance.button"
     )
     public R<Void> initiateAcceptance(@PathVariable("projectId") Long projectId){
+        projectActiveService.initiateAcceptance(projectId);
         return R.ok();
     }
 }
