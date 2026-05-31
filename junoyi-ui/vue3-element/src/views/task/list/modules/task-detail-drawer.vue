@@ -280,8 +280,8 @@ const calculateHours = (startTime?: string, endTime?: string) => {
 /**
  * 获取操作类型标签颜色
  */
-const getActionTypeTag = (actionType?: number): string => {
-  const typeMap: Record<number, string> = {
+const getActionTypeTag = (actionType?: number): 'primary' | 'success' | 'warning' | 'info' | 'danger' => {
+  const typeMap: Record<number, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
     1: 'primary',   // 创建
     2: 'success',   // 开始
     3: 'warning',   // 提交

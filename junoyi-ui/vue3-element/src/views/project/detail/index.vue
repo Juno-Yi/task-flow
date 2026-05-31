@@ -96,7 +96,7 @@
               <span class="flex items-center">
                 <ArtSvgIcon icon="ri:git-repository-line" class="mr-2" />
                 仓库
-                <ElBadge v-if="projectInfo.repositoryCount > 0" :value="projectInfo.repositoryCount" class="ml-2" />
+                <ElBadge v-if="projectInfo.repositoryCount && projectInfo.repositoryCount > 0" :value="projectInfo.repositoryCount" class="ml-2" />
               </span>
             </template>
             <RepositoryTab :project-info="projectInfo" />
@@ -153,13 +153,15 @@
     priorityLabel: '',
     priorityType: '',
     memberCount: 0,
+    taskCount: 0,
+    milestoneCount: 0,
+    requirementCount: 0,
     progress: 0,
     totalTasks: 0,
     completedTasks: 0,
     pendingTasks: 0,
     repositoryCount: 0,
     documentCount: 0,
-    milestoneCount: 0,
     createTime: '',
     updateTime: '',
     remark: '',
