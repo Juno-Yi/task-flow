@@ -46,7 +46,7 @@ import RepoSearch from './modules/repo-search.vue'
 import { ElTag, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
 import { fetchExportProjectBook } from '@/api/project/list'
-import {fetchGetProjectActiveList} from "@/api/project/execution";
+import { fetchGetProjectActiveList, fetchInitiateAcceptance } from "@/api/project/execution";
 
 
 defineOptions({ name: 'ProjectRepo' })
@@ -291,7 +291,7 @@ const {
               label: '请求验收',
               icon: 'ri:checkbox-circle-line',
               color: '#e7ac10',
-              auth: 'project.ui.list.acceptance.button'
+              auth: 'project.ui.execution.initiate.acceptance.button'
             },
           ]
 
@@ -364,7 +364,34 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
       viewRepo(row)
       break
     case 'acceptance':
+      initiateAcceptance(row)
       break
+  }
+}
+
+/**
+ * 项目发起验收
+ */
+const initiateAcceptance = async (row: RepoVO) => {
+  try {
+    await ElMessageBox.confirm(
+        `确定要对 "${row.name}" 发起验收吗？`,
+        `发起验收`,
+        {
+          confirmButtonText: '确定启动',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+    )
+
+    await fetchInitiateAcceptance(row.id)
+    ElMessage.success(`项目 ${row.name} 已发起验收!`)
+    getData() // 刷新列表
+  } catch (error) {
+    // 用户取消或者请求失败
+    if (error !== 'cancel'){
+      console.error('项目发起验收失败:',error)
+    }
   }
 }
 

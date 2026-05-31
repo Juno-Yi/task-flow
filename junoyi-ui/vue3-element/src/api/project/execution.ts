@@ -11,3 +11,12 @@ export function fetchGetProjectActiveList(params: Api.Project.ProjectListQueryDT
     })
 }
 
+/**
+ * 项目发起验收
+ * @param projectId 项目Id
+ */
+export function fetchInitiateAcceptance(projectId: number){
+    return request.post<void>({
+        url: `/project/execution/initiate/acceptance/${projectId}`
+    })
+}
