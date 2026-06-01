@@ -83,7 +83,12 @@ public enum ProjectRecordType {
     /**
      * 取消暂停项目
      */
-    CANCEL_PAUSE_PROJECT(15,"取消暂停项目");
+    CANCEL_PAUSE_PROJECT(15,"取消暂停项目"),
+
+    /**
+     * 发起验收
+     */
+    INITIATE_ACCEPTANCE(16,"发起验收");
 
     private final Integer code;
 

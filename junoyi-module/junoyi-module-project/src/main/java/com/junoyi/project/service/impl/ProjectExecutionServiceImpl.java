@@ -299,7 +299,14 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
         project.setUpdateTime(DateUtils.getNowDate());
         projectMapper.updateById(project);
 
-        // TODO 发布项目动态
+        // 发布项目动态
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(),
+                ProjectRecordType.INITIATE_ACCEPTANCE,
+                ProjectRecordTargetType.PROJECT,
+                "发起项目验收「" + project.getName() + "」(编号：" + project.getNo() + "）"
+        ));
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.of("initiate-acceptance", "project",
