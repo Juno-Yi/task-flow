@@ -53,7 +53,27 @@ public enum ProjectRecordType {
     /**
      * 更新任务
      */
-    UPDATE_TASK(9, "更新任务");
+    UPDATE_TASK(9, "更新任务"),
+
+    /**
+     * 创建仓库
+     */
+    CREATE_REPOSITORY(10,"创建仓库"),
+
+    /**
+     * 更新仓库
+     */
+    UPDATE_REPOSITORY(11,"更新仓库"),
+
+    /**
+     * 删除仓库
+     */
+    DELETE_REPOSITORY(12,"删除仓库"),
+
+    /**
+     * 启动项目
+     */
+    START_PROJECT(10,"启动项目");
 
     private final Integer code;
 

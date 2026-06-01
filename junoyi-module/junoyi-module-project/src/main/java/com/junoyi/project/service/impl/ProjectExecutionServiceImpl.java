@@ -13,6 +13,7 @@ import com.junoyi.project.domain.dto.TaskStatistics;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
+import com.junoyi.project.event.ProjectRecordEvent;
 import com.junoyi.project.exception.ProjectException;
 import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.mapper.ProjectMapper;
@@ -295,6 +296,8 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
         project.setUpdateBy(SecurityUtils.getUserName());
         project.setUpdateTime(DateUtils.getNowDate());
         projectMapper.updateById(project);
+
+        // TODO 发布项目动态
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.of("initiate-acceptance", "project",
