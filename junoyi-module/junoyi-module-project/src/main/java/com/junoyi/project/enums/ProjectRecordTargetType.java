@@ -28,7 +28,12 @@ public enum ProjectRecordTargetType {
     /**
      * 仓库
      */
-    REPOSITORY(4,"仓库");
+    REPOSITORY(4,"仓库"),
+
+    /**
+     * 项目
+     */
+    PROJECT(5,"项目");
 
     private final Integer code;
 
