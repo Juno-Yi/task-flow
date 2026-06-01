@@ -13,6 +13,8 @@ import com.junoyi.project.domain.dto.TaskStatistics;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
+import com.junoyi.project.enums.ProjectRecordTargetType;
+import com.junoyi.project.enums.ProjectRecordType;
 import com.junoyi.project.event.ProjectRecordEvent;
 import com.junoyi.project.exception.ProjectException;
 import com.junoyi.project.exception.ProjectNotFoundException;
@@ -337,6 +339,15 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
         project.setUpdateTime(DateUtils.getNowDate());
         projectMapper.updateById(project);
 
+        // 发布项目日志
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(),
+                ProjectRecordType.PAUSE_PROJECT,
+                ProjectRecordTargetType.PROJECT,
+                "暂停了项目「" + project.getName() + "」(编号：" + project.getNo() + "）"
+        ));
+
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.of("pause", "project",
                 "暂停了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
@@ -374,6 +385,15 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
         project.setUpdateBy(SecurityUtils.getUserName());
         project.setUpdateTime(DateUtils.getNowDate());
         projectMapper.updateById(project);
+
+        // 发布项目日志
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(),
+                ProjectRecordType.PAUSE_PROJECT,
+                ProjectRecordTargetType.PROJECT,
+                "取消暂停项目「" + project.getName() + "」(编号：" + project.getNo() + "）"
+        ));
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.of("cancel-pause", "project",

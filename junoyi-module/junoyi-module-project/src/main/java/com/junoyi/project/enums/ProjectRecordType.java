@@ -73,7 +73,17 @@ public enum ProjectRecordType {
     /**
      * 启动项目
      */
-    START_PROJECT(13,"启动项目");
+    START_PROJECT(13,"启动项目"),
+
+    /**
+     * 暂停项目
+     */
+    PAUSE_PROJECT(14,"暂停项目"),
+
+    /**
+     * 取消暂停项目
+     */
+    CANCEL_PAUSE_PROJECT(15,"取消暂停项目");
 
     private final Integer code;
 
