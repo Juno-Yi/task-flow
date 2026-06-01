@@ -46,7 +46,12 @@ import RepoSearch from './modules/repo-search.vue'
 import { ElTag, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
 import { fetchExportProjectBook } from '@/api/project/list'
-import { fetchGetProjectActiveList, fetchInitiateAcceptance } from "@/api/project/execution";
+import {
+  fetchGetProjectActiveList,
+  fetchInitiateAcceptance,
+  fetchPauseProject,
+  fetchCancelPauseProject
+} from "@/api/project/execution";
 
 
 defineOptions({ name: 'ProjectRepo' })
@@ -285,15 +290,39 @@ const {
               key: 'view',
               label: '查看详情',
               icon: 'ri:eye-line'
-            },
-            {
-              key: 'acceptance',
-              label: '请求验收',
-              icon: 'ri:checkbox-circle-line',
-              color: '#e7ac10',
-              auth: 'project.ui.execution.initiate.acceptance.button'
-            },
+            }
           ]
+
+          // 状态为 1（进行中）时显示暂停按钮
+          if (row.status === 1) {
+            list.push({
+              key: 'pause',
+              label: '暂停项目',
+              icon: 'ri:pause-circle-line',
+              color: '#e7ac10',
+              auth: 'project.ui.execution.pause.button'
+            })
+          }
+
+          // 状态为 2（暂停）时显示取消暂停按钮
+          if (row.status === 2) {
+            list.push({
+              key: 'cancelPause',
+              label: '取消暂停',
+              icon: 'ri:play-circle-line',
+              color: '#67c23a',
+              auth: 'project.ui.execution.pause.cancel.button'
+            })
+          }
+
+          // 请求验收按钮
+          list.push({
+            key: 'acceptance',
+            label: '请求验收',
+            icon: 'ri:checkbox-circle-line',
+            color: '#e7ac10',
+            auth: 'project.ui.execution.initiate.acceptance.button'
+          })
 
           return h(ArtButtonMore, {
             list,
@@ -363,6 +392,12 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
     case 'view':
       viewRepo(row)
       break
+    case 'pause':
+      pauseProject(row)
+      break
+    case 'cancelPause':
+      cancelPauseProject(row)
+      break
     case 'acceptance':
       initiateAcceptance(row)
       break
@@ -391,6 +426,58 @@ const initiateAcceptance = async (row: RepoVO) => {
     // 用户取消或者请求失败
     if (error !== 'cancel'){
       console.error('项目发起验收失败:',error)
+    }
+  }
+}
+
+/**
+ * 暂停项目
+ */
+const pauseProject = async (row: RepoVO) => {
+  try {
+    await ElMessageBox.confirm(
+        `确定要暂停项目 "${row.name}" 吗？暂停后项目将停止进行。`,
+        '暂停项目',
+        {
+          confirmButtonText: '确定暂停',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+    )
+
+    await fetchPauseProject(row.id)
+    ElMessage.success(`项目 ${row.name} 已暂停`)
+    getData() // 刷新列表
+  } catch (error) {
+    // 用户取消或者请求失败
+    if (error !== 'cancel') {
+      console.error('暂停项目失败:', error)
+    }
+  }
+}
+
+/**
+ * 取消暂停项目
+ */
+const cancelPauseProject = async (row: RepoVO) => {
+  try {
+    await ElMessageBox.confirm(
+        `确定要取消暂停项目 "${row.name}" 吗？项目将恢复进行。`,
+        '取消暂停',
+        {
+          confirmButtonText: '确定恢复',
+          cancelButtonText: '取消',
+          type: 'success'
+        }
+    )
+
+    await fetchCancelPauseProject(row.id)
+    ElMessage.success(`项目 ${row.name} 已恢复`)
+    getData() // 刷新列表
+  } catch (error) {
+    // 用户取消或者请求失败
+    if (error !== 'cancel') {
+      console.error('取消暂停项目失败:', error)
     }
   }
 }
