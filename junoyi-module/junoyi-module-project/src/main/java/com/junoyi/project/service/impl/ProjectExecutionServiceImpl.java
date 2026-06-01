@@ -316,7 +316,7 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
 
         // 项目状态是否进行中（状态1表示进行中）
         if (project.getStatus() != 1){
-            throw new ProjectException("项目状态不是进行中，无法提交验收");
+            throw new ProjectException("项目状态不是进行中，无法暂停");
         }
 
         // 获取当前用户ID
@@ -337,6 +337,44 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.of("pause", "project",
                 "暂停了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
+                String.valueOf(project.getId()), project.getName()));
+    }
+
+    /**
+     * 取消暂停项目
+     * @param projectId 项目ID
+     */
+    @Override
+    public void cancelPauseProject(Long projectId) {
+        // 检查项目是否存在
+        Project project = projectMapper.selectById(projectId);
+        if (project == null || project.isDelFlag()){
+            throw new ProjectNotFoundException("不存在的项目");
+        }
+
+        // 项目状态是否暂停（状态2表示暂停）
+        if (project.getStatus() != 2){
+            throw new ProjectException("项目状态不是暂停，无法暂停");
+        }
+
+        // 获取当前用户ID
+        Long currentUserId = SecurityUtils.getUserId();
+        boolean hasPermission = PermissionHelper.isSuperAdmin()
+                || PermissionHelper.hasPermission("project.ui.execution.pause.cancel.button")
+                || project.getLeader().equals(currentUserId);
+        if (!hasPermission) {
+            throw new ProjectException("无权限启动该项目，只有项目负责人或管理员可以取消暂停");
+        }
+
+        // 更新项目状态为进行中（状态1）
+        project.setStatus(1);
+        project.setUpdateBy(SecurityUtils.getUserName());
+        project.setUpdateTime(DateUtils.getNowDate());
+        projectMapper.updateById(project);
+
+        // 发布操作日志事件
+        EventBus.get().callEvent(UserOperationEvent.of("cancel-pause", "project",
+                "取消暂停了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
                 String.valueOf(project.getId()), project.getName()));
     }
 }
