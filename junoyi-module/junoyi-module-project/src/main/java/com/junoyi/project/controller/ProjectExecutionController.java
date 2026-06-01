@@ -38,11 +38,24 @@ public class ProjectExecutionController extends BaseController {
      */
     @PostMapping("/initiate/acceptance/{projectId}")
     @PlatformScope(PlatformType.ADMIN_WEB)
-    @Permission(
-            value =  "project.ui.execution.initiate.acceptance.button"
-    )
+//    @Permission(
+//            value =  "project.ui.execution.initiate.acceptance.button"
+//    )
     public R<Void> initiateAcceptance(@PathVariable("projectId") Long projectId){
         projectActiveService.initiateAcceptance(projectId);
+        return R.ok();
+    }
+
+    /**
+     * 暂停项目
+     */
+    @PostMapping("/pause/{projectId}")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = "project.ui.execution.pause.button"
+    )
+    public R<Void> pauseProject(@PathVariable("projectId") Long projectId){
+        projectActiveService.pauseProject(projectId);
         return R.ok();
     }
 }

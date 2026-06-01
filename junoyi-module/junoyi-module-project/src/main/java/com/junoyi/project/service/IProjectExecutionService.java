@@ -26,4 +26,10 @@ public interface IProjectExecutionService {
      */
     void initiateAcceptance(Long projectId);
 
+    /**
+     * 暂停项目
+     * @param projectId 项目ID
+     */
+    void pauseProject(Long projectId);
+
 }

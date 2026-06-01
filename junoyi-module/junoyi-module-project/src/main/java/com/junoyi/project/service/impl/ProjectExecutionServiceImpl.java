@@ -283,25 +283,60 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
 
         // 获取当前用户ID
         Long currentUserId = SecurityUtils.getUserId();
-
         boolean hasPermission = PermissionHelper.isSuperAdmin()
                 || PermissionHelper.hasPermission("project.ui.execution.initiate.acceptance.button")
                 || project.getLeader().equals(currentUserId);
-
         if (!hasPermission) {
             throw new ProjectException("无权限启动该项目，只有项目负责人或管理员可以发起项目验收");
         }
 
         // 更新项目状态为待验收（状态3）
         project.setStatus(3);
-        project.setStartTime(DateUtils.getNowDate());
         project.setUpdateBy(SecurityUtils.getUserName());
         project.setUpdateTime(DateUtils.getNowDate());
         projectMapper.updateById(project);
 
         // 发布操作日志事件
-        EventBus.get().callEvent(UserOperationEvent.of("start", "project",
+        EventBus.get().callEvent(UserOperationEvent.of("initiate-acceptance", "project",
                 "项目「" + project.getName() + "」（编号：" + project.getNo() + "）发起验收，等待验收",
+                String.valueOf(project.getId()), project.getName()));
+    }
+
+    /**
+     * 暂停项目
+     * @param projectId 项目ID
+     */
+    @Override
+    public void pauseProject(Long projectId) {
+        // 检查项目是否存在
+        Project project = projectMapper.selectById(projectId);
+        if (project == null || project.isDelFlag()){
+            throw new ProjectNotFoundException("不存在的项目");
+        }
+
+        // 项目状态是否进行中（状态1表示进行中）
+        if (project.getStatus() != 1){
+            throw new ProjectException("项目状态不是进行中，无法提交验收");
+        }
+
+        // 获取当前用户ID
+        Long currentUserId = SecurityUtils.getUserId();
+        boolean hasPermission = PermissionHelper.isSuperAdmin()
+                || PermissionHelper.hasPermission("project.ui.execution.pause.button")
+                || project.getLeader().equals(currentUserId);
+        if (!hasPermission) {
+            throw new ProjectException("无权限启动该项目，只有项目负责人或管理员可以暂停项目");
+        }
+
+        // 更新项目状态为暂停（状态2）
+        project.setStatus(2);
+        project.setUpdateBy(SecurityUtils.getUserName());
+        project.setUpdateTime(DateUtils.getNowDate());
+        projectMapper.updateById(project);
+
+        // 发布操作日志事件
+        EventBus.get().callEvent(UserOperationEvent.of("pause", "project",
+                "暂停了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
                 String.valueOf(project.getId()), project.getName()));
     }
 }
