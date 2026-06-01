@@ -20,3 +20,23 @@ export function fetchInitiateAcceptance(projectId: number){
         url: `/project/execution/initiate/acceptance/${projectId}`
     })
 }
+
+/**
+ * 暂停项目
+ * @param projectId 项目ID
+ */
+export function fetchPauseProject(projectId: number){
+    return request.post<void>({
+        url: `/project/execution/pause/${projectId}`
+    })
+}
+
+/**
+ * 取消暂停项目
+ * @param projectId 项目ID
+ */
+export function fetchCancelPauseProject(projectId: number){
+    return request.post<void>({
+        url: `/project/execution/pause/cancel/${projectId}`
+    })
+}
