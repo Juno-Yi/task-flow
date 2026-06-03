@@ -96,8 +96,8 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
                 .like(StringUtils.isNotBlank(queryDTO.getName()), Project::getName, queryDTO.getName())
                 .eq(queryDTO.getType() != null, Project::getType, queryDTO.getType())
                 .eq(Project::isDelFlag, false)
-                // 核心：只查询活跃状态（1-进行中、2-已暂停、、6-长期维护）
-                .in(Project::getStatus, 1, 2, 6);
+                // 核心：只查询活跃状态（1-进行中、2-已暂停、、6-长期维护、8-验收驳回）
+                .in(Project::getStatus, 1, 2, 6, 8);
 
         // 如果没有查看所有项目的权限，添加项目ID过滤条件
         if (!hasAllDataPermission && accessibleProjectIds != null) {

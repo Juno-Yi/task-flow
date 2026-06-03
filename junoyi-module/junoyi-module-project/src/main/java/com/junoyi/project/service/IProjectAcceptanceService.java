@@ -20,4 +20,6 @@ public interface IProjectAcceptanceService {
      * @return 结项列表
      */
     PageResult<ProjectListVO> getAcceptanceList(ProjectListQueryDTO queryDTO, Page<Project> page);
+
+
 }

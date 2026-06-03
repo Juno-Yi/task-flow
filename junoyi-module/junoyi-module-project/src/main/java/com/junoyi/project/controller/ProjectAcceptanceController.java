@@ -25,9 +25,14 @@ public class ProjectAcceptanceController extends BaseController {
 
     private final IProjectAcceptanceService projectAcceptanceService;
 
+    /**
+     * 获取项目结项列表
+     */
     @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
     public R<PageResult<ProjectListVO>> getProjectAcceptanceList(ProjectListQueryDTO queryDTO){
         return R.ok(projectAcceptanceService.getAcceptanceList(queryDTO,buildPage()));
     }
+
+
 }
