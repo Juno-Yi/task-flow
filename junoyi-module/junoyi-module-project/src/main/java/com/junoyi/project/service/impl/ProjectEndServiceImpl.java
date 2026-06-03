@@ -277,7 +277,7 @@ public class ProjectEndServiceImpl implements IProjectEndService {
         }
 
         // 检查项目状态
-        if (project.getStatus() != 4 || project.getStatus() != 5) {
+        if (project.getStatus() != 4 && project.getStatus() != 5) {
             throw new ProjectException("项目状态非法");
         }
 
