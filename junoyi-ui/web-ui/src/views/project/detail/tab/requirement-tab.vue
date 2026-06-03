@@ -134,7 +134,7 @@
 
         <ElTableColumn prop="priority" label="优先级" width="100" align="center">
           <template #default="{ row }">
-            <ElTag :type="row.priorityType as any" size="small">
+            <ElTag :type="getTagType(row.priorityType)" size="small">
               {{ row.priorityLabel }}
             </ElTag>
           </template>
@@ -193,7 +193,7 @@
 
         <ElTableColumn prop="source" label="来源" width="100" align="center">
           <template #default="{ row }">
-            <ElTag :type="row.sourceType as any" size="small" effect="plain">
+            <ElTag :type="getTagType(row.sourceType)" size="small" effect="plain">
               {{ row.sourceLabel }}
             </ElTag>
           </template>
@@ -201,7 +201,7 @@
 
         <ElTableColumn prop="type" label="类型" width="100" align="center">
           <template #default="{ row }">
-            <ElTag :type="row.typeLabelType as any" size="small" effect="plain">
+            <ElTag :type="getTagType(row.typeLabelType)" size="small" effect="plain">
               {{ row.typeLabel }}
             </ElTag>
           </template>
