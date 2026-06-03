@@ -3,7 +3,9 @@ package com.junoyi.project.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.core.utils.StringUtils;
+import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.permission.helper.PermissionHelper;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.domain.dto.ProjectListQueryDTO;
@@ -11,6 +13,11 @@ import com.junoyi.project.domain.dto.TaskStatistics;
 import com.junoyi.project.domain.po.Project;
 import com.junoyi.project.domain.po.ProjectMember;
 import com.junoyi.project.domain.vo.ProjectListVO;
+import com.junoyi.project.enums.ProjectRecordTargetType;
+import com.junoyi.project.enums.ProjectRecordType;
+import com.junoyi.project.event.ProjectRecordEvent;
+import com.junoyi.project.exception.ProjectException;
+import com.junoyi.project.exception.ProjectNotFoundException;
 import com.junoyi.project.mapper.ProjectMapper;
 import com.junoyi.project.mapper.ProjectMemberMapper;
 import com.junoyi.project.service.IProjectEndService;
@@ -257,5 +264,35 @@ public class ProjectEndServiceImpl implements IProjectEndService {
         return statisticsMap;
     }
 
+    /**
+     * 项目归档
+     * @param projectId 项目ID
+     */
+    @Override
+    public void archive(Long projectId) {
+        // 检查项目是否存在
+        Project project = projectMapper.selectById(projectId);
+        if (project == null || project.isDelFlag()) {
+            throw new ProjectNotFoundException("不存在的项目");
+        }
 
+        // 检查项目状态
+        if (project.getStatus() != 4 && project.getStatus() != 5) {
+            throw new ProjectException("项目状态非法");
+        }
+
+        // 更新项目状态为已归档（状态7）
+        project.setStatus(7);
+        project.setUpdateBy(SecurityUtils.getUserName());
+        project.setUpdateTime(DateUtils.getNowDate());
+        projectMapper.updateById(project);
+
+        // 发布项目动态记录
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(), ProjectRecordType.ARCHIVE_PROJECT,
+                ProjectRecordTargetType.PROJECT,
+                "项目「" + project.getName() + "」(编号：" + project.getNo() + "）已经归档"
+        ));
+    }
 }

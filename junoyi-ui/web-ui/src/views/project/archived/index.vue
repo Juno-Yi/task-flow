@@ -276,7 +276,11 @@ const {
         fixed: 'right',
         formatter: (row: RepoVO) => {
           const list: ButtonMoreItem[] = [
-
+            {
+              key: 'view',
+              label: '查看详情',
+              icon: 'ri:eye-line'
+            },
           ]
 
           return h(ArtButtonMore, {

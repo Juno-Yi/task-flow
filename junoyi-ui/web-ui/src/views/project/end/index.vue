@@ -46,7 +46,7 @@ import RepoSearch from './modules/repo-search.vue'
 import { ElTag, ElMessageBox, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
 import { fetchExportProjectBook } from '@/api/project/list'
-import {fetchGetProjectEndList} from "@/api/project/end";
+import {fetchArchiveProject, fetchGetProjectEndList} from "@/api/project/end";
 
 
 defineOptions({ name: 'ProjectRepo' })
@@ -354,7 +354,33 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
       viewRepo(row)
       break
     case 'archive':
+      archiveProject(row)
       break
+  }
+}
+
+/**
+ * 项目归档
+ */
+const archiveProject = async (row: RepoVO) => {
+  try {
+    await ElMessageBox.confirm(
+        `确定要归档项目 "${row.name}"吗？`,
+        '项目归档',
+        {
+          confirmButtonText: '确定归档',
+          cancelButtonText: '取消',
+          type: "success"
+        }
+    )
+    await fetchArchiveProject(row.id)
+    ElMessage.success(`项目${row.name} 已归档`)
+    getData()
+  } catch (error){
+    // 用户取消或者请求失败
+    if (error  !== 'cancel'){
+      console.error('项目归档失败:',error)
+    }
   }
 }
 

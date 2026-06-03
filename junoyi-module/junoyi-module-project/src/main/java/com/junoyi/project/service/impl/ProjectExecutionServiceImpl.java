@@ -439,7 +439,7 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
         EventBus.get().callEvent(new ProjectRecordEvent(
                 projectId,
                 SecurityUtils.getUserId(),
-                ProjectRecordType.PAUSE_PROJECT,
+                ProjectRecordType.STOP_PROJECT,
                 ProjectRecordTargetType.PROJECT,
                 "终止项目「" + project.getName() + "」(编号：" + project.getNo() + "）"
         ));

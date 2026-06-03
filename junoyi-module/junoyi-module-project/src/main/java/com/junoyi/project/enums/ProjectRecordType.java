@@ -88,7 +88,28 @@ public enum ProjectRecordType {
     /**
      * 发起验收
      */
-    INITIATE_ACCEPTANCE(16,"发起验收");
+    INITIATE_ACCEPTANCE(16,"发起验收"),
+
+    /**
+     * 项目通过验收
+     */
+    PASS_PROJECT(17,"项目通过验收"),
+
+    /**
+     * 项目验收驳回
+     */
+    REJECT_PROJECT(18,"项目验收驳回"),
+
+    /**
+     * 项目终止archive
+     */
+    STOP_PROJECT(19,"项目终止"),
+
+    /**
+     * 项目归档
+     */
+    ARCHIVE_PROJECT(20,"项目归档");
+
 
     private final Integer code;
 
