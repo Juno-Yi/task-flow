@@ -46,7 +46,7 @@ import RepoSearch from './modules/repo-search.vue'
 import { ElTag, ElProgress } from 'element-plus'
 import { DialogType } from '@/types'
 import { fetchExportProjectBook } from '@/api/project/list'
-import {fetchGetProjectAacceptanceList} from "@/api/project/acceptance";
+import {fetchGetProjectAacceptanceList, fetchPassAcceptance, fetchRejectAcceptance} from "@/api/project/acceptance";
 
 
 defineOptions({ name: 'ProjectRepo' })
@@ -286,6 +286,20 @@ const {
               label: '查看详情',
               icon: 'ri:eye-line'
             },
+            {
+              key: 'pass',
+              label: '通过验收',
+              icon: 'ri:checkbox-circle-line',
+              color: '#67c23a',
+              auth: 'project.ui.acceptance.pass.button'
+            },
+            {
+              key: 'reject',
+              label: '驳回验收',
+              icon: 'ri:close-circle-line',
+              color: '#f56c6c',
+              auth: 'project.ui.acceptance.reject.button'
+            },
           ]
 
           return h(ArtButtonMore, {
@@ -346,8 +360,64 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
     case 'view':
       viewRepo(row)
       break
-    case 'edit':
+    case 'pass':
+      passAcceptance(row)
       break
+    case 'reject':
+      rejectAcceptance(row)
+      break
+  }
+}
+
+/**
+ * 通过验收
+ */
+const passAcceptance = async (row: RepoVO) => {
+  try {
+    await ElMessageBox.confirm(
+        `确定要通过项目 "${row.name}" 的验收吗？`,
+        '通过验收',
+        {
+          confirmButtonText: '确定通过',
+          cancelButtonText: '取消',
+          type: 'success'
+        }
+    )
+
+    await fetchPassAcceptance(row.id)
+    ElMessage.success(`项目 ${row.name} 已通过验收`)
+    getData() // 刷新列表
+  } catch (error) {
+    // 用户取消或者请求失败
+    if (error !== 'cancel') {
+      console.error('通过验收失败:', error)
+    }
+  }
+}
+
+/**
+ * 驳回验收
+ */
+const rejectAcceptance = async (row: RepoVO) => {
+  try {
+    await ElMessageBox.confirm(
+        `确定要驳回项目 "${row.name}" 的验收吗？驳回后项目将退回执行阶段。`,
+        '驳回验收',
+        {
+          confirmButtonText: '确定驳回',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+    )
+
+    await fetchRejectAcceptance(row.id)
+    ElMessage.success(`项目 ${row.name} 的验收已驳回`)
+    getData() // 刷新列表
+  } catch (error) {
+    // 用户取消或者请求失败
+    if (error !== 'cancel') {
+      console.error('驳回验收失败:', error)
+    }
   }
 }
 
