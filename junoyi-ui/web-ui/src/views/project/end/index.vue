@@ -378,7 +378,7 @@ const archiveProject = async (row: RepoVO) => {
     getData()
   } catch (error){
     // 用户取消或者请求失败
-    if (error  !== 'cencel'){
+    if (error  !== 'cancel'){
       console.error('项目归档失败:',error)
     }
   }
