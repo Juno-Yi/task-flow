@@ -2,15 +2,15 @@
   "title": "VUE H5开发模板",
   "tabbar": {
     "home": "首页",
-    "list": "列表",
-    "member": "我的",
-    "demo": "示例"
+    "my-task": "我的任务",
+    "my-project": "我的项目",
+    "me": "我的"
   },
   "language": {
     "en": "英文",
     "zh": "中文"
   },
-  "introduction": "一个快速开发vue3的移动端模板",
+  "introduction": "专门为像软件开发团队、产品研发团队等打造的轻量级任务协作平台",
   "home": {
     "support": "支持"
   },

@@ -1,6 +1,6 @@
 <template>
   <div class="main-page">
-    <van-nav-bar :title="$t($route.meta.title as string)" :left-arrow="!tabbarVisible" @click-left="goBack" />
+<!--    <van-nav-bar :title="$t($route.meta.title as string)" :left-arrow="!tabbarVisible" @click-left="goBack" />-->
     <div class="main-box" :class="{ tabbar: tabbarVisible, border: showBorder }">
       <RouterView v-slot="{ Component }" v-if="$route.meta.keepAlive">
         <keep-alive>
@@ -23,13 +23,13 @@
 </template>
 
 <script lang="ts" setup name="BasicLayoutPage">
-  import { Home, Horizontal, My, Location } from '@nutui/icons-vue';
+  import { Home, Checklist, My, Category } from '@nutui/icons-vue';
 
   const tabItem = [
     { key: 'home', icon: Home },
-    { key: 'list', icon: Horizontal },
-    { key: 'member', icon: My },
-    { key: 'demo', icon: Location },
+    { key: 'my-task', icon: Checklist },
+    { key: 'my-project', icon: Category },
+    { key: 'me', icon: My },
   ];
 
   const router = useRouter();
@@ -45,21 +45,31 @@
   watch(
     () => route.path,
     (path) => {
-      const currentKey = path.replace('/', '');
-      const judgeRoute = tabItem.some((item) => item.key === currentKey);
-      activeTab.value = tabItem.findIndex((item) => item.key === currentKey);
-      tabbarVisible.value = judgeRoute;
-      showBorder.value = judgeRoute;
+      // 获取一级路由路径（处理多级路由的情况）
+      const pathSegments = path.split('/').filter(Boolean);
+      const currentKey = pathSegments[0] || '';
+
+      // 查找当前路由在 tabItem 中的索引
+      const tabIndex = tabItem.findIndex((item) => item.key === currentKey);
+      const isTabRoute = tabIndex !== -1;
+
+      // 只有当路由在 tabItem 中时才更新 activeTab
+      if (isTabRoute) {
+        activeTab.value = tabIndex;
+      }
+
+      tabbarVisible.value = isTabRoute;
+      showBorder.value = isTabRoute;
     },
     { immediate: true },
   );
 
   const tabSwitch = (_item: any, index: number) => {
     const tab = tabItem[index];
-    if (tab) {
+    if (tab && index >= 0 && index < tabItem.length) {
+      activeTab.value = index;
       router.push(`/${tab.key}`);
     }
-    activeTab.value = index;
   };
 
   const goBack = () => {
