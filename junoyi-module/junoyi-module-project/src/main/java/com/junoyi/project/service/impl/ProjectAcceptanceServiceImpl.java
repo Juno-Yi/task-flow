@@ -319,8 +319,8 @@ public class ProjectAcceptanceServiceImpl implements IProjectAcceptanceService {
             throw new ProjectException("项目状态不是待验收，无法驳回");
         }
 
-        // 更新项目状态为进行中（状态1）
-        project.setStatus(1);
+        // 更新项目状态为验收驳回（状态8）
+        project.setStatus(8);
         project.setUpdateBy(SecurityUtils.getUserName());
         project.setUpdateTime(DateUtils.getNowDate());
         projectMapper.updateById(project);
