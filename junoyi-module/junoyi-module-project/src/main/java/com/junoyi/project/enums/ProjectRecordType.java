@@ -101,9 +101,15 @@ public enum ProjectRecordType {
     REJECT_PROJECT(18,"项目验收驳回"),
 
     /**
-     * 项目终止
+     * 项目终止archive
      */
-    STOP_PROJECT(19,"项目终止");
+    STOP_PROJECT(19,"项目终止"),
+
+    /**
+     * 项目归档
+     */
+    ARCHIVE_PROJECT(20,"项目归档");
+
 
     private final Integer code;
 

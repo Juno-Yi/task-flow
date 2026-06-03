@@ -11,3 +11,12 @@ export function fetchGetProjectEndList(params: Api.Project.ProjectListQueryDTO) 
     })
 }
 
+/**
+ * 项目结束后归档请求
+ * @param projectId 项目ID
+ */
+export function fetchArchiveProject(projectId: number){
+    return request.post<void>({
+        url: `/project/end/${projectId}/archive`
+    })
+}
