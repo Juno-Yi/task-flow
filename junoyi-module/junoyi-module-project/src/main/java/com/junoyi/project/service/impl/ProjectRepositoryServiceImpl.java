@@ -2,11 +2,15 @@ package com.junoyi.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.junoyi.framework.core.utils.DateUtils;
+import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.project.convert.ProjectRepositoryConverter;
 import com.junoyi.project.domain.dto.ProjectRepositoryDTO;
 import com.junoyi.project.domain.po.ProjectRepository;
 import com.junoyi.project.domain.vo.ProjectRepositoryVO;
+import com.junoyi.project.enums.ProjectRecordTargetType;
+import com.junoyi.project.enums.ProjectRecordType;
+import com.junoyi.project.event.ProjectRecordEvent;
 import com.junoyi.project.mapper.ProjectRepositoryMapper;
 import com.junoyi.project.service.IProjectRepositoryService;
 import com.junoyi.system.api.SysDictApi;
@@ -95,7 +99,14 @@ public class ProjectRepositoryServiceImpl implements IProjectRepositoryService {
 
         projectRepositoryMapper.insert(repository);
 
-        // TODO: 后续发布项目动态事件
+        // 发布项目动态事件
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                repository.getProjectId(),
+                SecurityUtils.getUserId(),
+                ProjectRecordType.CREATE_REPOSITORY,
+                ProjectRecordTargetType.REPOSITORY,
+                "添加了仓库「" + repository.getName() + "」"
+        ));
     }
 
     /**
@@ -110,7 +121,14 @@ public class ProjectRepositoryServiceImpl implements IProjectRepositoryService {
 
         projectRepositoryMapper.updateById(repository);
 
-        // TODO: 后续发布项目动态事件
+        // 发布项目动态事件
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                repository.getProjectId(),
+                SecurityUtils.getUserId(),
+                ProjectRecordType.UPDATE_REPOSITORY,
+                ProjectRecordTargetType.REPOSITORY,
+                "修改了仓库「" + repository.getName() + "」"
+        ));
     }
 
     /**
@@ -123,7 +141,14 @@ public class ProjectRepositoryServiceImpl implements IProjectRepositoryService {
         if (repository != null) {
             projectRepositoryMapper.deleteById(id);
 
-            // TODO: 后续发布项目动态
+            // 发布项目动态
+            EventBus.get().callEvent(new ProjectRecordEvent(
+                    repository.getProjectId(),
+                    SecurityUtils.getUserId(),
+                    ProjectRecordType.DELETE_REPOSITORY,
+                    ProjectRecordTargetType.REPOSITORY,
+                    "删除了仓库「" + repository.getName() + "」"
+            ));
         }
     }
 
