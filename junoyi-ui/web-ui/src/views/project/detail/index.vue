@@ -61,10 +61,7 @@
                 <ElBadge v-if="projectInfo.taskCount > 0" :value="projectInfo.taskCount" class="ml-2" />
               </span>
             </template>
-            <ProjectTaskTab
-              v-if="projectInfo.id"
-              :project-id="projectInfo.id"
-            />
+            <ProjectTaskTab :project-info="projectInfo"/>
           </ElTabPane>
 
           <!-- 里程碑 -->

@@ -9,13 +9,6 @@
         {{ task.title }}
       </h4>
       <div class="flex items-center gap-2 flex-shrink-0">
-        <ElIcon 
-          class="text-gray-400 hover:text-primary cursor-pointer" 
-          :size="16"
-          @click.stop="handleEdit"
-        >
-          <Edit />
-        </ElIcon>
         <ElTag v-if="task.isOverdue" type="danger" size="small">逾期</ElTag>
         <ElTag
           :type="getPriorityConfig(task.priority).type"
@@ -146,9 +139,6 @@ const handleClick = () => {
   emit('click')
 }
 
-const handleEdit = () => {
-  emit('edit')
-}
 </script>
 
 <style scoped lang="scss">

@@ -21,7 +21,6 @@
             :key="task.id"
             :task="task"
             @click="handleTaskClick(task)"
-            @edit="handleTaskEdit(task)"
           />
         </TransitionGroup>
         
@@ -60,9 +59,6 @@ const handleTaskClick = (task: Api.Project.ProjectTaskItemVO) => {
   emit('taskClick', task)
 }
 
-const handleTaskEdit = (task: Api.Project.ProjectTaskItemVO) => {
-  emit('taskEdit', task)
-}
 </script>
 
 <style scoped lang="scss">

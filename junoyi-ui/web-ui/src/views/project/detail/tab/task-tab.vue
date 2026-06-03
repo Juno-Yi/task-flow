@@ -16,7 +16,7 @@
           class="w-60"
           :prefix-icon="Search"
         />
-        <ElButton type="primary" :icon="Plus" @click="handleAddTask" v-ripple>
+        <ElButton v-if="projectRole.isOwner.value || projectRole.isAdmin.value" type="primary" :icon="Plus" @click="handleAddTask" v-ripple>
           新建任务
         </ElButton>
         <ElButton :icon="Refresh" :loading="loading" @click="loadTasks" v-ripple>
@@ -34,7 +34,6 @@
           status="0"
           color="#909399"
           @task-click="handleTaskClick"
-          @task-edit="handleEditTask"
         />
         <TaskColumn
           title="进行中"
@@ -42,7 +41,6 @@
           status="1"
           color="#409EFF"
           @task-click="handleTaskClick"
-          @task-edit="handleEditTask"
         />
         <TaskColumn
           title="待验收"
@@ -50,7 +48,6 @@
           status="2"
           color="#E6A23C"
           @task-click="handleTaskClick"
-          @task-edit="handleEditTask"
         />
         <TaskColumn
           title="已驳回"
@@ -58,7 +55,6 @@
           status="3"
           color="#F56C6C"
           @task-click="handleTaskClick"
-          @task-edit="handleEditTask"
         />
         <TaskColumn
           title="已完成"
@@ -66,7 +62,6 @@
           status="4"
           color="#67C23A"
           @task-click="handleTaskClick"
-          @task-edit="handleEditTask"
         />
       </div>
     </ElCard>
@@ -138,7 +133,7 @@
       <template #footer>
         <div class="flex justify-end gap-2">
           <ElButton @click="detailVisible = false">关闭</ElButton>
-          <ElButton type="primary" @click="handleEditFromDetail">编辑</ElButton>
+          <ElButton v-if="projectRole.isOwner.value || projectRole.isAdmin.value" type="primary" @click="handleEditFromDetail">编辑</ElButton>
         </div>
       </template>
     </ElDialog>
@@ -306,20 +301,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { fetchGetProjectTaskList, fetchAddProjectTask, fetchUpdateProjectTask } from '@/api/project/task'
 import { fetchGetProjectMemberOptions } from '@/api/project/member'
 import TaskColumn from './modules/task/task-column.vue'
+import {useProjectRole} from "@/hooks/useProjectRole";
 
 defineOptions({ name: 'ProjectTaskTab' })
 
 interface Props {
-  projectId: number
+  projectInfo: Api.Project.ProjectDetailVO
 }
 
 const props = defineProps<Props>()
+
+// 使用项目角色权限
+const projectRole = useProjectRole(computed(() => props.projectInfo.currentUserRole))
 
 // 状态
 const loading = ref(false)
@@ -438,11 +437,11 @@ const overdueTaskCount = computed(() =>
  * 加载任务列表
  */
 const loadTasks = async () => {
-  if (!props.projectId) return
+  if (!props.projectInfo.id) return
 
   loading.value = true
   try {
-    const data = await fetchGetProjectTaskList(props.projectId)
+    const data = await fetchGetProjectTaskList(props.projectInfo.id)
     taskList.value = data || []
   } catch (error) {
     console.error('加载任务列表失败:', error)
@@ -456,11 +455,11 @@ const loadTasks = async () => {
  * 加载项目成员列表
  */
 const loadProjectMembers = async (nickName?: string) => {
-  if (!props.projectId) return
+  if (!props.projectInfo.id) return
 
   memberLoading.value = true
   try {
-    const data = await fetchGetProjectMemberOptions(props.projectId, nickName)
+    const data = await fetchGetProjectMemberOptions(props.projectInfo.id, nickName)
     projectMembers.value = data || []
   } catch (error) {
     console.error('加载项目成员失败:', error)
@@ -607,6 +606,9 @@ const handleAddTask = () => {
  * 处理编辑任务
  */
 const handleEditTask = (task: Api.Project.ProjectTaskItemVO) => {
+  if (!projectRole.isOwner.value && !projectRole.isAdmin.value) {
+    return
+  }
   formType.value = 'edit'
   formData.value = {
     id: task.id,
@@ -641,10 +643,12 @@ const handleEditTask = (task: Api.Project.ProjectTaskItemVO) => {
  * 从详情页编辑
  */
 const handleEditFromDetail = () => {
+
   if (currentTask.value) {
     detailVisible.value = false
     handleEditTask(currentTask.value)
   }
+
 }
 
 /**
@@ -660,7 +664,7 @@ const handleSubmit = async () => {
     try {
       if (formType.value === 'add') {
         await fetchAddProjectTask({
-          projectId: props.projectId,
+          projectId: props.projectInfo.id,
           title: formData.value.title,
           description: formData.value.description,
           priority: formData.value.priority,
@@ -672,7 +676,7 @@ const handleSubmit = async () => {
         })
         ElMessage.success('创建任务成功')
       } else {
-        await fetchUpdateProjectTask(props.projectId, {
+        await fetchUpdateProjectTask(props.projectInfo.id, {
           id: formData.value.id!,
           title: formData.value.title,
           description: formData.value.description,
@@ -764,6 +768,17 @@ const calculateHours = (startTime?: string, endTime?: string) => {
   const hours = Math.round(diffHours % 24)
   return hours > 0 ? `${days} 天 ${hours} 小时` : `${days} 天`
 }
+
+// 监听项目ID变化，当ID可用时加载数据
+watch(
+  () => props.projectInfo.id,
+  (newId) => {
+    if (newId && newId > 0) {
+      loadTasks()
+    }
+  },
+  { immediate: true }
+)
 
 // 生命周期
 onMounted(() => {
