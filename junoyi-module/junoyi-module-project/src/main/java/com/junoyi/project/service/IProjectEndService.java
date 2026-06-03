@@ -20,4 +20,10 @@ public interface IProjectEndService {
      * @return 结后列表
      */
     PageResult<ProjectListVO> getEndList(ProjectListQueryDTO queryDTO, Page<Project> page);
+
+    /**
+     * 项目归档
+     * @param projectId 项目ID
+     */
+    void archive(Long projectId);
 }

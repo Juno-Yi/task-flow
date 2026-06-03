@@ -291,7 +291,7 @@ public class ProjectAcceptanceServiceImpl implements IProjectAcceptanceService {
         // 发布项目动态记录
         EventBus.get().callEvent(new ProjectRecordEvent(
                 projectId,
-                SecurityUtils.getUserId(), ProjectRecordType.START_PROJECT,
+                SecurityUtils.getUserId(), ProjectRecordType.PASS_PROJECT,
                 ProjectRecordTargetType.PROJECT,
                 "项目「" + project.getName() + "」(编号：" + project.getNo() + "）通过验收！"
         ));
@@ -328,7 +328,7 @@ public class ProjectAcceptanceServiceImpl implements IProjectAcceptanceService {
         // 发布项目动态记录
         EventBus.get().callEvent(new ProjectRecordEvent(
                 projectId,
-                SecurityUtils.getUserId(), ProjectRecordType.START_PROJECT,
+                SecurityUtils.getUserId(), ProjectRecordType.REJECT_PROJECT,
                 ProjectRecordTargetType.PROJECT,
                 "项目「" + project.getName() + "」(编号：" + project.getNo() + "）已经驳回"
         ));
