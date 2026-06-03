@@ -38,4 +38,9 @@ public interface IProjectExecutionService {
      */
     void cancelPauseProject(Long projectId);
 
+    /**
+     * 终止项目
+     * @param projectId 项目ID
+     */
+    void stopProject(Long projectId);
 }

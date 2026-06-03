@@ -30,6 +30,7 @@ import com.junoyi.task.api.TaskServiceApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -272,6 +273,7 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
      * @param projectId 项目ID
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void initiateAcceptance(Long projectId) {
         // 检查项目是否存在
         Project project = projectMapper.selectById(projectId);
@@ -405,6 +407,46 @@ public class ProjectExecutionServiceImpl implements IProjectExecutionService {
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.of("cancel-pause", "project",
                 "取消暂停了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
+                String.valueOf(project.getId()), project.getName()));
+    }
+
+    /**
+     * 终止项目
+     * @param projectId 项目ID
+     */
+    @Override
+    public void stopProject(Long projectId) {
+        // 检查项目是否存在
+        Project project = projectMapper.selectById(projectId);
+        if (project == null || project.isDelFlag()){
+            throw new ProjectNotFoundException("不存在的项目");
+        }
+
+        // 权限校验
+        boolean hasPermission = PermissionHelper.isSuperAdmin()
+                || PermissionHelper.hasPermission("project.ui.stop.button");
+        if (!hasPermission) {
+            throw new ProjectException("无权限启动该项目，只有管理员才能终止项目");
+        }
+
+        // 更新项目状态为终止（状态5）
+        project.setStatus(5);
+        project.setUpdateBy(SecurityUtils.getUserName());
+        project.setUpdateTime(DateUtils.getNowDate());
+        projectMapper.updateById(project);
+
+        // 发布项目日志
+        EventBus.get().callEvent(new ProjectRecordEvent(
+                projectId,
+                SecurityUtils.getUserId(),
+                ProjectRecordType.PAUSE_PROJECT,
+                ProjectRecordTargetType.PROJECT,
+                "终止项目「" + project.getName() + "」(编号：" + project.getNo() + "）"
+        ));
+
+        // 发布操作日志事件
+        EventBus.get().callEvent(UserOperationEvent.of("cancel-pause", "project",
+                "终止了项目「" + project.getName() + "」（编号：" + project.getNo() + "）",
                 String.valueOf(project.getId()), project.getName()));
     }
 }
