@@ -21,5 +21,15 @@ public interface IProjectAcceptanceService {
      */
     PageResult<ProjectListVO> getAcceptanceList(ProjectListQueryDTO queryDTO, Page<Project> page);
 
+    /**
+     * 项目验收通过
+     * @param projectId 项目ID
+     */
+    void pass(Long projectId);
 
+    /**
+     * 项目验收驳回
+     * @param projectId 项目ID
+     */
+    void reject(Long projectId);
 }
