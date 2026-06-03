@@ -40,3 +40,13 @@ export function fetchCancelPauseProject(projectId: number){
         url: `/project/execution/pause/cancel/${projectId}`
     })
 }
+
+/**
+ * 终止进行中的项目
+ * @param projectId 项目ID
+ */
+export function fetchStopProject(projectId: number){
+    return request.post<void>({
+        url: `/project/execution/stop/${projectId}`
+    })
+}

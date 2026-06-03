@@ -50,7 +50,7 @@ import {
   fetchGetProjectActiveList,
   fetchInitiateAcceptance,
   fetchPauseProject,
-  fetchCancelPauseProject
+  fetchCancelPauseProject, fetchStopProject
 } from "@/api/project/execution";
 
 
@@ -324,6 +324,15 @@ const {
             auth: 'project.ui.execution.initiate.acceptance.button'
           })
 
+          // 终止项目按钮
+          list.push({
+            key: 'stop',
+            label: '终止项目',
+            icon: 'ri:close-circle-line',
+            color: '#fa0202',
+            auth: 'project.ui.execution.stop.button'
+          })
+
           return h(ArtButtonMore, {
             list,
             onClick: (item: ButtonMoreItem) => handleButtonMoreClick(item, row)
@@ -401,6 +410,35 @@ const handleButtonMoreClick = (item: ButtonMoreItem, row: RepoVO) => {
     case 'acceptance':
       initiateAcceptance(row)
       break
+    case 'stop':
+      stopProject(row)
+      break;
+  }
+}
+
+/**
+ * 终止项目
+ */
+const stopProject = async (row: RepoVO) => {
+  try {
+    await ElMessageBox.confirm(
+        `确定要终止 "${row.name}" 吗？`,
+        `终止项目`,
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+    )
+
+    await fetchStopProject(row.id)
+    ElMessage.success(`项目 ${row.name} 已终止!`)
+    getData() // 刷新列表
+  } catch (error) {
+    // 用户取消或者请求失败
+    if (error !== 'cancel'){
+      console.error('终止项目失败:',error)
+    }
   }
 }
 

@@ -77,7 +77,7 @@ public class ProjectExecutionController extends BaseController {
     @PostMapping("/stop/{projectId}")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = "project.ui.stop.button"
+            value = "project.ui.execution.stop.button"
     )
     public R<Void> stop(@PathVariable("projectId") Long projectId) {
         projectActiveService.stopProject(projectId);
