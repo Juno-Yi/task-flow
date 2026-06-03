@@ -11,3 +11,22 @@ export function fetchGetProjectAacceptanceList(params: Api.Project.ProjectListQu
     })
 }
 
+/**
+ * 项目通过验收
+ * @param projectId 项目ID
+ */
+export function fetchPassAcceptance(projectId: number){
+    return request.post<void>({
+        url: `/project/acceptance/${projectId}/pass`
+    })
+}
+
+/**
+ * 项目验收驳回
+ * @param projectId 项目ID
+ */
+export function fetchRejectAcceptance(projectId: number){
+    return request.post<void>({
+        url: `/project/acceptance/${projectId}/reject`
+    })
+}
