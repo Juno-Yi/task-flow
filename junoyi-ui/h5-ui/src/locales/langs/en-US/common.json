@@ -1,0 +1,25 @@
+{
+  "title": "VUE H5 development template",
+  "tabbar": {
+    "home": "Home",
+    "my-task": "My Task",
+    "my-project": "My Project",
+    "me": "Me"
+  },
+  "language": {
+    "en": "English",
+    "zh": "Chinese"
+  },
+  "introduction": "A rapid development vue3 of mobile terminal template",
+  "home": {
+    "support": "support"
+  },
+  "list": {
+    "details": "list details"
+  },
+  "btn": {
+    "confirm": "confirm",
+    "cancel": "cancel"
+  }
+}
+

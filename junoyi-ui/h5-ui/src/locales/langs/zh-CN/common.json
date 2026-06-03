@@ -1,0 +1,24 @@
+{
+  "title": "VUE H5开发模板",
+  "tabbar": {
+    "home": "首页",
+    "my-task": "我的任务",
+    "my-project": "我的项目",
+    "me": "我的"
+  },
+  "language": {
+    "en": "英文",
+    "zh": "中文"
+  },
+  "introduction": "专门为像软件开发团队、产品研发团队等打造的轻量级任务协作平台",
+  "home": {
+    "support": "支持"
+  },
+  "list": {
+    "details": "列表详情"
+  },
+  "btn": {
+    "confirm": "确认",
+    "cancel": "取消"
+  }
+}
