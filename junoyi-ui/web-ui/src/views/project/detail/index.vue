@@ -70,7 +70,6 @@
               <span class="flex items-center">
                 <ArtSvgIcon icon="ri:flag-line" class="mr-2" />
                 里程碑
-                <ElBadge v-if="projectInfo.milestoneCount > 0" :value="projectInfo.milestoneCount" class="ml-2" />
               </span>
             </template>
             <MilestoneTab :project-info="projectInfo" />
