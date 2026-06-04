@@ -100,9 +100,6 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
         // 统计项目未完成任务数量
         detailVO.setTaskCount(taskServiceApi.getProjectUnfinishedTaskCount(project.getId()));
 
-        // TODO: 统计里程碑数量
-        detailVO.setMilestoneCount(0);
-
         // 字典翻译 - 项目类型
         if (project.getType() != null) {
             SysDictDataVO typeDict = sysDictApi.getDictItem("project_type", String.valueOf(project.getType()));
