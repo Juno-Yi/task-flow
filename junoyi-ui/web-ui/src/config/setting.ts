@@ -34,7 +34,7 @@ export const SETTING_DEFAULT_CONFIG = {
   /** 菜单是否展开 */
   menuOpen: true,
   /** 双菜单是否显示文本 */
-  dualMenuShowText: false,
+  dualMenuShowText: true,
   /** 系统主题类型 */
   systemThemeType: SystemThemeEnum.AUTO,
   /** 系统主题模式 */
@@ -54,9 +54,9 @@ export const SETTING_DEFAULT_CONFIG = {
   /** 是否显示语言切换 */
   showLanguage: true,
   /** 是否显示进度条 */
-  showNprogress: false,
+  showNprogress: true,
   /** 是否显示设置引导 */
-  showSettingGuide: true,
+  showSettingGuide: false,
   /** 是否显示节日文本 */
   showFestivalText: false,
   /** 是否自动关闭 */
@@ -82,7 +82,7 @@ export const SETTING_DEFAULT_CONFIG = {
   /** 节日日期 */
   festivalDate: '',
   /** 是否显示水印 */
-  watermarkVisible: false
+  watermarkVisible: true
 }
 
 /**

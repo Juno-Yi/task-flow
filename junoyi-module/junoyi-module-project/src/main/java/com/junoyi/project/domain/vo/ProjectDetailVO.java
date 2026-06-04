@@ -99,11 +99,6 @@ public class ProjectDetailVO {
     private Long taskCount;
 
     /**
-     * 里程碑数量
-     */
-    private Integer milestoneCount;
-
-    /**
      * 未完成需求数量
      */
     private Long requirementCount;

@@ -31,5 +31,10 @@ public class ProjectOverviewVO {
      * 项目需求完成趋势数据
      */
     private ProjectRequirementCompletedVO projectRequirementCompletedVO;
+
+    /**
+     * 项目任务完成情况趋势数据
+     */
+    private ProjectTaskCompletedVO projectTaskCompletedVO;
 }
 

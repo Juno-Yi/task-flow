@@ -37,8 +37,6 @@ declare namespace Api.Project {
         memberCount: number
         /** 项目任务数量 */
         taskCount: number
-        /** 里程碑数量 */
-        milestoneCount: number
         /** 未完成的需求数量 */
         requirementCount: number
         /** 项目进度 */
@@ -77,6 +75,16 @@ declare namespace Api.Project {
         projectKeyData: ProjectKeyDateVO
         projectRequirementSituation: ProjectRequirementSituationVO[]
         projectRequirementCompletedVO: ProjectRequirementCompletedVO
+        projectTaskCompletedVO: ProjectTaskCompletedVO
+    }
+
+    /**
+     * 项目任务完成情况趋势数据
+     */
+    interface ProjectTaskCompletedVO {
+        sevenDayList: TaskTrendVO[]
+        thirtyDayList: TaskTrendVO[]
+        ninetyDayList: TaskTrendVO[]
     }
 
     /**
@@ -97,6 +105,11 @@ declare namespace Api.Project {
         thirtyDayList: RequirementTrendVO[]
         ninetyDayList: RequirementTrendVO[]
     }
+
+    /**
+     * 任务完成趋势 VO
+     */
+    interface TaskTrendVO extends RequirementTrendVO {}
 
     /**
      * 需求趋势 VO

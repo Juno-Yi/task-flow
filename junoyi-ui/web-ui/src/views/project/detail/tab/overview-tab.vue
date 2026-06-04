@@ -75,7 +75,7 @@
               <span class="font-semibold">近期任务完成趋势</span>
             </div>
           </template>
-          <div class="chart-placeholder chart-placeholder-task-trend">预留图表区域：近期任务完成趋势折线图</div>
+          <ProjectTaskCompletedChart :data="overviewData.projectTaskCompletedVO" />
         </ElCard>
       </ElCol>
 
@@ -99,18 +99,6 @@
               <ElTag :type="getProjectRoleTagType(member.role)" size="small">{{ getProjectRoleName(member.role) }}</ElTag>
             </div>
           </div>
-        </ElCard>
-
-        <ElCard shadow="never" class="mb-4">
-          <template #header>
-            <div class="flex items-center"><ArtSvgIcon icon="ri:flashlight-line" class="mr-2" /><span class="font-semibold">快速操作</span></div>
-          </template>
-          <ElSpace direction="vertical" :fill="true" style="width: 100%">
-            <ElButton v-if="canManageProject" style="width: 100%" @click="emit('add-member')"><ArtSvgIcon icon="ri:user-add-line" class="mr-1" />添加成员</ElButton>
-            <ElButton v-if="canContribute" style="width: 100%" @click="emit('add-document')"><ArtSvgIcon icon="ri:file-add-line" class="mr-1" />添加文档</ElButton>
-            <ElButton v-if="canManageProject" style="width: 100%" @click="emit('add-milestone')"><ArtSvgIcon icon="ri:flag-line" class="mr-1" />添加里程碑</ElButton>
-            <ElEmpty v-if="!canManageProject && !canContribute" description="暂无快捷操作" :image-size="90" />
-          </ElSpace>
         </ElCard>
 
         <ElCard shadow="never" class="mb-4">
@@ -165,6 +153,7 @@ import { useProjectRole } from '@/hooks/useProjectRole'
 import ProjectActivityTrendChart from './modules/overview/project-activity-trend-chart.vue'
 import ProjectRequirementCompletedChart from './modules/overview/project-requirement-completed-chart.vue'
 import ProjectRequirementSituationChart from './modules/overview/project-requirement-situation-chart.vue'
+import ProjectTaskCompletedChart from './modules/overview/project-task-completed-chart.vue'
 
 defineOptions({ name: 'OverviewTab' })
 
@@ -197,6 +186,11 @@ const overviewData = ref<Api.Project.ProjectOverviewVO>({
   },
   projectRequirementSituation: [],
   projectRequirementCompletedVO: {
+    sevenDayList: [],
+    thirtyDayList: [],
+    ninetyDayList: []
+  },
+  projectTaskCompletedVO: {
     sevenDayList: [],
     thirtyDayList: [],
     ninetyDayList: []
@@ -238,8 +232,19 @@ const loadOverviewData = async () => {
     const data = await fetchGetProjectOverview(props.projectInfo.no)
     overviewData.value = data || {
       projectActivityTrend: [],
+      projectKeyData: {
+        projectCompletion: 0,
+        ongoingTasks: 0,
+        pendingRequirements: 0,
+        overdueTasks: 0
+      },
       projectRequirementSituation: [],
       projectRequirementCompletedVO: {
+        sevenDayList: [],
+        thirtyDayList: [],
+        ninetyDayList: []
+      },
+      projectTaskCompletedVO: {
         sevenDayList: [],
         thirtyDayList: [],
         ninetyDayList: []

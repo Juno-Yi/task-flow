@@ -9,6 +9,7 @@ import com.junoyi.task.domain.po.Task;
 import com.junoyi.task.domain.po.TaskRecord;
 import com.junoyi.task.domain.po.TaskUser;
 import com.junoyi.task.domain.vo.ProjectTaskItemVO;
+import com.junoyi.task.domain.vo.TaskTrendItemVO;
 import com.junoyi.task.enums.TaskRecordActionType;
 import com.junoyi.task.exception.TaskException;
 import com.junoyi.task.mapper.TaskMapper;
@@ -19,8 +20,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 任务业务API接口实现
@@ -377,5 +383,58 @@ public class TaskServiceApiImpl implements TaskServiceApi {
                 .isNotNull(Task::getPlanEndTime)  // 有计划结束时间
                 .lt(Task::getPlanEndTime, now);   // 计划结束时间早于当前时间
         return taskMapper.selectCount(wrapper);
+    }
+
+    /**
+     * 获取项目任务完成趋势数据
+     * @param projectId 项目ID
+     * @param days 统计天数
+     * @return 任务完成趋势数据列表
+     */
+    @Override
+    public List<TaskTrendItemVO> getProjectTaskCompletedTrend(Long projectId, int days) {
+        // 查询项目下已完成的任务（假设状态为4表示已完成）
+        LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Task::getProjectId, projectId)
+                .eq(Task::getDelFlag, false)
+                .eq(Task::getStatus, 4);
+        List<Task> completedTaskList = taskMapper.selectList(wrapper);
+
+        // 构建指定天数的趋势数据
+        return buildTaskTrendList(completedTaskList, days);
+    }
+
+    /**
+     * 构建指定天数的任务完成趋势数据
+     */
+    private List<TaskTrendItemVO> buildTaskTrendList(List<Task> completedTaskList, int days) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(days - 1L);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
+
+        // 统计每天完成的任务数量（使用 updateTime 作为完成时间）
+        Map<LocalDate, Long> dateCountMap = completedTaskList.stream()
+                .map(Task::getUpdateTime)
+                .filter(date -> date != null)
+                .map(this::convertToLocalDate)
+                .filter(date -> !date.isBefore(startDate) && !date.isAfter(endDate))
+                .collect(Collectors.groupingBy(date -> date, Collectors.counting()));
+
+        // 生成日期范围内的所有数据点
+        return startDate.datesUntil(endDate.plusDays(1))
+                .map(date -> {
+                    TaskTrendItemVO trendVO = new TaskTrendItemVO();
+                    trendVO.setDate(date.format(formatter));
+                    trendVO.setCount(dateCountMap.getOrDefault(date, 0L));
+                    return trendVO;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Date 转 LocalDate
+     */
+    private LocalDate convertToLocalDate(Date date) {
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 }
