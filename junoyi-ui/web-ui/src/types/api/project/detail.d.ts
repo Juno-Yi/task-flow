@@ -77,6 +77,16 @@ declare namespace Api.Project {
         projectKeyData: ProjectKeyDateVO
         projectRequirementSituation: ProjectRequirementSituationVO[]
         projectRequirementCompletedVO: ProjectRequirementCompletedVO
+        projectTaskCompletedVO: ProjectTaskCompletedVO
+    }
+
+    /**
+     * 项目任务完成情况趋势数据
+     */
+    interface ProjectTaskCompletedVO {
+        sevenDayList: TaskTrendVO[]
+        thirtyDayList: TaskTrendVO[]
+        ninetyDayList: TaskTrendVO[]
     }
 
     /**
@@ -97,6 +107,11 @@ declare namespace Api.Project {
         thirtyDayList: RequirementTrendVO[]
         ninetyDayList: RequirementTrendVO[]
     }
+
+    /**
+     * 任务完成趋势 VO
+     */
+    interface TaskTrendVO extends RequirementTrendVO {}
 
     /**
      * 需求趋势 VO

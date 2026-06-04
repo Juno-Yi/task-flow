@@ -216,9 +216,21 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
         ProjectKeyDataVO projectKeyData = getProjectKeyData(project.getId());
         projectOverviewVO.setProjectKeyData(projectKeyData);
 
-        // TODO: 近期任务完成趋势折线图数据
+        // 近期任务完成趋势折线图数据
+        ProjectTaskCompletedVO projectTaskCompletedData = getProjectTaskCompletedData(project.getId());
+        projectOverviewVO.setProjectTaskCompletedVO(projectTaskCompletedData);
 
         return projectOverviewVO;
+    }
+
+    /**
+     * TODO: 获取项目任务完成情况趋势折线图数据
+     * @param projectId 项目ID
+     * @return 返回项目任务完成情况趋势数据
+     */
+    private ProjectTaskCompletedVO getProjectTaskCompletedData(Long projectId){
+
+        return null;
     }
 
     /**
