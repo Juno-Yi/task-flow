@@ -37,8 +37,6 @@ declare namespace Api.Project {
         memberCount: number
         /** 项目任务数量 */
         taskCount: number
-        /** 里程碑数量 */
-        milestoneCount: number
         /** 未完成的需求数量 */
         requirementCount: number
         /** 项目进度 */
