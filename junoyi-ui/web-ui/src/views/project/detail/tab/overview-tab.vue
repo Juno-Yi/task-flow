@@ -103,18 +103,6 @@
 
         <ElCard shadow="never" class="mb-4">
           <template #header>
-            <div class="flex items-center"><ArtSvgIcon icon="ri:flashlight-line" class="mr-2" /><span class="font-semibold">快速操作</span></div>
-          </template>
-          <ElSpace direction="vertical" :fill="true" style="width: 100%">
-            <ElButton v-if="canManageProject" style="width: 100%" @click="emit('add-member')"><ArtSvgIcon icon="ri:user-add-line" class="mr-1" />添加成员</ElButton>
-            <ElButton v-if="canContribute" style="width: 100%" @click="emit('add-document')"><ArtSvgIcon icon="ri:file-add-line" class="mr-1" />添加文档</ElButton>
-            <ElButton v-if="canManageProject" style="width: 100%" @click="emit('add-milestone')"><ArtSvgIcon icon="ri:flag-line" class="mr-1" />添加里程碑</ElButton>
-            <ElEmpty v-if="!canManageProject && !canContribute" description="暂无快捷操作" :image-size="90" />
-          </ElSpace>
-        </ElCard>
-
-        <ElCard shadow="never" class="mb-4">
-          <template #header>
             <div class="flex items-center"><ArtSvgIcon icon="ri:dashboard-3-line" class="mr-2" /><span class="font-semibold">关键指标</span></div>
           </template>
           <div class="side-stat-grid">
