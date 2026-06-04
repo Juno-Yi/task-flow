@@ -75,7 +75,7 @@
               <span class="font-semibold">近期任务完成趋势</span>
             </div>
           </template>
-          <div class="chart-placeholder chart-placeholder-task-trend">预留图表区域：近期任务完成趋势折线图</div>
+          <ProjectTaskCompletedChart :data="overviewData.projectTaskCompletedVO" />
         </ElCard>
       </ElCol>
 
@@ -165,6 +165,7 @@ import { useProjectRole } from '@/hooks/useProjectRole'
 import ProjectActivityTrendChart from './modules/overview/project-activity-trend-chart.vue'
 import ProjectRequirementCompletedChart from './modules/overview/project-requirement-completed-chart.vue'
 import ProjectRequirementSituationChart from './modules/overview/project-requirement-situation-chart.vue'
+import ProjectTaskCompletedChart from './modules/overview/project-task-completed-chart.vue'
 
 defineOptions({ name: 'OverviewTab' })
 
@@ -197,6 +198,11 @@ const overviewData = ref<Api.Project.ProjectOverviewVO>({
   },
   projectRequirementSituation: [],
   projectRequirementCompletedVO: {
+    sevenDayList: [],
+    thirtyDayList: [],
+    ninetyDayList: []
+  },
+  projectTaskCompletedVO: {
     sevenDayList: [],
     thirtyDayList: [],
     ninetyDayList: []
@@ -238,8 +244,19 @@ const loadOverviewData = async () => {
     const data = await fetchGetProjectOverview(props.projectInfo.no)
     overviewData.value = data || {
       projectActivityTrend: [],
+      projectKeyData: {
+        projectCompletion: 0,
+        ongoingTasks: 0,
+        pendingRequirements: 0,
+        overdueTasks: 0
+      },
       projectRequirementSituation: [],
       projectRequirementCompletedVO: {
+        sevenDayList: [],
+        thirtyDayList: [],
+        ninetyDayList: []
+      },
+      projectTaskCompletedVO: {
         sevenDayList: [],
         thirtyDayList: [],
         ninetyDayList: []
