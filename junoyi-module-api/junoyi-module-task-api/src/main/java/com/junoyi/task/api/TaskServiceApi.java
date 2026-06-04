@@ -3,6 +3,7 @@ package com.junoyi.task.api;
 import com.junoyi.task.domain.dto.ProjectTaskCreateDTO;
 import com.junoyi.task.domain.dto.ProjectTaskUpdateDTO;
 import com.junoyi.task.domain.vo.ProjectTaskItemVO;
+import com.junoyi.task.domain.vo.TaskTrendItemVO;
 
 import java.util.List;
 
@@ -67,4 +68,13 @@ public interface TaskServiceApi {
      * @return 已经逾期的任务总量
      */
     Long getProjectOverdueTaskCount(Long projectId);
+
+    /**
+     * 获取项目任务完成趋势数据
+     * @param projectId 项目ID
+     * @param days 统计天数
+     * @return 任务完成趋势数据列表
+     */
+    List<TaskTrendItemVO> getProjectTaskCompletedTrend(Long projectId, int days);
+
 }

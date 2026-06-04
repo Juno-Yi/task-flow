@@ -45,7 +45,6 @@ import java.util.stream.Collectors;
 public class ProjectDetailServiceImpl implements IProjectDetailService {
 
     private final IProjectRequirementService projectRequirementService;
-
     private final ProjectMapper projectMapper;
     private final ProjectRequirementMapper projectRequirementMapper;
     private final ProjectRecordMapper projectRecordMapper;
@@ -224,13 +223,47 @@ public class ProjectDetailServiceImpl implements IProjectDetailService {
     }
 
     /**
-     * TODO: 获取项目任务完成情况趋势折线图数据
+     * 获取项目任务完成情况趋势折线图数据
      * @param projectId 项目ID
      * @return 返回项目任务完成情况趋势数据
      */
     private ProjectTaskCompletedVO getProjectTaskCompletedData(Long projectId){
+        ProjectTaskCompletedVO vo = new ProjectTaskCompletedVO();
 
-        return null;
+        // 获取7天的任务完成趋势数据
+        List<com.junoyi.task.domain.vo.TaskTrendItemVO> sevenDayData = taskServiceApi.getProjectTaskCompletedTrend(projectId, 7);
+        vo.setSevenDayList(convertToTaskTrendVOList(sevenDayData));
+
+        // 获取30天的任务完成趋势数据
+        List<com.junoyi.task.domain.vo.TaskTrendItemVO> thirtyDayData = taskServiceApi.getProjectTaskCompletedTrend(projectId, 30);
+        vo.setThirtyDayList(convertToTaskTrendVOList(thirtyDayData));
+
+        // 获取90天的任务完成趋势数据
+        List<com.junoyi.task.domain.vo.TaskTrendItemVO> ninetyDayData = taskServiceApi.getProjectTaskCompletedTrend(projectId, 90);
+        vo.setNinetyDayList(convertToTaskTrendVOList(ninetyDayData));
+
+        return vo;
+    }
+
+    /**
+     * 转换任务趋势数据列表
+     * @param taskTrendItems 任务趋势数据列表
+     * @return TaskTrendVO列表
+     */
+    private List<TaskTrendVO> convertToTaskTrendVOList(List<com.junoyi.task.domain.vo.TaskTrendItemVO> taskTrendItems) {
+        if (taskTrendItems == null || taskTrendItems.isEmpty()) {
+            return List.of();
+        }
+
+        // 将 TaskTrendItemVO 转换为 TaskTrendVO
+        return taskTrendItems.stream()
+                .map(item -> {
+                    TaskTrendVO vo = new TaskTrendVO();
+                    vo.setDate(item.getDate());
+                    vo.setCount(item.getCount());
+                    return vo;
+                })
+                .collect(Collectors.toList());
     }
 
     /**
