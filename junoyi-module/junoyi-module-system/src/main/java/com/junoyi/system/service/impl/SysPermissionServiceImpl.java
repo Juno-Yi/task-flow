@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
-import com.junoyi.system.convert.SysPermissionConverter;
 import com.junoyi.system.domain.dto.SysPermissionDTO;
 import com.junoyi.system.domain.dto.SysPermissionQueryDTO;
 import com.junoyi.system.domain.po.SysPermission;
