@@ -33,10 +33,6 @@
             </template>
             <OverviewTab
                 :project-info="projectInfo"
-                @add-member="handleAddMember"
-                @add-document="handleAddDocument"
-                @add-milestone="handleAddMilestone"
-                @switch-tab="handleSwitchTab"
             />
           </ElTabPane>
 
@@ -150,7 +146,6 @@
     priorityType: '',
     memberCount: 0,
     taskCount: 0,
-    milestoneCount: 0,
     requirementCount: 0,
     progress: 0,
     totalTasks: 0,
@@ -234,34 +229,6 @@
         tab: String(tabName)
       }
     })
-  }
-
-  /**
-   * 切换 Tab 标签
-   */
-  const handleSwitchTab = () => {
-
-  }
-
-  /**
-   * 添加项目成员
-   */
-  const handleAddMember = () => {
-
-  }
-
-  /**
-   * 添加项目文档
-   */
-  const handleAddDocument = () => {
-
-  }
-
-  /**
-   * 添加项目里程碑
-   */
-  const handleAddMilestone = () => {
-
   }
 
 
