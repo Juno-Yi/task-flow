@@ -18,6 +18,14 @@
             <groupId>com.junoyi</groupId>
             <artifactId>junoyi-framework-boot-starter</artifactId>
         </dependency>
+
+        <!--   企业微信SDk     -->
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-cp</artifactId>
+        </dependency>
+
+
     </dependencies>
 
 </project>
