@@ -1,6 +1,6 @@
 package com.junoyi.platform.api;
 
-import com.junoyi.platform.enums.PlatformType;
+import com.junoyi.platform.enums.ThirdPlatformType;
 
 /**
  * 平台消息通知 API 接口
@@ -12,7 +12,7 @@ public interface PlatformMessageServiceApi {
      * 获取平台类型
      * @return 平台类型
      */
-    PlatformType getPlatform();
+    ThirdPlatformType getPlatform();
 
     /**
      * 发送文本消息

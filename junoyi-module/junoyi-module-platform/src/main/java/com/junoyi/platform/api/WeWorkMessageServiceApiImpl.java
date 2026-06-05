@@ -1,6 +1,6 @@
 package com.junoyi.platform.api;
 
-import com.junoyi.platform.enums.PlatformType;
+import com.junoyi.platform.enums.ThirdPlatformType;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,8 +15,8 @@ public class WeWorkMessageServiceApiImpl implements PlatformMessageServiceApi {
      * 获取平台类型（企业微信）
      */
     @Override
-    public PlatformType getPlatform() {
-        return PlatformType.WEWORK;
+    public ThirdPlatformType getPlatform() {
+        return ThirdPlatformType.WEWORK;
     }
 
     /**

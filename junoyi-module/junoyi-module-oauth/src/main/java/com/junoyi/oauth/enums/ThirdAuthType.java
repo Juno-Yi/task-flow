@@ -18,11 +18,6 @@ public enum ThirdAuthType {
     WEWORK("wework", "企业微信"),
 
     /**
-     * 微信
-     */
-    WECHAT("wechat", "微信"),
-
-    /**
      * 钉钉
      */
     DINGTALK("dingtalk", "钉钉"),

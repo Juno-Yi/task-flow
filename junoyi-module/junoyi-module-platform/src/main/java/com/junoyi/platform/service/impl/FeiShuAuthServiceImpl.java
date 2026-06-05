@@ -1,6 +1,6 @@
 package com.junoyi.platform.service.impl;
 
-import com.junoyi.platform.enums.PlatformType;
+import com.junoyi.platform.enums.ThirdPlatformType;
 import com.junoyi.platform.service.PlatformAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class FeiShuAuthServiceImpl implements PlatformAuthService {
+public class FeiShuAuthServiceImpl {
 
     /**
      * 获取平台类型
      * @return 平台类型
      */
-    @Override
-    public PlatformType getPlatformType() {
-        return PlatformType.FEISHU;
+//    @Override
+    public ThirdPlatformType getPlatformType() {
+        return ThirdPlatformType.FEISHU;
     }
 }

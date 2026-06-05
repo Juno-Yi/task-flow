@@ -14,6 +14,8 @@ import com.junoyi.oauth.domain.vo.ThirdAuthUrlVO;
 import com.junoyi.oauth.domain.vo.WeWorkConfigVO;
 import com.junoyi.oauth.enums.ThirdAuthType;
 import com.junoyi.oauth.service.IWeWorkService;
+import com.junoyi.platform.api.PlatformAuthServiceApi;
+import com.junoyi.platform.enums.ThirdPlatformType;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.po.SysUserThirdAuth;
 import com.junoyi.system.domain.vo.AuthVO;
@@ -25,11 +27,8 @@ import com.junoyi.system.helper.LoginUserBuilder;
 import com.junoyi.system.mapper.SysUserMapper;
 import com.junoyi.system.mapper.SysUserThirdAuthMapper;
 import lombok.RequiredArgsConstructor;
-//import me.chanjar.weixin.common.error.WxErrorException;
-//import me.chanjar.weixin.cp.bean.WxCpOauth2UserInfo;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.UUID;
 
 /**
@@ -43,12 +42,11 @@ public class WeWorkServiceImpl implements IWeWorkService {
 
     private final JunoYiLog log = JunoYiLogFactory.getLogger(WeWorkServiceImpl.class);
 
-//    private final WeWorkClient weWorkClient;
-//    private final WeWorkProperties weWorkProperties;
     private final AuthHelper authHelper;
     private final SysUserMapper sysUserMapper;
     private final SysUserThirdAuthMapper sysUserThirdAuthMapper;
     private final LoginUserBuilder loginUserBuilder;
+    private final PlatformAuthServiceApi platformAuthServiceApi;
 
     /**
      * 获取企业微信OAuth授权URL
@@ -57,39 +55,23 @@ public class WeWorkServiceImpl implements IWeWorkService {
      */
     @Override
     public ThirdAuthUrlVO getAuthorizationUrl() {
-//        try {
-//             测试 Redis 连接
-//            String testKey = "wework:test:" + System.currentTimeMillis();
-//            String testValue = "test-value";
-//            RedisUtils.setCacheObject(testKey, testValue, Duration.ofMinutes(1));
-//            String retrieved = RedisUtils.getCacheObject(testKey);
-//            log.info("Redis测试", "写入key={}, 读取value={}", testKey, retrieved);
-//            RedisUtils.deleteObject(testKey);
-//
-//             记录配置信息（不记录 secret）
-//            log.info("企业微信配置", "corpId={}, agentId={}, redirectUri={}",
-//                    weWorkProperties.getCorpId(),
-//                    weWorkProperties.getAgentId(),
-//                    weWorkProperties.getRedirectUri());
-//
-//            weWorkProperties.validateRedirectUri();
-//
+        try {
+
             // 生成随机 state 用于防止 CSRF 攻击
-//            String state = UUID.randomUUID().toString().replace("-", "");
-//            String authUrl = weWorkClient.buildQrConnectUrl(state);
-//
-//            log.info("企业微信授权", "生成授权URL: {}", authUrl);
-//
-//            return ThirdAuthUrlVO.builder()
-//                    .authUrl(authUrl)
-//                    .authType(ThirdAuthType.WEWORK.getCode())
-//                    .state(state)
-//                    .build();
-//        } catch (Exception e) {
-//            log.error("企业微信授权", "生成授权URL失败: {}", e.getMessage(), e);
-//            throw new RuntimeException("生成授权URL失败: " + e.getMessage(), e);
-//        }
-        return null;
+            String state = UUID.randomUUID().toString().replace("-", "");
+            String authUrl = platformAuthServiceApi.getQrLoginUrl(ThirdPlatformType.WEWORK,state);
+
+            log.info("企业微信授权", "生成授权URL: {}", authUrl);
+
+            return ThirdAuthUrlVO.builder()
+                    .authUrl(authUrl)
+                    .authType(ThirdAuthType.WEWORK.getCode())
+                    .state(state)
+                    .build();
+        } catch (Exception e) {
+            log.error("企业微信授权", "生成授权URL失败: {}", e.getMessage(), e);
+            throw new RuntimeException("生成授权URL失败: " + e.getMessage(), e);
+        }
     }
 
 

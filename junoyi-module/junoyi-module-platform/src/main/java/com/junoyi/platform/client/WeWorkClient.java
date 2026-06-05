@@ -38,8 +38,24 @@ public class WeWorkClient {
      * 获取Oauth回调地址
      * @return Oauth回调地址
      */
-    public String getOauthRedirectUrl(){
+    public String getRedirectUrl(){
         return properties.getRedirectUrl();
+    }
+
+    /**
+     * 获取企业ID
+     * @return 企业ID
+     */
+    public String getCorpId(){
+        return properties.getCorpId();
+    }
+
+    /**
+     * 获取应用 AgentId
+     * @return 应用 AgentId
+     */
+    public Integer getAgentId(){
+        return properties.getAgentId();
     }
 
 }

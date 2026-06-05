@@ -5,7 +5,7 @@ package com.junoyi.platform.enums;
  *
  * @author Fan
  */
-public enum PlatformType {
+public enum ThirdPlatformType {
     /**
      * 企业微信
      */
