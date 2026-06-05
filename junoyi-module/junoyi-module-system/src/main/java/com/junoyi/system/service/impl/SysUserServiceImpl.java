@@ -73,7 +73,6 @@ public class SysUserServiceImpl implements ISysUserService {
     private final SysRoleMapper sysRoleMapper;
     private final SysDeptMapper sysDeptMapper;
     private final SysPermGroupMapper sysPermGroupMapper;
-    private final SysRoleConverter sysRoleConverter;
     private final SysDeptConverter sysDeptConverter;
     private final SysPermGroupConverter sysPermGroupConverter;
     private final SysDictApi sysDictApi;
@@ -375,7 +374,7 @@ public class SysUserServiceImpl implements ISysUserService {
                         .in(SysRole::getId, roleIds)
                         .eq(SysRole::isDelFlag, false));
 
-        return sysRoleConverter.toVoList(roles);
+        return SysRoleConverter.toVoList(roles);
     }
 
     /**
