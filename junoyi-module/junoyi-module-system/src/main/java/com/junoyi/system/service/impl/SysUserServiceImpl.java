@@ -12,6 +12,7 @@ import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.system.convert.SysDeptConverter;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.constant.DictTypeConstants;
+import com.junoyi.system.convert.SysPermGroupConverter;
 import com.junoyi.system.convert.SysRoleConverter;
 import com.junoyi.system.convert.SysUserConverter;
 import com.junoyi.system.domain.dto.SysUserDTO;
@@ -73,7 +74,6 @@ public class SysUserServiceImpl implements ISysUserService {
     private final SysDeptMapper sysDeptMapper;
     private final SysPermGroupMapper sysPermGroupMapper;
     private final SysDeptConverter sysDeptConverter;
-    private final SysPermGroupConverter sysPermGroupConverter;
     private final SysDictApi sysDictApi;
 
     /**
@@ -560,7 +560,7 @@ public class SysUserServiceImpl implements ISysUserService {
                 new LambdaQueryWrapper<SysPermGroup>()
                         .in(SysPermGroup::getId, groupIds));
 
-        return sysPermGroupConverter.toVoList(groups);
+        return SysPermGroupConverter.toVoList(groups);
     }
 
     /**
