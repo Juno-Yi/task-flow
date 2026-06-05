@@ -25,7 +25,6 @@ public class SysUserCenterServiceImpl implements ISysUserCenterService {
 
 
     private final SysUserMapper sysUserMapper;
-    private final SysUserConverter sysUserConverter;
 
     @Override
     public SysUserVO getCurrentUserProfile() {
@@ -34,7 +33,7 @@ public class SysUserCenterServiceImpl implements ISysUserCenterService {
         if (user == null) {
             throw new RuntimeException("用户不存在");
         }
-        return sysUserConverter.toVo(user);
+        return SysUserConverter.toVo(user);
     }
 
     @Override
