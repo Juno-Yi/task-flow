@@ -10,19 +10,15 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>junoyi-module-oauth</artifactId>
-    <description> 第三方登录认证模块 </description>
+    <artifactId>junoyi-module-platform</artifactId>
+    <description> 第三方平台（企业微信、飞书、钉钉）接入模块 </description>
 
     <dependencies>
         <dependency>
             <groupId>com.junoyi</groupId>
-            <artifactId>junoyi-module-system</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.junoyi</groupId>
             <artifactId>junoyi-module-platform-api</artifactId>
         </dependency>
+
     </dependencies>
 
 </project>

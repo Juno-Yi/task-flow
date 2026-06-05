@@ -43,6 +43,7 @@
         <aliyun.oss.version>3.17.1</aliyun.oss.version>
         <minio.version>8.5.7</minio.version>
         <qiniu.version>7.13.1</qiniu.version>
+        <weixin-java.version>4.6.0</weixin-java.version>
     </properties>
 
     <dependencyManagement>
@@ -142,11 +143,6 @@
                 <artifactId>junoyi-framework-file</artifactId>
                 <version>${revision}</version>
             </dependency>
-            <dependency>
-                <groupId>com.junoyi</groupId>
-                <artifactId>junoyi-framework-wework</artifactId>
-                <version>${revision}</version>
-            </dependency>
 
             <!-- Module 功能模块 -->
             <dependency>
@@ -169,6 +165,11 @@
                 <artifactId>junoyi-module-project</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.junoyi</groupId>
+                <artifactId>junoyi-module-platform</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <!--    Module API 解耦模块       -->
             <dependency>
@@ -176,9 +177,19 @@
                 <artifactId>junoyi-module-task-api</artifactId>
                 <version>${revision}</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.junoyi</groupId>
+                <artifactId>junoyi-module-platform-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <!-- ========== 第三方依赖版本管理 ========== -->
+            <!-- 企业微信 SDK -->
+            <dependency>
+                <groupId>com.github.binarywang</groupId>
+                <artifactId>weixin-java-cp</artifactId>
+                <version>${weixin-java.version}</version>
+            </dependency>
             <!-- 七牛云 (可选) -->
             <dependency>
                 <groupId>com.qiniu</groupId>
