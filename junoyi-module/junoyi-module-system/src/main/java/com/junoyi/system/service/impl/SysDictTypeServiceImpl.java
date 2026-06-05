@@ -1,10 +1,7 @@
 package com.junoyi.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.core.utils.DateUtils;
-import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.json.utils.JsonUtils;
 import com.junoyi.framework.log.core.JunoYiLog;
@@ -13,7 +10,6 @@ import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.system.api.SysDictApiImpl;
 import com.junoyi.system.convert.SysDictTypeConverter;
 import com.junoyi.system.domain.dto.SysDictTypeDTO;
-import com.junoyi.system.domain.dto.SysDictTypeQueryDTO;
 import com.junoyi.system.domain.po.SysDictData;
 import com.junoyi.system.domain.po.SysDictType;
 import com.junoyi.system.domain.vo.SysDictTypeVO;
@@ -38,7 +34,6 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
 
     private final JunoYiLog log = JunoYiLogFactory.getLogger(SysDictTypeServiceImpl.class);
     private final SysDictTypeMapper sysDictTypeMapper;
-    private final SysDictTypeConverter sysDictTypeConverter;
     private final SysDictDataMapper sysDictDataMapper;
     private final SysDictApiImpl sysDictApi;
 
@@ -54,7 +49,7 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
                 .orderByAsc(SysDictType::getDictType);
 
         List<SysDictType> dictTypes = sysDictTypeMapper.selectList(wrapper);
-        return sysDictTypeConverter.toVoList(dictTypes);
+        return SysDictTypeConverter.toVoList(dictTypes);
     }
 
     /**
@@ -66,7 +61,7 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
     @Override
     public SysDictTypeVO getDictTypeById(Long dictId) {
         SysDictType dictType = sysDictTypeMapper.selectById(dictId);
-        return dictType != null ? sysDictTypeConverter.toVo(dictType) : null;
+        return dictType != null ? SysDictTypeConverter.toVo(dictType) : null;
     }
 
     /**
@@ -77,7 +72,7 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addDictType(SysDictTypeDTO dictTypeDTO) {
-        SysDictType dictType = sysDictTypeConverter.toEntity(dictTypeDTO);
+        SysDictType dictType = SysDictTypeConverter.toEntity(dictTypeDTO);
 
         // 设置默认值
         if (dictType.getStatus() == null) {
@@ -113,7 +108,7 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
             throw new RuntimeException("字典类型不存在");
         }
 
-        SysDictType dictType = sysDictTypeConverter.toEntity(dictTypeDTO);
+        SysDictType dictType = SysDictTypeConverter.toEntity(dictTypeDTO);
         dictType.setDictId(dictTypeDTO.getDictId());
 
         // 保留原有的字段值

@@ -7,12 +7,10 @@ import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
 import com.junoyi.framework.redis.utils.RedisUtils;
 import com.junoyi.system.convert.SysDictDataConverter;
-import com.junoyi.system.domain.po.SysDept;
 import com.junoyi.system.domain.po.SysDictData;
 import com.junoyi.system.domain.vo.SysDictDataVO;
 import com.junoyi.system.mapper.SysDictDataMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -34,7 +32,6 @@ public class SysDictApiImpl implements SysDictApi {
     private final JunoYiLog log = JunoYiLogFactory.getLogger(SysDictApiImpl.class);
 
     private final SysDictDataMapper sysDictDataMapper;
-    private final SysDictDataConverter sysDictDataConverter;
 
     /**
      * 根据字典类型查询字典数据
@@ -65,7 +62,7 @@ public class SysDictApiImpl implements SysDictApi {
                 .orderByAsc(SysDictData::getDictSort);
 
         List<SysDictData> dictDataList = sysDictDataMapper.selectList(wrapper);
-        List<SysDictDataVO> voList = sysDictDataConverter.toVoList(dictDataList);
+        List<SysDictDataVO> voList = SysDictDataConverter.toVoList(dictDataList);
 
         // 存入缓存
         if (!voList.isEmpty()) {
@@ -194,7 +191,7 @@ public class SysDictApiImpl implements SysDictApi {
                 .orderByAsc(SysDictData::getDictSort);
 
         List<SysDictData> dictDataList = sysDictDataMapper.selectList(wrapper);
-        List<SysDictDataVO> voList = sysDictDataConverter.toVoList(dictDataList);
+        List<SysDictDataVO> voList = SysDictDataConverter.toVoList(dictDataList);
 
         // 按字典类型分组
         return voList.stream()
@@ -253,7 +250,7 @@ public class SysDictApiImpl implements SysDictApi {
 
         for (Map.Entry<String, List<SysDictData>> entry : groupedData.entrySet()) {
             String dictType = entry.getKey();
-            List<SysDictDataVO> voList = sysDictDataConverter.toVoList(entry.getValue());
+            List<SysDictDataVO> voList = SysDictDataConverter.toVoList(entry.getValue());
 
             // 缓存字典数据列表
             String cacheKey = CacheConstants.DICT_DATA + dictType;

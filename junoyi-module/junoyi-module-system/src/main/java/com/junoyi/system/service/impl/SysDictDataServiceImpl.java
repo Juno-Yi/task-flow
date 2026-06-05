@@ -38,7 +38,6 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
 
     private final JunoYiLog log = JunoYiLogFactory.getLogger(SysDictDataServiceImpl.class);
     private final SysDictDataMapper sysDictDataMapper;
-    private final SysDictDataConverter sysDictDataConverter;
     private final SysDictApiImpl sysDictApi;
 
     /**
@@ -59,7 +58,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
         Page<SysDictData> page = new Page<>(queryDTO.getCurrent(), queryDTO.getSize());
         Page<SysDictData> resultPage = sysDictDataMapper.selectPage(page, wrapper);
 
-        List<SysDictDataVO> voList = sysDictDataConverter.toVoList(resultPage.getRecords());
+        List<SysDictDataVO> voList = SysDictDataConverter.toVoList(resultPage.getRecords());
         return PageResult.of(voList, resultPage.getTotal(), (int) resultPage.getCurrent(), (int) resultPage.getSize());
     }
 
@@ -77,7 +76,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
                 .orderByAsc(SysDictData::getDictSort);
 
         List<SysDictData> dictDataList = sysDictDataMapper.selectList(wrapper);
-        return sysDictDataConverter.toVoList(dictDataList);
+        return SysDictDataConverter.toVoList(dictDataList);
     }
 
     /**
@@ -89,7 +88,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
     @Override
     public SysDictDataVO getDictDataById(Long dictCode) {
         SysDictData dictData = sysDictDataMapper.selectById(dictCode);
-        return dictData != null ? sysDictDataConverter.toVo(dictData) : null;
+        return dictData != null ? SysDictDataConverter.toVo(dictData) : null;
     }
 
     /**
@@ -100,7 +99,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addDictData(SysDictDataDTO dictDataDTO) {
-        SysDictData dictData = sysDictDataConverter.toEntity(dictDataDTO);
+        SysDictData dictData = SysDictDataConverter.toEntity(dictDataDTO);
 
         // 设置默认值
         if (dictData.getStatus() == null) {
@@ -142,7 +141,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
             throw new RuntimeException("字典数据不存在");
         }
 
-        SysDictData dictData = sysDictDataConverter.toEntity(dictDataDTO);
+        SysDictData dictData = SysDictDataConverter.toEntity(dictDataDTO);
         dictData.setDictCode(dictDataDTO.getDictCode());
 
         // 保留原有的字段值
