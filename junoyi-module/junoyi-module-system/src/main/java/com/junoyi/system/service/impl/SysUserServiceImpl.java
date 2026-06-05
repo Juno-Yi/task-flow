@@ -9,9 +9,9 @@ import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.json.utils.JsonUtils;
 import com.junoyi.framework.security.utils.PasswordUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
-import com.junoyi.system.convert.SysDeptConverter;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.constant.DictTypeConstants;
+import com.junoyi.system.convert.SysDeptConverter;
 import com.junoyi.system.convert.SysPermGroupConverter;
 import com.junoyi.system.convert.SysRoleConverter;
 import com.junoyi.system.convert.SysUserConverter;
@@ -73,7 +73,6 @@ public class SysUserServiceImpl implements ISysUserService {
     private final SysRoleMapper sysRoleMapper;
     private final SysDeptMapper sysDeptMapper;
     private final SysPermGroupMapper sysPermGroupMapper;
-    private final SysDeptConverter sysDeptConverter;
     private final SysDictApi sysDictApi;
 
     /**
@@ -459,7 +458,7 @@ public class SysUserServiceImpl implements ISysUserService {
                         .in(SysDept::getId, deptIds)
                         .eq(SysDept::isDelFlag, false));
 
-        return sysDeptConverter.toVoList(depts);
+        return SysDeptConverter.toVoList(depts);
     }
 
     /**

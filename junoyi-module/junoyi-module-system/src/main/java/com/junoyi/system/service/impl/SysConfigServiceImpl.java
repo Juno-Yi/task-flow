@@ -42,7 +42,6 @@ public class SysConfigServiceImpl implements ISysConfigService {
 
     private final JunoYiLog log = JunoYiLogFactory.getLogger(SysConfigServiceImpl.class);
     private final SysConfigMapper sysConfigMapper;
-    private final SysConfigConverter sysConfigConverter;
 
     private static final String CACHE_KEY_PREFIX = "sys:config:";
     private static final long CACHE_EXPIRE_HOURS = 24;
@@ -66,7 +65,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
         Page<SysConfig> page = new Page<>(queryDTO.getCurrent(), queryDTO.getSize());
         Page<SysConfig> resultPage = sysConfigMapper.selectPage(page, wrapper);
 
-        List<SysConfigVO> voList = sysConfigConverter.toVoList(resultPage.getRecords());
+        List<SysConfigVO> voList = SysConfigConverter.toVoList(resultPage.getRecords());
         return PageResult.of(voList, resultPage.getTotal(), (int) resultPage.getCurrent(), (int) resultPage.getSize());
     }
 
@@ -79,7 +78,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
     @Override
     public SysConfigVO getConfigById(Long id) {
         SysConfig config = sysConfigMapper.selectById(id);
-        return config != null ? sysConfigConverter.toVo(config) : null;
+        return config != null ? SysConfigConverter.toVo(config) : null;
     }
 
     /**
@@ -141,7 +140,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
                 configDTO.getConfigValue()
         );
 
-        SysConfig config = sysConfigConverter.toEntity(configDTO);
+        SysConfig config = SysConfigConverter.toEntity(configDTO);
 
         // 设置默认值
         if (config.getIsSystem() == null)
@@ -202,7 +201,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
         );
 
         // 转换DTO到实体
-        SysConfig config = sysConfigConverter.toEntity(configDTO);
+        SysConfig config = SysConfigConverter.toEntity(configDTO);
         config.setConfigId(configDTO.getConfigId());
 
         // 保留原有的字段值（DTO中没有的字段）
@@ -336,7 +335,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
                 .orderByAsc(SysConfig::getSort);
 
         List<SysConfig> configs = sysConfigMapper.selectList(wrapper);
-        return sysConfigConverter.toVoList(configs);
+        return SysConfigConverter.toVoList(configs);
     }
 
     /**
