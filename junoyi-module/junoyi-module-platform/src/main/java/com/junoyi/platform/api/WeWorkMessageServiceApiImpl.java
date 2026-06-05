@@ -20,10 +20,13 @@ public class WeWorkMessageServiceApiImpl implements PlatformMessageServiceApi {
     }
 
     /**
-     * 发送消息
+     * 发送文本消息
+     *
+     * @param weworkUserId 消息接收用户企微唯一ID
+     * @param text 消息文本
      */
     @Override
-    public void sendMessage() {
+    public void sendText(String weworkUserId, String text){
 
     }
 }

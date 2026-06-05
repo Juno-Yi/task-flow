@@ -15,7 +15,10 @@ public interface PlatformMessageServiceApi {
     PlatformType getPlatform();
 
     /**
-     * 发送平台Message
+     * 发送文本消息
+     *
+     * @param weworkUserId 消息接收用户企微唯一ID
+     * @param text 消息文本
      */
-    void sendMessage();
+    void sendText(String weworkUserId, String text);
 }

@@ -8,6 +8,9 @@ import me.chanjar.weixin.cp.api.WxCpService;
 /**
  * 企业微信统一客户端
  *
+ * 如果platform模块业务中如果需要调用关于企业微信应用的API，
+ * 都需要统一去注入获取WeWorkClient的bean实例，然后通过本类实例操作调用。
+ *
  * @author Fan
  */
 public class WeWorkClient {
@@ -31,5 +34,12 @@ public class WeWorkClient {
         this.wxCpService = wxCpService;
     }
 
+    /**
+     * 获取Oauth回调地址
+     * @return Oauth回调地址
+     */
+    public String getOauthRedirectUrl(){
+        return properties.getRedirectUrl();
+    }
 
 }
