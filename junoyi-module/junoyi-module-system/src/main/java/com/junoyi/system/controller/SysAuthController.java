@@ -1,7 +1,6 @@
 package com.junoyi.system.controller;
 
 import com.junoyi.framework.captcha.helper.CaptchaHelper;
-import com.junoyi.framework.captcha.properties.CaptchaProperties;
 import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
 import com.junoyi.framework.web.domain.BaseController;
@@ -37,7 +36,6 @@ public class SysAuthController extends BaseController {
 
     private final ISysAuthService sysAuthService;
     private final AuthHelper authHelper;
-    private final LoginConverter loginConverter;
 
     /**
      * 这里需要通过注解进行注入，声明这个依赖bean注入是可选的
@@ -65,7 +63,7 @@ public class SysAuthController extends BaseController {
         }
 
         // 转换为 LoginBO 并调用登录服务
-        LoginBO loginBO = loginConverter.toLoginBO(loginDTO);
+        LoginBO loginBO = LoginConverter.toLoginBo(loginDTO);
         AuthVO authVo = sysAuthService.login(loginBO);
 
         return R.ok(authVo);

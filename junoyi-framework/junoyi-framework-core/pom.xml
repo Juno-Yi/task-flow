@@ -83,12 +83,6 @@
             <artifactId>junoyi-framework-datasource</artifactId>
         </dependency>
 
-        <!-- MapStruct 对象转换 -->
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-        </dependency>
-
         <!-- IP地址解析 -->
         <dependency>
             <groupId>org.lionsoul</groupId>
@@ -107,23 +101,11 @@
                     <source>21</source>
                     <target>21</target>
                     <annotationProcessorPaths>
-                        <!-- Lombok 必须在 MapStruct 之前 -->
+                        <!-- Lombok 注解处理器 -->
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>1.18.30</version>
-                        </path>
-                        <!-- MapStruct 注解处理器 -->
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>1.5.5.Final</version>
-                        </path>
-                        <!-- Lombok 与 MapStruct 绑定 -->
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>0.2.0</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

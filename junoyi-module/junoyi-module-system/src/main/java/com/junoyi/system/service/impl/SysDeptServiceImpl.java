@@ -4,17 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.constant.DictTypeConstants;
+import com.junoyi.system.convert.SysDeptConverter;
+import com.junoyi.system.convert.SysPermGroupConverter;
 import com.junoyi.system.event.UserOperationEvent;
 import com.junoyi.system.exception.DeptHasChildrenException;
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.security.utils.SecurityUtils;
-import com.junoyi.system.convert.SysDeptConverter;
-import com.junoyi.system.convert.SysPermGroupConverter;
 import com.junoyi.system.domain.bo.SysDeptSortItem;
 import com.junoyi.system.domain.dto.SysDeptDTO;
 import com.junoyi.system.domain.dto.SysDeptQueryDTO;
-import com.junoyi.system.domain.dto.SysDeptSortDTO;
 import com.junoyi.system.domain.po.SysDept;
 import com.junoyi.system.domain.po.SysDeptGroup;
 import com.junoyi.system.domain.po.SysPermGroup;
@@ -51,8 +50,6 @@ public class SysDeptServiceImpl implements ISysDeptService {
     private final SysDeptMapper sysDeptMapper;
     private final SysDeptGroupMapper sysDeptGroupMapper;
     private final SysPermGroupMapper sysPermGroupMapper;
-    private final SysDeptConverter sysDeptConverter;
-    private final SysPermGroupConverter sysPermGroupConverter;
     private final SysDictApi sysDictApi;
 
     /**
@@ -76,7 +73,7 @@ public class SysDeptServiceImpl implements ISysDeptService {
         // 查询符合条件的部门列表
         List<SysDept> deptList = sysDeptMapper.selectList(wrapper);
         // 将实体对象转换为VO对象
-        List<SysDeptVO> voList = sysDeptConverter.toVoList(deptList);
+        List<SysDeptVO> voList = SysDeptConverter.toVoList(deptList);
         
         // 使用字典API翻译状态标签，并获取标签类型（颜色）
         for (SysDeptVO deptVO : voList) {
@@ -109,7 +106,7 @@ public class SysDeptServiceImpl implements ISysDeptService {
         if (sysDept == null || sysDept.isDelFlag()) {
             return null;
         }
-        return sysDeptConverter.toVo(sysDept);
+        return SysDeptConverter.toVo(sysDept);
     }
 
     /**
@@ -119,7 +116,7 @@ public class SysDeptServiceImpl implements ISysDeptService {
      */
     @Override
     public void addDept(SysDeptDTO deptDTO) {
-        SysDept sysDept = sysDeptConverter.toPo(deptDTO);
+        SysDept sysDept = SysDeptConverter.toPo(deptDTO);
         sysDept.setDelFlag(false);
         sysDept.setStatus(SysDeptStatus.ENABLE.getCode());
         sysDept.setCreateTime(DateUtils.getNowDate());
@@ -139,7 +136,7 @@ public class SysDeptServiceImpl implements ISysDeptService {
      */
     @Override
     public void updateDept(SysDeptDTO deptDTO) {
-        SysDept sysDept = sysDeptConverter.toPo(deptDTO);
+        SysDept sysDept = SysDeptConverter.toPo(deptDTO);
         sysDept.setUpdateTime(DateUtils.getNowDate());
         sysDept.setUpdateBy(SecurityUtils.getUserName());
         sysDeptMapper.updateById(sysDept);
@@ -269,7 +266,7 @@ public class SysDeptServiceImpl implements ISysDeptService {
                 new LambdaQueryWrapper<SysPermGroup>()
                         .in(SysPermGroup::getId, groupIds));
 
-        return sysPermGroupConverter.toVoList(groups);
+        return SysPermGroupConverter.toVoList(groups);
     }
 
     /**

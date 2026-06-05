@@ -51,8 +51,6 @@ public class SysRoleServiceImpl implements ISysRoleService {
     private final SysRoleMapper sysRoleMapper;
     private final SysRoleGroupMapper sysRoleGroupMapper;
     private final SysPermGroupMapper sysPermGroupMapper;
-    private final SysRoleConverter sysRoleConverter;
-    private final SysPermGroupConverter sysPermGroupConverter;
     private final SysDictApi sysDictApi;
 
     /**
@@ -73,7 +71,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
                 .orderByAsc(SysRole::getSort);
 
         Page<SysRole> resultPage = sysRoleMapper.selectPage(page, wrapper);
-        List<SysRoleVO> roleVOList = sysRoleConverter.toVoList(resultPage.getRecords());
+        List<SysRoleVO> roleVOList = SysRoleConverter.toVoList(resultPage.getRecords());
         
         // 使用字典API翻译状态和数据范围标签，并获取标签类型（颜色）
         for (SysRoleVO roleVO : roleVOList) {
@@ -119,7 +117,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
                 .ne(SysRole::getId, 1L)
                 .orderByAsc(SysRole::getSort);
         List<SysRole> sysRoles = sysRoleMapper.selectList(wrapper);
-        List<SysRoleVO> roleVOList = sysRoleConverter.toVoList(sysRoles);
+        List<SysRoleVO> roleVOList = SysRoleConverter.toVoList(sysRoles);
         
         // 使用字典API翻译状态和数据范围标签，并获取标签类型（颜色）
         for (SysRoleVO roleVO : roleVOList) {
@@ -160,7 +158,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
         if (sysRole == null || sysRole.isDelFlag()) {
             return null;
         }
-        return sysRoleConverter.toVo(sysRole);
+        return SysRoleConverter.toVo(sysRole);
     }
 
     /**
@@ -170,7 +168,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     @Override
     public void addRole(SysRoleDTO roleDTO) {
-        SysRole sysRole = sysRoleConverter.toPo(roleDTO);
+        SysRole sysRole = SysRoleConverter.toPo(roleDTO);
         sysRole.setStatus(SysRoleStatus.ENABLE.getCode());
         sysRole.setDelFlag(false);
         sysRole.setCreateBy(SecurityUtils.getUserName());
@@ -191,7 +189,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     @Override
     public void updateRole(SysRoleDTO roleDTO) {
-        SysRole sysRole = sysRoleConverter.toPo(roleDTO);
+        SysRole sysRole = SysRoleConverter.toPo(roleDTO);
         sysRole.setUpdateBy(SecurityUtils.getUserName());
         sysRole.setUpdateTime(DateUtils.getNowDate());
         sysRoleMapper.updateById(sysRole);
@@ -298,7 +296,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
                 new LambdaQueryWrapper<SysPermGroup>()
                         .in(SysPermGroup::getId, groupIds));
 
-        return sysPermGroupConverter.toVoList(groups);
+        return SysPermGroupConverter.toVoList(groups);
     }
 
     /**

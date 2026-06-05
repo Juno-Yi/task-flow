@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.event.core.EventBus;
+import com.junoyi.system.convert.SysMenuConverter;
 import com.junoyi.system.event.UserOperationEvent;
 import com.junoyi.system.exception.MenuHasChildrenException;
 import com.junoyi.framework.core.utils.DateUtils;
@@ -12,7 +13,6 @@ import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
 import com.junoyi.framework.security.utils.SecurityUtils;
-import com.junoyi.system.convert.SysMenuConverter;
 import com.junoyi.system.domain.dto.SysMenuDTO;
 import com.junoyi.system.domain.dto.SysMenuQueryDTO;
 import com.junoyi.system.domain.bo.SysMenuSortItem;
@@ -41,7 +41,6 @@ public class SysMenuServiceImpl implements ISysMenuService {
     private final JunoYiLog log = JunoYiLogFactory.getLogger(this.getClass());
 
     private final SysMenuMapper sysMenuMapper;
-    private final SysMenuConverter sysMenuConverter;
 
     /**
      * 获取菜单树形结构
@@ -55,7 +54,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
         // 查询所有菜单
         List<SysMenu> menus = queryMenuList(queryDTO);
         // 转换为 VO
-        List<SysMenuVO> menuVOList = sysMenuConverter.toVoList(menus);
+        List<SysMenuVO> menuVOList = SysMenuConverter.toVoList(menus);
         // 构建树形结构
         return buildTree(menuVOList, 0L);
     }
@@ -74,7 +73,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
         LambdaQueryWrapper<SysMenu> wrapper = buildQueryWrapper(queryDTO);
         Page<SysMenu> result = sysMenuMapper.selectPage(page, wrapper);
 
-        List<SysMenuVO> voList = sysMenuConverter.toVoList(result.getRecords());
+        List<SysMenuVO> voList = SysMenuConverter.toVoList(result.getRecords());
         return PageResult.of(voList, result.getTotal(), (int) result.getCurrent(), (int) result.getSize());
     }
 
@@ -88,7 +87,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
     public List<SysMenuVO> getMenuList(SysMenuQueryDTO queryDTO) {
         log.debug("查询菜单列表, queryDTO: {}", queryDTO);
         List<SysMenu> menus = queryMenuList(queryDTO);
-        return sysMenuConverter.toVoList(menus);
+        return SysMenuConverter.toVoList(menus);
     }
 
     /**
@@ -100,7 +99,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
     @Override
     public SysMenuVO getMenuById(Long id) {
         SysMenu menu = sysMenuMapper.selectById(id);
-        return menu != null ? sysMenuConverter.toVo(menu) : null;
+        return menu != null ? SysMenuConverter.toVo(menu) : null;
     }
 
     /**
@@ -111,7 +110,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
      */
     @Override
     public Long addMenu(SysMenuDTO menuDTO) {
-        SysMenu menu = sysMenuConverter.toEntity(menuDTO);
+        SysMenu menu = SysMenuConverter.toEntity(menuDTO);
         // 设置默认值
         if (menu.getParentId() == null)
             menu.setParentId(0L);
@@ -140,7 +139,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
     public boolean updateMenu(SysMenuDTO menuDTO) {
         if (menuDTO.getId() == null)
             return false;
-        SysMenu menu = sysMenuConverter.toEntity(menuDTO);
+        SysMenu menu = SysMenuConverter.toEntity(menuDTO);
         menu.setUpdateTime(DateUtils.getNowDate());
         boolean result = sysMenuMapper.updateById(menu) > 0;
 

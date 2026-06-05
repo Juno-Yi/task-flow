@@ -4,11 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.json.utils.JsonUtils;
+import com.junoyi.system.convert.SysPermGroupConverter;
 import com.junoyi.system.event.UserOperationEvent;
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.security.utils.SecurityUtils;
-import com.junoyi.system.convert.SysPermGroupConverter;
 import com.junoyi.system.domain.dto.SysPermGroupDTO;
 import com.junoyi.system.domain.dto.SysPermGroupQueryDTO;
 import com.junoyi.system.domain.po.SysPermGroup;
@@ -33,7 +33,6 @@ import java.util.List;
 public class SysPermGroupServiceImpl implements ISysPermGroupService {
 
     private final SysPermGroupMapper sysPermGroupMapper;
-    private final SysPermGroupConverter sysPermGroupConverter;
 
     /**
      * 获取权限组列表
@@ -55,7 +54,7 @@ public class SysPermGroupServiceImpl implements ISysPermGroupService {
         wrapper.orderByAsc(SysPermGroup::getPriority);
 
         Page<SysPermGroup> resultPage = sysPermGroupMapper.selectPage(page, wrapper);
-        List<SysPermGroupVO> voList = sysPermGroupConverter.toVoList(resultPage.getRecords());
+        List<SysPermGroupVO> voList = SysPermGroupConverter.toVoList(resultPage.getRecords());
         
         return PageResult.of(voList,
                 resultPage.getTotal(),
@@ -73,7 +72,7 @@ public class SysPermGroupServiceImpl implements ISysPermGroupService {
         wrapper.eq(SysPermGroup::getStatus, 1)
                 .orderByAsc(SysPermGroup::getPriority);
         List<SysPermGroup> permGroups = sysPermGroupMapper.selectList(wrapper);
-        return sysPermGroupConverter.toVoList(permGroups);
+        return SysPermGroupConverter.toVoList(permGroups);
     }
 
     /**
@@ -83,7 +82,7 @@ public class SysPermGroupServiceImpl implements ISysPermGroupService {
     @Override
     public void addPermGroup(SysPermGroupDTO dto) {
         // DTO转换为PO对象
-        SysPermGroup permGroup = sysPermGroupConverter.toPo(dto);
+        SysPermGroup permGroup = SysPermGroupConverter.toPo(dto);
         // 设置创建人和创建时间
         permGroup.setCreateBy(SecurityUtils.getUserName());
         permGroup.setCreateTime(DateUtils.getNowDate());
@@ -102,7 +101,7 @@ public class SysPermGroupServiceImpl implements ISysPermGroupService {
      */
     @Override
     public void updatePermGroup(SysPermGroupDTO dto) {
-        SysPermGroup permGroup = sysPermGroupConverter.toPo(dto);
+        SysPermGroup permGroup = SysPermGroupConverter.toPo(dto);
         permGroup.setUpdateBy(SecurityUtils.getUserName());
         permGroup.setUpdateTime(DateUtils.getNowDate());
         sysPermGroupMapper.updateById(permGroup);
