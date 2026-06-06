@@ -141,6 +141,10 @@
 
           <!-- 企业微信扫码登录 -->
           <div v-else-if="loginMode === 'wework'" class="wework-qrcode-container">
+            <!-- 标题 -->
+            <h3 class="qrcode-title">企业微信扫码登录</h3>
+
+            <!-- 二维码 -->
             <div class="qrcode-wrapper">
               <div id="wework_qrcode" class="qrcode-box"></div>
               <div v-if="qrcodeLoading" class="qrcode-loading">
@@ -148,8 +152,9 @@
                 <p>加载中...</p>
               </div>
             </div>
-            <p class="qrcode-tip">请使用企业微信扫码登录</p>
-            <ElButton text type="primary" @click="switchToPasswordLogin" class="mt-4">
+
+            <!-- 返回按钮 -->
+            <ElButton text type="primary" @click="switchToPasswordLogin" class="back-btn">
               <ElIcon><ArrowLeft /></ElIcon>
               返回账号密码登录
             </ElButton>
@@ -429,6 +434,15 @@
     try {
       const redirectUri = encodeURIComponent(config.redirectUri)
 
+      // 使用 data URL 方式内联 CSS
+      const customStyle = `
+        .impowerBox .title { display: none !important; }
+        .impowerBox .info { display: none !important; }
+        .impowerBox .status { display: none !important; }
+        .impowerBox .qrcode { margin-top: 0 !important; }
+      `
+      const styleDataUrl = `data:text/css;base64,${btoa(encodeURIComponent(customStyle).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode(parseInt(p1, 16))))}`
+
       // 动态加载企业微信 JS-SDK
       loadWeWorkScript().then(() => {
         // @ts-ignore
@@ -440,7 +454,7 @@
             agentid: config.agentId,
             redirect_uri: redirectUri,
             state: config.state,
-            href: '', // 可以自定义样式
+            href: styleDataUrl, // 自定义样式
             lang: 'zh'
           })
 
@@ -627,24 +641,32 @@
   }
 
   // 企业微信扫码登录样式
+  // 企业微信扫码登录样式
   .wework-qrcode-container {
-    margin-top: 25px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 400px;
+    padding: 20px;
+    min-height: 500px;
 
+    // 标题
+    .qrcode-title {
+      margin: 0 0 20px 0;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--el-text-color-primary);
+    }
+
+    // 二维码容器
     .qrcode-wrapper {
       position: relative;
       width: 300px;
-      height: 300px;
+      height: 380px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid var(--art-border-color);
-      border-radius: 8px;
-      background: #fff;
+      margin-bottom: 20px;
+      overflow: hidden;
 
       .qrcode-box {
         width: 100%;
@@ -652,6 +674,31 @@
         display: flex;
         align-items: center;
         justify-content: center;
+
+        // 让企业微信的 iframe 完全显示
+        :deep(iframe) {
+          width: 100%;
+          height: 100%;
+          border: none;
+        }
+
+        // 隐藏企业微信二维码中的标题和应用名称
+        :deep(.impowerBox) {
+          .title {
+            display: none !important;
+          }
+          .info {
+            display: none !important;
+          }
+        }
+
+        // 另一种可能的选择器
+        :deep(.qrcode) {
+          .title,
+          .status {
+            display: none !important;
+          }
+        }
       }
 
       .qrcode-loading {
@@ -680,10 +727,10 @@
       }
     }
 
-    .qrcode-tip {
+    // 返回按钮
+    .back-btn {
       margin-top: 20px;
       font-size: 14px;
-      color: var(--el-text-color-regular);
     }
   }
 </style>
