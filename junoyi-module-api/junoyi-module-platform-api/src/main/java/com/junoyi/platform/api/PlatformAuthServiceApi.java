@@ -1,5 +1,6 @@
 package com.junoyi.platform.api;
 
+import com.junoyi.platform.domain.OauthConfig;
 import com.junoyi.platform.enums.ThirdPlatformType;
 
 /**
@@ -16,4 +17,11 @@ public interface PlatformAuthServiceApi {
      * @return 扫描登录地址URL
      */
     String getQrLoginUrl(ThirdPlatformType thirdPlatformType, String state);
+
+    /**
+     * 获取第三方平台的Oauth配置
+     * @param thirdPlatformType 平台类型
+     * @return Oauth配置
+     */
+    OauthConfig getOauthConfig(ThirdPlatformType thirdPlatformType);
 }

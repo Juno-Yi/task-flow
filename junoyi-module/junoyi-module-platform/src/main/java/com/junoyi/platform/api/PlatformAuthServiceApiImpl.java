@@ -1,5 +1,6 @@
 package com.junoyi.platform.api;
 
+import com.junoyi.platform.domain.OauthConfig;
 import com.junoyi.platform.enums.ThirdPlatformType;
 import com.junoyi.platform.factory.PlatformAuthFactory;
 import com.junoyi.platform.service.PlatformAuthService;
@@ -29,4 +30,13 @@ public class PlatformAuthServiceApiImpl implements PlatformAuthServiceApi {
         return platformAuthFactory.get(thirdPlatformType).getAuthorizeUrl(state);
     }
 
+    /**
+     * 获取第三方平台的Oauth配置
+     * @param thirdPlatformType 平台类型
+     * @return Oauth配置
+     */
+    @Override
+    public OauthConfig getOauthConfig(ThirdPlatformType thirdPlatformType) {
+        return platformAuthFactory.get(thirdPlatformType).getOauthConfig();
+    }
 }

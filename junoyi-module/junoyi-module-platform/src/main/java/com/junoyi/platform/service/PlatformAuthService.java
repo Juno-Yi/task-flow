@@ -1,6 +1,7 @@
 package com.junoyi.platform.service;
 
 
+import com.junoyi.platform.domain.OauthConfig;
 import com.junoyi.platform.enums.ThirdPlatformType;
 
 /**
@@ -22,4 +23,10 @@ public interface PlatformAuthService {
      * @return 授权地址
      */
     String getAuthorizeUrl(String state);
+
+    /**
+     * 获取该平台的Oauth配置
+     * @return Oauth配置
+     */
+    OauthConfig getOauthConfig();
 }

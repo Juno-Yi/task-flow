@@ -1,6 +1,8 @@
 package com.junoyi.platform.service.impl;
 
 import com.junoyi.platform.client.WeWorkClient;
+import com.junoyi.platform.domain.OauthConfig;
+import com.junoyi.platform.domain.WeWorkOauthConfig;
 import com.junoyi.platform.enums.ThirdPlatformType;
 import com.junoyi.platform.service.PlatformAuthService;
 import lombok.RequiredArgsConstructor;
@@ -42,5 +44,18 @@ public class WeWorkAuthServiceImpl implements PlatformAuthService {
                 urlEncode(weWorkClient.getRedirectUrl()),
                 state
         );
+    }
+
+    /**
+     * 获取该平台的Oauth配置
+     * @return Oauth配置
+     */
+    @Override
+    public OauthConfig getOauthConfig() {
+        WeWorkOauthConfig weWorkOauthConfig = new WeWorkOauthConfig();
+        weWorkOauthConfig.setCorpId(weWorkClient.getCorpId());
+        weWorkOauthConfig.setAgentId(weWorkClient.getAgentId());
+        weWorkOauthConfig.setRedirectUrl(weWorkClient.getRedirectUrl());
+        return weWorkOauthConfig;
     }
 }

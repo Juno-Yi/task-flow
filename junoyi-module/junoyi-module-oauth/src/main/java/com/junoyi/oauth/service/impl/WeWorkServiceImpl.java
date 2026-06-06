@@ -15,6 +15,7 @@ import com.junoyi.oauth.domain.vo.WeWorkConfigVO;
 import com.junoyi.oauth.enums.ThirdAuthType;
 import com.junoyi.oauth.service.IWeWorkService;
 import com.junoyi.platform.api.PlatformAuthServiceApi;
+import com.junoyi.platform.domain.WeWorkOauthConfig;
 import com.junoyi.platform.enums.ThirdPlatformType;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.po.SysUserThirdAuth;
@@ -82,27 +83,22 @@ public class WeWorkServiceImpl implements IWeWorkService {
      */
     @Override
     public WeWorkConfigVO getLoginConfig() {
-//        try {
-//            log.info("企业微信配置", "获取登录配置: corpId={}, agentId={}",
-//                    weWorkProperties.getCorpId(),
-//                    weWorkProperties.getAgentId());
-//
-//            weWorkProperties.validateRedirectUri();
-//
-//             生成随机 state 用于防止 CSRF 攻击
-//            String state = UUID.randomUUID().toString().replace("-", "");
-//
-//            return WeWorkConfigVO.builder()
-//                    .corpId(weWorkProperties.getCorpId())
-//                    .agentId(String.valueOf(weWorkProperties.getAgentId()))
-//                    .redirectUri(weWorkProperties.getRedirectUri())
-//                    .state(state)
-//                    .build();
-//        } catch (Exception e) {
-//            log.error("企业微信配置", "获取登录配置失败: {}", e.getMessage(), e);
-//            throw new RuntimeException("获取登录配置失败: " + e.getMessage(), e);
-//        }
-        return null;
+        try {
+             // 生成随机 state 用于防止 CSRF 攻击
+            String state = UUID.randomUUID().toString().replace("-", "");
+
+            WeWorkOauthConfig weWorkOauthConfig = (WeWorkOauthConfig) platformAuthServiceApi.getOauthConfig(ThirdPlatformType.WEWORK);
+
+            return WeWorkConfigVO.builder()
+                    .corpId(weWorkOauthConfig.getCorpId())
+                    .agentId(String.valueOf(weWorkOauthConfig.getAgentId()))
+                    .redirectUri(weWorkOauthConfig.getRedirectUrl())
+                    .state(state)
+                    .build();
+        } catch (Exception e) {
+            log.error("企业微信配置", "获取登录配置失败: {}", e.getMessage(), e);
+            throw new RuntimeException("获取登录配置失败: " + e.getMessage(), e);
+        }
     }
 
 
