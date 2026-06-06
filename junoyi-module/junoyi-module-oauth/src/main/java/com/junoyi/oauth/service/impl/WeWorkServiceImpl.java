@@ -59,7 +59,8 @@ public class WeWorkServiceImpl implements IWeWorkService {
         try {
 
             // 生成随机 state 用于防止 CSRF 攻击
-            String state = UUID.randomUUID().toString().replace("-", "");
+            String random = UUID.randomUUID().toString().replace("-", "");
+            String state = "WEWORK:" + random;
             String authUrl = platformAuthServiceApi.getQrLoginUrl(ThirdPlatformType.WEWORK,state);
 
             log.info("企业微信授权", "生成授权URL: {}", authUrl);
@@ -84,9 +85,9 @@ public class WeWorkServiceImpl implements IWeWorkService {
     @Override
     public WeWorkConfigVO getLoginConfig() {
         try {
-             // 生成随机 state 用于防止 CSRF 攻击
-            String state = UUID.randomUUID().toString().replace("-", "");
-
+            // 生成随机 state 用于防止 CSRF 攻击
+            String random = UUID.randomUUID().toString().replace("-", "");
+            String state = "WEWORK:" + random;
             WeWorkOauthConfig weWorkOauthConfig = (WeWorkOauthConfig) platformAuthServiceApi.getOauthConfig(ThirdPlatformType.WEWORK);
 
             return WeWorkConfigVO.builder()

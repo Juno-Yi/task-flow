@@ -269,7 +269,7 @@ junoyi:
     # 应用Secret
     secret: aKK3E-vUDUpjFWNES54YQUG2HVndZ1-iT5JcmSwR8aw
     # OAuth回调地址
-    redirect-url: https://web.dev-platform.junoyi.com/#/auth/wework/callback
+    redirect-url: https://web.dev-platform.junoyi.com/#/auth/callback
     # token 存储方式：memory / redis
     token-store-type: redis
     # Redis 中的 key 前缀

@@ -502,11 +502,28 @@
 
   // 检查企业微信回调
   const checkWeWorkCallback = () => {
-    const urlParams = new URLSearchParams(window.location.search)
+    // 支持 hash 路由模式，从 hash 中提取参数
+    const hash = window.location.hash
+    let searchString = ''
+
+    // 从 hash 中提取查询字符串
+    if (hash.includes('?')) {
+      searchString = hash.split('?')[1] || ''
+    }
+
+    // 如果 hash 中没有参数，则尝试从 window.location.search 获取（非 hash 模式）
+    if (!searchString) {
+      searchString = window.location.search.substring(1)
+    }
+
+    const urlParams = new URLSearchParams(searchString)
     const code = urlParams.get('code')
     const state = urlParams.get('state')
 
+    console.log('[WeWork] 检查回调参数:', { code, state, hash, searchString })
+
     if (code && state) {
+      console.log('[WeWork] 检测到回调参数，开始处理登录')
       handleWeWorkCallback(code)
     }
   }
@@ -515,7 +532,10 @@
   const handleWeWorkCallback = async (code: string) => {
     try {
       loading.value = true
+      console.log('[WeWork] 开始处理回调，code:', code)
+
       const response = await fetchWeWorkCallback(code)
+      console.log('[WeWork] 回调响应:', response)
 
       if (response.accessToken) {
         // 直接登录成功
@@ -529,31 +549,53 @@
         await nextTick()
         showLoginSuccessNotice(userInfo.nickName)
 
-        // 清除 URL 参数
-        window.history.replaceState({}, '', window.location.pathname)
+        // 清除 URL 中的回调参数（支持 hash 路由）
+        const hash = window.location.hash
+        if (hash.includes('?')) {
+          // 移除查询参数，只保留路径
+          const cleanHash = hash.split('?')[0]
+          window.history.replaceState({}, '', window.location.pathname + cleanHash)
+        }
 
         // 跳转
         const redirect = route.query.redirect as string
+        console.log('[WeWork] 登录成功，准备跳转到:', redirect || '/')
         router.push(redirect || '/')
       } else if (response.needBind) {
         // 需要绑定账号
+        console.log('[WeWork] 需要绑定账号')
         ElNotification({
           title: '提示',
           message: '该企业微信账号未绑定，请先绑定账号',
           type: 'warning',
           duration: 3000
         })
+
+        // 清除 URL 中的回调参数
+        const hash = window.location.hash
+        if (hash.includes('?')) {
+          const cleanHash = hash.split('?')[0]
+          window.history.replaceState({}, '', window.location.pathname + cleanHash)
+        }
+
         // TODO: 跳转到绑定页面或显示绑定表单
         // 这里可以保存 code 和 weWorkUserId，然后切换到绑定模式
       }
     } catch (error) {
-      console.error('企业微信登录失败:', error)
+      console.error('[WeWork] 企业微信登录失败:', error)
       ElNotification({
         title: '登录失败',
         message: '企业微信登录失败，请重试',
         type: 'error',
         duration: 3000
       })
+
+      // 清除 URL 中的回调参数
+      const hash = window.location.hash
+      if (hash.includes('?')) {
+        const cleanHash = hash.split('?')[0]
+        window.history.replaceState({}, '', window.location.pathname + cleanHash)
+      }
     } finally {
       loading.value = false
     }
