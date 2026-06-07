@@ -1,11 +1,14 @@
 package com.junoyi.platform.service.impl;
 
 import com.junoyi.platform.client.WeWorkClient;
+import com.junoyi.platform.domain.OAuthUserInfo;
 import com.junoyi.platform.domain.OauthConfig;
 import com.junoyi.platform.domain.WeWorkOauthConfig;
 import com.junoyi.platform.enums.ThirdPlatformType;
 import com.junoyi.platform.service.PlatformAuthService;
 import lombok.RequiredArgsConstructor;
+import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.cp.bean.WxCpOauth2UserInfo;
 import org.springframework.stereotype.Service;
 
 import static com.junoyi.framework.core.utils.ServletUtils.urlEncode;
@@ -57,5 +60,23 @@ public class WeWorkAuthServiceImpl implements PlatformAuthService {
         weWorkOauthConfig.setAgentId(weWorkClient.getAgentId());
         weWorkOauthConfig.setRedirectUrl(weWorkClient.getRedirectUrl());
         return weWorkOauthConfig;
+    }
+
+    /**
+     * 获取该平台的Oauth用户唯一标识
+     * @param code code授权码
+     * @return OauthUserInfo
+     */
+    @Override
+    public OAuthUserInfo getOauthUserInfo(String code) {
+        OAuthUserInfo oAuthUserInfo = new OAuthUserInfo();
+        oAuthUserInfo.setPlatformType(ThirdPlatformType.WEWORK);
+        try {
+            WxCpOauth2UserInfo wxCpOauth2UserInfo = weWorkClient.getOauthUserInfo(code);
+            oAuthUserInfo.setPlatformUserId(wxCpOauth2UserInfo.getUserId());
+        } catch (WxErrorException e) {
+            throw new RuntimeException(e);
+        }
+        return oAuthUserInfo;
     }
 }

@@ -275,7 +275,7 @@ defineOptions({ name: 'Login' })
 
 const { t, locale } = useI18n()
 const formKey = ref(0)
-const activeTab = ref('wework') // 默认显示企业微信登录
+const activeTab = ref('account') // 默认显示账号密码登录
 
 // 监听语言切换，重置表单
 watch(locale, () => {

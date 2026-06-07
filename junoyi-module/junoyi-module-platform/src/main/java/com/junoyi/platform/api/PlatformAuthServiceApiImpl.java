@@ -49,6 +49,6 @@ public class PlatformAuthServiceApiImpl implements PlatformAuthServiceApi {
      */
     @Override
     public OAuthUserInfo getOauthUserInfo(ThirdPlatformType thirdPlatformType, String code) {
-        return null;
+        return platformAuthFactory.get(thirdPlatformType).getOauthUserInfo(code);
     }
 }

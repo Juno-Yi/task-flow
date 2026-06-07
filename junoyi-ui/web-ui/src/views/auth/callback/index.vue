@@ -59,6 +59,9 @@
   const handlerWeWorkCallBack = async (code: string) => {
     const data = await fetchWeWorkCallback(code)
 
+    if (data == null)
+      throw Error("企业微信登录回调异常")
+
     // 是否需要绑定账号
     if (data.needBind){
       // 携带参数跳转绑定账号页面

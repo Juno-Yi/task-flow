@@ -1,25 +1,27 @@
 package com.junoyi.system.domain.po;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.junoyi.framework.core.domain.base.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
 /**
- * 用户第三方登录绑定表
+ * 系统用户第三方登录绑定
  *
- * @author JunoYi
+ * @author Fan
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("sys_user_third_auth")
-public class SysUserThirdAuth {
+public class SysUserThirdAuth extends BaseEntity {
 
     /**
      * 主键ID
      */
-    @TableId(type = IdType.AUTO)
+    @TableId
     private Long id;
 
     /**
@@ -28,53 +30,13 @@ public class SysUserThirdAuth {
     private Long userId;
 
     /**
-     * 登录类型（github、gitee、wework、feishu、dingtalk）
+     * 第三方登录类型
      */
     private String authType;
 
     /**
-     * 平台唯一标识符
+     * 第三方平台唯一标识符
      */
     private String authKey;
 
-    /**
-     * 第三方平台访问令牌
-     */
-    private String accessToken;
-
-    /**
-     * 第三方平台刷新令牌
-     */
-    private String refreshToken;
-
-    /**
-     * 令牌过期时间
-     */
-    private Date tokenExpireTime;
-
-    /**
-     * 创建者
-     */
-    private String createBy;
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新者
-     */
-    private String updateBy;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
-
-    /**
-     * 备注
-     */
-    private String remark;
 }
-

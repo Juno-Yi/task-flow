@@ -119,12 +119,16 @@ public class WeWorkServiceImpl implements IWeWorkService {
             // 通过code获取用户信息
             OAuthUserInfo oauthUserInfo = platformAuthServiceApi.getOauthUserInfo(ThirdPlatformType.WEWORK, code);
 
+
             // 判断一下获取的OauthUserInfo是否是企业微信平台的
             if (oauthUserInfo.getPlatformType() != ThirdPlatformType.WEWORK)
                 throw new LoginException("非法平台");
 
             // 获取企业微信用户唯一标识符
             String weworkUserId = oauthUserInfo.getPlatformUserId();
+
+            log.info("测试","企业微信唯一标识符：" + weworkUserId);
+
 
             // 根据企业微信userId查找系统用户
             SysUser user = findUserByWeWorkUserId(weworkUserId);
