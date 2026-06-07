@@ -71,6 +71,17 @@ public class WeWorkOAuthController extends BaseController {
     }
 
     /**
+     * 企业微信OAuth回调处理
+     *
+     */
+    @GetMapping("/callback")
+    public R<AuthVO> callback(@RequestParam("code") String code) {
+        log.info("企业微信回调", "收到授权码: code={}", code);
+        AuthVO authVO = weWorkService.handleCallback(code);
+        return R.ok(authVO);
+    }
+
+    /**
      * 绑定企业微信账号
      *
      * @param username 系统用户名

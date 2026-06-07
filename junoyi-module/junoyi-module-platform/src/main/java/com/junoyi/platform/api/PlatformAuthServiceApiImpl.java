@@ -1,5 +1,6 @@
 package com.junoyi.platform.api;
 
+import com.junoyi.platform.domain.OAuthUserInfo;
 import com.junoyi.platform.domain.OauthConfig;
 import com.junoyi.platform.enums.ThirdPlatformType;
 import com.junoyi.platform.factory.PlatformAuthFactory;
@@ -38,5 +39,16 @@ public class PlatformAuthServiceApiImpl implements PlatformAuthServiceApi {
     @Override
     public OauthConfig getOauthConfig(ThirdPlatformType thirdPlatformType) {
         return platformAuthFactory.get(thirdPlatformType).getOauthConfig();
+    }
+
+    /**
+     * 通过 code 获取该平台用户信息
+     * @param thirdPlatformType 平台类型
+     * @param code 授权码
+     * @return 用户信息
+     */
+    @Override
+    public OAuthUserInfo getOauthUserInfo(ThirdPlatformType thirdPlatformType, String code) {
+        return null;
     }
 }
