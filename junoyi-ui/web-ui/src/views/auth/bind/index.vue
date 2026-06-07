@@ -10,6 +10,7 @@
       <div class="center-form-card">
         <div class="form">
           <h4 class="title">账号绑定</h4>
+          <p class="sub-title">未绑定过任何账号，请先登录并绑定！</p>
           <ElForm
               ref="formRef"
               :model="formData"
@@ -109,6 +110,7 @@
       <div class="auth-right-wrap" :class="{ 'animate-left': authLayout === 'right-left' }">
         <div class="form">
           <h4 class="title">账号绑定</h4>
+          <p class="sub-title">未绑定过任何账号，请先登录并绑定！</p>
           <!-- 账号密码登录 Tab -->
           <ElForm
               ref="formRef"
