@@ -240,18 +240,18 @@ public class WeWorkServiceImpl implements IWeWorkService {
      */
     @Override
     public AuthVO bindAccount(BindOauthParamsDTO dto) {
-        // 1. 验证用户并获取用户信息
+        // 验证用户并获取用户信息
         SysUser user = validateAndGetUser(dto);
 
-        // 2. 从缓存中获取OAuth绑定信息
+        // 从缓存中获取OAuth绑定信息
         OauthBindCacheDTO bindCacheDTO = getBindCacheDTO(dto.getCode());
 
-        // 3. 验证平台类型
+        // 验证平台类型
         validatePlatformType(bindCacheDTO);
 
         String weWorkUserId = bindCacheDTO.getPlatformUserId();
 
-        // 4. 删除缓存
+        // 删除缓存
         String cacheKey = "oauth:bind:" + dto.getCode();
         RedisUtils.deleteObject(cacheKey);
         log.info("OAuth绑定", "已删除缓存: cacheKey={}", cacheKey);
@@ -259,10 +259,10 @@ public class WeWorkServiceImpl implements IWeWorkService {
         log.info("企业微信绑定", "用户{}准备绑定企业微信账号: platformType={}, platformUserId={}",
                 dto.getUsername(), bindCacheDTO.getPlatformType(), weWorkUserId);
 
-        // 5. 检查并创建绑定关系
+        // 检查并创建绑定关系
         checkAndBindAccount(user.getUserId(), weWorkUserId);
 
-        // 6. 执行登录流程
+        // 执行登录流程
         return performLogin(user);
     }
 
