@@ -369,7 +369,11 @@ const initWeWorkLogin = async () => {
       return
     }
 
-    console.log('企业微信配置:', config)
+    // 暂存 state，在回调时候识别
+    sessionStorage.setItem(
+        'oauth_state',
+        config.state
+    )
 
     // 根据布局选择不同的容器ID
     const containerId = authLayout.value === 'center' ? '#wework-qrcode-center' : '#wework-qrcode-side'
@@ -408,7 +412,7 @@ const initWeWorkLogin = async () => {
         console.log('企业微信登录成功，code:', code)
         // 跳转到回调页面处理登录
         router.push({
-          name: 'CallBack',
+          name: 'Callback',
           query: { code }
         })
       },
