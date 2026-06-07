@@ -402,13 +402,13 @@ const initWeWorkLogin = async () => {
         agentid: config.agentId,
         redirect_uri: config.redirectUri,
         state: config.state,
-        redirect_type: 'callback' as any
+        redirect_type: 'callback' as any,
       },
       onLoginSuccess: ({ code }: { code: string }) => {
         console.log('企业微信登录成功，code:', code)
         // 跳转到回调页面处理登录
         router.push({
-          name: 'WeWorkCallback',
+          name: 'CallBack',
           query: { code }
         })
       },
