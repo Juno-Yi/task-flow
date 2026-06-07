@@ -137,13 +137,6 @@
 
           <!-- Tab 切换 -->
           <ElTabs v-model="activeTab" class="login-tabs" @tab-change="handleTabChange">
-            <!-- 企业微信登录 Tab -->
-            <ElTabPane label="企业微信登录" name="wework">
-              <div class="wework-login-container">
-                <div id="wework-qrcode-side" class="wework-qrcode"></div>
-              </div>
-            </ElTabPane>
-
             <!-- 账号密码登录 Tab -->
             <ElTabPane label="账号登录" name="account">
               <ElForm
@@ -171,7 +164,6 @@
                       show-password
                   />
                 </ElFormItem>
-
                 <!-- 验证码 -->
                 <ElFormItem prop="code">
                   <div class="flex w-full gap-3">
@@ -200,7 +192,6 @@
                     </div>
                   </div>
                 </ElFormItem>
-
                 <div class="flex-cb mt-2 text-sm">
                   <ElCheckbox v-model="formData.rememberPassword">{{
                       $t('login.rememberPwd')
@@ -209,7 +200,6 @@
                       $t('login.forgetPwd')
                     }}</RouterLink>
                 </div>
-
                 <div style="margin-top: 30px">
                   <ElButton
                       class="w-full custom-height"
@@ -221,7 +211,6 @@
                     {{ $t('login.btnText') }}
                   </ElButton>
                 </div>
-
                 <div class="mt-5 text-sm text-gray-600 text-center">
                   <span>{{ $t('login.noAccount') }}</span>
                   <RouterLink class="text-theme" :to="{ name: 'Register' }">{{
@@ -230,6 +219,25 @@
                 </div>
               </ElForm>
             </ElTabPane>
+
+            <!-- 企业微信登录 Tab -->
+            <ElTabPane label="企业微信登录" name="wework">
+              <div class="wework-login-container">
+                <div id="wework-qrcode-side" class="wework-qrcode"></div>
+              </div>
+            </ElTabPane>
+
+            <!--    飞书登录 Tab   -->
+            <ElTabPane label="飞书登录" name="feishu">
+
+            </ElTabPane>
+
+            <!--    钉钉登录 Tab   -->
+            <ElTabPane label="钉钉登录" name="dingtalk">
+
+            </ElTabPane>
+
+
           </ElTabs>
         </div>
       </div>
