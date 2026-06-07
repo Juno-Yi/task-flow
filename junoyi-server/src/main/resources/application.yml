@@ -318,7 +318,7 @@ junoyi:
       - /auth/login
       - /auth/register
       - /auth/refresh
-      - /auth/**
+      - /auth/wework/**
       - /system/info/**
       - /captcha/**
       - /auth/captcha/config
