@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import type { Router } from 'vue-router';
 import routes from './routes';
-import { useUserStore } from '@/store/modules/user';
 
 const router: Router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,13 +11,15 @@ const router: Router = createRouter({
 const whiteList = ['/login', '/auth/callback', '/auth/bind'];
 
 router.beforeEach(async (to, _from, next) => {
-  const userStore = useUserStore();
-
   // 在白名单中，直接放行
   if (whiteList.includes(to.path)) {
     next();
     return;
   }
+
+  // 动态导入 store，避免循环依赖和初始化顺序问题
+  const { useUserStore } = await import('@/store/modules/user');
+  const userStore = useUserStore();
 
   // 检查是否登录（有 accessToken）
   if (!userStore.accessToken || !userStore.isLogin) {
