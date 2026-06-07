@@ -15,13 +15,7 @@
 
           <!-- Tab 切换 -->
           <ElTabs v-model="activeTab" class="login-tabs" @tab-change="handleTabChange">
-            <!-- 企业微信登录 Tab -->
-            <ElTabPane label="企业微信" name="wework">
-              <div class="wework-login-container">
-                <div id="wework-qrcode-center" class="wework-qrcode"></div>
-                <p class="wework-tip">请使用企业微信扫码登录</p>
-              </div>
-            </ElTabPane>
+
 
             <!-- 账号密码登录 Tab -->
             <ElTabPane label="账号登录" name="account">
@@ -109,6 +103,25 @@
                 </div>
               </ElForm>
             </ElTabPane>
+
+            <!-- 企业微信登录 Tab -->
+            <ElTabPane label="企业微信" name="wework">
+              <div class="wework-login-container">
+                <div id="wework-qrcode-center" class="wework-qrcode"></div>
+                <p class="wework-tip">请使用企业微信扫码登录</p>
+              </div>
+            </ElTabPane>
+
+            <!--    飞书登录 Tab   -->
+            <ElTabPane label="飞书登录" name="feishu">
+
+            </ElTabPane>
+
+            <!--    钉钉登录 Tab   -->
+            <ElTabPane label="钉钉登录" name="dingtalk">
+
+            </ElTabPane>
+
           </ElTabs>
         </div>
       </div>
