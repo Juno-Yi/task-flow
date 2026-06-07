@@ -59,20 +59,22 @@ export function fetchWeWorkCallback(code: string) {
 }
 
 /**
+ * 绑定企业微信账号参数
+ */
+export interface BindWeWorkAccountParams {
+  username: string
+  password: string
+  code: string
+  captchaId: string
+  captchaCode: string
+}
+
+/**
  * 绑定企业微信账号
  */
-export function fetchBindWeWorkAccount(username: string, password: string, code: string) {
-  // 使用 URLSearchParams 构造表单数据
-  const formData = new URLSearchParams()
-  formData.append('username', username)
-  formData.append('password', password)
-  formData.append('code', code)
-
+export function fetchBindWeWorkAccount(params: BindWeWorkAccountParams) {
   return request.post<WeWorkLoginResponse>({
     url: '/auth/wework/bind',
-    data: formData,
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
+    params
   })
 }

@@ -1,5 +1,6 @@
 package com.junoyi.oauth.service;
 
+import com.junoyi.oauth.domain.dto.BindOauthParamsDTO;
 import com.junoyi.oauth.domain.vo.ThirdAuthUrlVO;
 import com.junoyi.oauth.domain.vo.WeWorkConfigVO;
 import com.junoyi.system.domain.vo.AuthVO;
@@ -35,12 +36,9 @@ public interface IWeWorkService {
 
     /**
      * 绑定企业微信账号
-     *
-     * @param username 系统用户名
-     * @param password 系统密码
-     * @param bindToken 绑定令牌（从回调接口获取）
+     * @param dto 绑定并登录数据
      * @return 认证信息
      */
-    AuthVO bindAccount(String username, String password, String bindToken);
+    AuthVO bindAccount(BindOauthParamsDTO dto);
 
 }
