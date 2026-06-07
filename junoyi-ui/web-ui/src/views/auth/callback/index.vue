@@ -78,7 +78,7 @@
       setTimeout(() => {
         router.push({
           name: 'Bind',
-          query: { code: data.code }
+          query: { code: data.code, type: 'wework' }
         })
       }, 1500)
       return

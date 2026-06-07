@@ -202,20 +202,20 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount } from 'vue'
 import AppConfig from '@/config'
 import { useUserStore } from '@/store/modules/user'
 import { useSettingStore } from '@/store/modules/setting'
 import { useI18n } from 'vue-i18n'
 import { HttpError } from '@/utils/http/error'
 import { fetchLogin, fetchGetCaptcha, fetchGetUserInfo } from '@/api/auth'
-import { fetchGetWeWorkLoginConfig } from '@/api/oauth/wework'
+import { fetchBindWeWorkAccount, type BindWeWorkAccountParams } from '@/api/oauth/wework'
+import { fetchBindFeishuAccount, type BindFeishuAccountParams } from '@/api/oauth/feishu'
+import { fetchBindDingtalkAccount, type BindDingtalkAccountParams } from '@/api/oauth/dingtalk'
 import { fetchGetSystemInfo, type SystemInfo } from '@/api/system/info'
 import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
 import LoginBackgroundCenter from '@/components/core/views/login/LoginBackgroundCenter.vue'
 import AuthTopBar from '@/components/core/views/login/AuthTopBar.vue'
-// @ts-ignore
-import * as ww from '@wecom/jssdk'
+import {useRoute, useRouter} from "vue-router";
 
 defineOptions({ name: 'Login' })
 
@@ -244,13 +244,17 @@ const captchaLoading = ref(false)
 // 系统信息
 const systemInfo = ref<SystemInfo | null>(null)
 
-// 是否自动填充登录信息
-const autoFillLogin = import.meta.env.VITE_AUTO_FILL_LOGIN === 'true'
+// 绑定信息code
+const code = ref('')
+// 绑定的平台类型
+const type = ref('')
+
 
 const formData = reactive({
   captchaId: '',
-  username: autoFillLogin ? 'super_admin' : '',
-  password: autoFillLogin ? 'admin123' : '',
+  username: '',
+  password: '',
+  captchaCode: '',
   code: '',
   rememberPassword: true
 })
@@ -262,11 +266,12 @@ const rules = computed<FormRules>(() => ({
 }))
 
 const loading = ref(false)
-const weWorkLoading = ref(false)
-const isInitializingWeWork = ref(false)
-let wwLoginPanel: any = null
 
 onMounted(() => {
+  code.value = route.query.code as string
+  type.value = route.query.type as string
+
+  // console.log(`调试：code=${code.value} type=${type.value}`)
   getCaptchaImage()
   getSystemInfo()
 })
@@ -306,15 +311,74 @@ const handleSubmit = async () => {
 
     loading.value = true
 
-    // 登录请求
-    const { username, password, code, captchaId } = formData
+    const { username, password, code: captchaCode, captchaId } = formData
 
-    const { accessToken, refreshToken } = await fetchLogin({
-      captchaId,
-      username,
-      password,
-      code
-    })
+    let accessToken = ''
+    let refreshToken = ''
+
+    // 根据 type 类型调用不同的绑定接口
+    if (type.value) {
+      // 第三方账号绑定
+      switch (type.value) {
+        case 'wework': {
+          // 企业微信绑定
+          const bindParams: BindWeWorkAccountParams = {
+            username,
+            password,
+            code: code.value, // OAuth code
+            captchaId,
+            captchaCode
+          }
+          const weworkRes = await fetchBindWeWorkAccount(bindParams)
+          accessToken = weworkRes.accessToken || ''
+          refreshToken = weworkRes.refreshToken || ''
+          break
+        }
+
+        case 'feishu': {
+          // 飞书绑定
+          const bindParams: BindFeishuAccountParams = {
+            username,
+            password,
+            code: code.value, // OAuth code
+            captchaId,
+            captchaCode
+          }
+          const feishuRes = await fetchBindFeishuAccount(bindParams)
+          accessToken = feishuRes.accessToken || ''
+          refreshToken = feishuRes.refreshToken || ''
+          break
+        }
+
+        case 'dingtalk': {
+          // 钉钉绑定
+          const bindParams: BindDingtalkAccountParams = {
+            username,
+            password,
+            code: code.value, // OAuth code
+            captchaId,
+            captchaCode
+          }
+          const dingtalkRes = await fetchBindDingtalkAccount(bindParams)
+          accessToken = dingtalkRes.accessToken || ''
+          refreshToken = dingtalkRes.refreshToken || ''
+          break
+        }
+
+        default:
+          throw new Error(`不支持的绑定类型: ${type.value}`)
+      }
+    } else {
+      // 普通登录（无绑定）
+      const loginRes = await fetchLogin({
+        captchaId,
+        username,
+        password,
+        code: captchaCode
+      })
+      accessToken = loginRes.accessToken
+      refreshToken = loginRes.refreshToken
+    }
 
     // 验证token
     if (!accessToken) {
@@ -329,11 +393,11 @@ const handleSubmit = async () => {
     const userInfo = await fetchGetUserInfo()
     userStore.setUserInfo(userInfo)
 
-    // 等待 Vue 响应式系统更新完成
-    await nextTick()
-
     // 登录成功处理
-    showLoginSuccessNotice(userInfo.nickName)
+    const successMessage = type.value
+      ? `${getPlatformName(type.value)}账号绑定成功`
+      : '登录成功'
+    showLoginSuccessNotice(userInfo.nickName, successMessage)
 
     // 获取 redirect 参数，如果存在则跳转到指定页面，否则跳转到首页
     const redirect = route.query.redirect as string
@@ -353,15 +417,25 @@ const handleSubmit = async () => {
   }
 }
 
+// 获取平台名称
+const getPlatformName = (platformType: string): string => {
+  const platformNames: Record<string, string> = {
+    wework: '企业微信',
+    feishu: '飞书',
+    dingtalk: '钉钉'
+  }
+  return platformNames[platformType] || platformType
+}
+
 // 登录成功提示
-const showLoginSuccessNotice = (nickName: string) => {
+const showLoginSuccessNotice = (nickName: string, message?: string) => {
   setTimeout(() => {
     ElNotification({
-      title: t('login.success.title'),
+      title: message || t('login.success.title'),
       type: 'success',
       duration: 2500,
       zIndex: 10000,
-      message: `${t('login.success.message')}, ${nickName}!`
+      message: `${message ? '' : t('login.success.message') + ', '}${nickName}!`
     })
   }, 1000)
 }
