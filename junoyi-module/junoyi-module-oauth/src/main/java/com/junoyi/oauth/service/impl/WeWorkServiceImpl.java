@@ -10,6 +10,10 @@ import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.security.exception.LoginException;
 import com.junoyi.framework.security.exception.LoginPasswordWrongException;
 import com.junoyi.framework.security.helper.AuthHelper;
+import com.junoyi.oauth.exception.OauthAccountAlreadyBoundException;
+import com.junoyi.oauth.exception.OauthBindFailedException;
+import com.junoyi.oauth.exception.OauthBindTokenExpiredException;
+import com.junoyi.oauth.exception.OauthPlatformTypeMismatchException;
 import com.junoyi.framework.security.module.LoginUser;
 import com.junoyi.framework.security.module.TokenPair;
 import com.junoyi.framework.security.utils.PasswordUtils;
@@ -236,77 +240,128 @@ public class WeWorkServiceImpl implements IWeWorkService {
      */
     @Override
     public AuthVO bindAccount(BindOauthParamsDTO dto) {
+        // 1. 验证用户并获取用户信息
+        SysUser user = validateAndGetUser(dto);
+
+        // 2. 从缓存中获取OAuth绑定信息
+        OauthBindCacheDTO bindCacheDTO = getBindCacheDTO(dto.getCode());
+
+        // 3. 验证平台类型
+        validatePlatformType(bindCacheDTO);
+
+        String weWorkUserId = bindCacheDTO.getPlatformUserId();
+
+        // 4. 删除缓存
+        String cacheKey = "oauth:bind:" + dto.getCode();
+        RedisUtils.deleteObject(cacheKey);
+        log.info("OAuth绑定", "已删除缓存: cacheKey={}", cacheKey);
+
+        log.info("企业微信绑定", "用户{}准备绑定企业微信账号: platformType={}, platformUserId={}",
+                dto.getUsername(), bindCacheDTO.getPlatformType(), weWorkUserId);
+
+        // 5. 检查并创建绑定关系
+        checkAndBindAccount(user.getUserId(), weWorkUserId);
+
+        // 6. 执行登录流程
+        return performLogin(user);
+    }
+
+    /**
+     * 验证用户并获取用户信息
+     * @param dto 绑定参数
+     * @return 用户信息
+     */
+    private SysUser validateAndGetUser(BindOauthParamsDTO dto) {
+        // 查询用户
+        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysUser::getUserName, dto.getUsername())
+                .eq(SysUser::isDelFlag, false);
+
+        SysUser user = sysUserMapper.selectOne(wrapper);
+
+        if (user == null) {
+            throw new UserNotExistException("用户名或密码错误");
+        }
+
+        // 校验用户状态
+        validateUser(user);
+
+        // 验证密码
+        if (!PasswordUtils.matches(dto.getPassword(), user.getSalt(), user.getPassword())) {
+            throw new LoginPasswordWrongException("用户名或密码错误");
+        }
+
+        return user;
+    }
+
+    /**
+     * 从缓存中获取OAuth绑定信息
+     * @param code 绑定码
+     * @return 绑定缓存信息
+     */
+    private OauthBindCacheDTO getBindCacheDTO(String code) {
+        String cacheKey = "oauth:bind:" + code;
+        log.info("OAuth绑定", "尝试从缓存获取: cacheKey={}", cacheKey);
+
+        OauthBindCacheDTO bindCacheDTO = RedisUtils.getCacheObject(cacheKey);
+        log.info("OAuth绑定", "从缓存获取结果: {}", bindCacheDTO);
+
+        if (bindCacheDTO == null || bindCacheDTO.getPlatformUserId() == null) {
+            log.error("OAuth绑定", "绑定令牌已失效或不存在: bindToken={}, cacheKey={}", code, cacheKey);
+            throw new OauthBindTokenExpiredException("绑定令牌已失效，请重新扫码");
+        }
+
+        return bindCacheDTO;
+    }
+
+    /**
+     * 验证平台类型
+     * @param bindCacheDTO 绑定缓存信息
+     */
+    private void validatePlatformType(OauthBindCacheDTO bindCacheDTO) {
+        if (bindCacheDTO.getPlatformType() != ThirdPlatformType.WEWORK) {
+            log.error("OAuth绑定", "平台类型不匹配: expected=WEWORK, actual={}", bindCacheDTO.getPlatformType());
+            throw new OauthPlatformTypeMismatchException("平台类型不匹配");
+        }
+    }
+
+    /**
+     * 检查并绑定账号
+     * @param userId 用户ID
+     * @param weWorkUserId 企业微信用户ID
+     */
+    private void checkAndBindAccount(Long userId, String weWorkUserId) {
+        // 检查该企业微信账号是否已被其他用户绑定
+        LambdaQueryWrapper<SysUserThirdAuth> checkWrapper = new LambdaQueryWrapper<>();
+        checkWrapper.eq(SysUserThirdAuth::getAuthType, ThirdAuthType.WEWORK.getCode())
+                .eq(SysUserThirdAuth::getAuthKey, weWorkUserId);
+
+        SysUserThirdAuth existingAuth = sysUserThirdAuthMapper.selectOne(checkWrapper);
+
+        if (existingAuth != null && !existingAuth.getUserId().equals(userId)) {
+            throw new OauthAccountAlreadyBoundException("该企业微信账号已被其他用户绑定");
+        }
+
+        // 创建绑定关系（如果不存在）
+        if (existingAuth == null) {
+            SysUserThirdAuth thirdAuth = new SysUserThirdAuth();
+            thirdAuth.setUserId(userId);
+            thirdAuth.setAuthType(ThirdAuthType.WEWORK.getCode());
+            thirdAuth.setAuthKey(weWorkUserId);
+            sysUserThirdAuthMapper.insert(thirdAuth);
+            log.info("企业微信绑定", "创建绑定关系成功: userId={}, weWorkUserId={}", userId, weWorkUserId);
+        } else {
+            log.info("企业微信绑定", "绑定关系已存在: userId={}, weWorkUserId={}", userId, weWorkUserId);
+        }
+    }
+
+    /**
+     * 执行登录流程
+     * @param user 用户信息
+     * @return 认证信息
+     */
+    private AuthVO performLogin(SysUser user) {
         try {
-            // 验证用户名和密码
-            LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysUser::getUserName, dto.getUsername())
-                    .eq(SysUser::isDelFlag, false);
-
-            SysUser user = sysUserMapper.selectOne(wrapper);
-
-            if (user == null) {
-                throw new UserNotExistException("用户名或密码错误");
-            }
-
-            // 校验用户状态
-            validateUser(user);
-
-            // 验证密码
-             if (!PasswordUtils.matches(dto.getPassword(), user.getSalt(), user.getPassword())) {
-                 throw new LoginPasswordWrongException("用户名或密码错误");
-             }
-
-            // 从缓存中获取OAuth绑定信息（包含平台类型和用户ID）
-            String cacheKey = "oauth:bind:" + dto.getCode();
-            log.info("OAuth绑定", "尝试从缓存获取: cacheKey={}", cacheKey);
-
-            OauthBindCacheDTO bindCacheDTO = RedisUtils.getCacheObject(cacheKey);
-            log.info("OAuth绑定", "从缓存获取结果: {}", bindCacheDTO);
-
-            if (bindCacheDTO == null || bindCacheDTO.getPlatformUserId() == null) {
-                log.error("OAuth绑定", "绑定令牌已失效或不存在: bindToken={}, cacheKey={}", dto.getCode(), cacheKey);
-                throw new RuntimeException("绑定令牌已失效，请重新扫码");
-            }
-
-            // 验证平台类型
-            if (bindCacheDTO.getPlatformType() != ThirdPlatformType.WEWORK) {
-                log.error("OAuth绑定", "平台类型不匹配: expected=WEWORK, actual={}", bindCacheDTO.getPlatformType());
-                throw new RuntimeException("平台类型不匹配");
-            }
-
-            String weWorkUserId = bindCacheDTO.getPlatformUserId();
-
-            // 删除缓存
-            RedisUtils.deleteObject(cacheKey);
-            log.info("OAuth绑定", "已删除缓存: cacheKey={}", cacheKey);
-
-            log.info("企业微信绑定", "用户{}准备绑定企业微信账号: platformType={}, platformUserId={}",
-                    dto.getUsername(), bindCacheDTO.getPlatformType(), weWorkUserId);
-
-            // 检查该企业微信账号是否已被其他用户绑定
-            LambdaQueryWrapper<SysUserThirdAuth> checkWrapper = new LambdaQueryWrapper<>();
-            checkWrapper.eq(SysUserThirdAuth::getAuthType, ThirdAuthType.WEWORK.getCode())
-                    .eq(SysUserThirdAuth::getAuthKey, weWorkUserId);
-
-            SysUserThirdAuth existingAuth = sysUserThirdAuthMapper.selectOne(checkWrapper);
-
-            if (existingAuth != null && !existingAuth.getUserId().equals(user.getUserId())) {
-                throw new RuntimeException("该企业微信账号已被其他用户绑定");
-            }
-
-            // 创建或更新绑定关系
-            if (existingAuth == null) {
-                SysUserThirdAuth thirdAuth = new SysUserThirdAuth();
-                thirdAuth.setUserId(user.getUserId());
-                thirdAuth.setAuthType(ThirdAuthType.WEWORK.getCode());
-                thirdAuth.setAuthKey(weWorkUserId);
-                sysUserThirdAuthMapper.insert(thirdAuth);
-                log.info("企业微信绑定", "创建绑定关系成功: userId={}, weWorkUserId={}", user.getUserId(), weWorkUserId);
-            } else {
-                log.info("企业微信绑定", "绑定关系已存在: userId={}, weWorkUserId={}", user.getUserId(), weWorkUserId);
-            }
-
-            // 执行登录流程
             String loginIp = ServletUtils.getClientIp();
             String userAgent = ServletUtils.getUserAgent();
             PlatformType platformType = PlatformType.ADMIN_WEB;
@@ -323,13 +378,12 @@ public class WeWorkServiceImpl implements IWeWorkService {
             authVO.setRefreshToken(tokenPair.getRefreshToken());
 
             return authVO;
-
-        } catch (UserNotExistException e) {
-            log.error("企业微信绑定失败", "username={}, error={}", dto.getUsername(), e.getMessage());
+        } catch (LoginException e) {
+            log.error("企业微信绑定", "登录失败: userId={}, error={}", user.getUserId(), e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("企业微信绑定失败", "username={}, error={}", dto.getUsername(), e.getMessage());
-            throw new RuntimeException("企业微信绑定失败: " + e.getMessage());
+            log.error("企业微信绑定", "登录失败: userId={}, error={}", user.getUserId(), e.getMessage());
+            throw new OauthBindFailedException("企业微信绑定后登录失败", e);
         }
     }
 }
