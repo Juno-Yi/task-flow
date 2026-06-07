@@ -2,6 +2,12 @@ import axios from 'axios';
 import type { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { showToast } from 'vant';
 import { useUserStore } from '@/store/modules/user';
+import { fetchRefreshToken } from '@/api/auth';
+
+// 是否正在刷新 token
+let isRefreshing = false;
+// 刷新 token 失败的请求队列
+let requestQueue: Array<() => void> = [];
 
 const service: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
@@ -12,8 +18,9 @@ const service: AxiosInstance = axios.create({
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const userStore = useUserStore();
-    if (userStore.token) {
-      config.headers.Authorization = `Bearer ${userStore.token}`;
+    // 使用 accessToken
+    if (userStore.accessToken) {
+      config.headers.Authorization = `Bearer ${userStore.accessToken}`;
     }
     return config;
   },
@@ -31,13 +38,55 @@ service.interceptors.response.use(
     }
     return res.data;
   },
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
     const status = error.response?.status;
-    if (status === 401) {
+    const config = error.config as InternalAxiosRequestConfig;
+
+    // 401 未授权 - 尝试刷新 token
+    if (status === 401 && config) {
       const userStore = useUserStore();
-      userStore.$reset();
-      window.location.hash = '#/login';
+
+      // 如果没有 refreshToken，直接跳转登录
+      if (!userStore.refreshToken) {
+        userStore.clearUser();
+        window.location.hash = '#/login';
+        return Promise.reject(error);
+      }
+
+      // 如果正在刷新 token，将请求加入队列
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          requestQueue.push(() => {
+            config.headers.Authorization = `Bearer ${userStore.accessToken}`;
+            resolve(service(config));
+          });
+        });
+      }
+
+      isRefreshing = true;
+
+      try {
+        // 刷新 token
+        const { accessToken, refreshToken } = await fetchRefreshToken(userStore.refreshToken);
+        userStore.setToken(accessToken, refreshToken);
+
+        // 重试队列中的请求
+        requestQueue.forEach((callback) => callback());
+        requestQueue = [];
+
+        // 重试当前请求
+        config.headers.Authorization = `Bearer ${accessToken}`;
+        return service(config);
+      } catch (refreshError) {
+        // 刷新 token 失败，清空用户信息并跳转登录页
+        userStore.clearUser();
+        window.location.hash = '#/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
+
     const message = (error.response?.data as any)?.msg || error.message || 'Network Error';
     showToast(message);
     return Promise.reject(error);

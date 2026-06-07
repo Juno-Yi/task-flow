@@ -49,6 +49,24 @@ export const routes: RouteRecordRaw[] = [
       keepAlive: true,
     },
   },
+  {
+    name: 'callback',
+    path: '/auth/callback',
+    component: () => import('@/views/auth/callback.vue'),
+    meta: {
+      title: '登录中...',
+      keepAlive: false,
+    },
+  },
+  {
+    name: 'bind',
+    path: '/auth/bind',
+    component: () => import('@/views/auth/bind.vue'),
+    meta: {
+      title: '账号绑定',
+      keepAlive: false,
+    },
+  },
   // 匹配不到重定向会主页
   {
     // 找不到路由重定向到首页
