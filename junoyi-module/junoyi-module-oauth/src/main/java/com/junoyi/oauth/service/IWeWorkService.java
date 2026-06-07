@@ -43,11 +43,4 @@ public interface IWeWorkService {
      */
     AuthVO bindAccount(String username, String password, String bindToken);
 
-    /**
-     * 获取企业微信用户信息（用于绑定前预览）
-     *
-     * @param code 授权码
-     * @return 企业微信用户ID
-     */
-    String getWeWorkUserInfo(String code);
 }

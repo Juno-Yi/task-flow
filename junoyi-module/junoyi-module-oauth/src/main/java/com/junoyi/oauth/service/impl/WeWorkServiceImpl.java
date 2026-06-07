@@ -7,6 +7,7 @@ import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
 import com.junoyi.framework.redis.utils.RedisUtils;
 import com.junoyi.framework.security.enums.PlatformType;
+import com.junoyi.framework.security.exception.LoginException;
 import com.junoyi.framework.security.helper.AuthHelper;
 import com.junoyi.framework.security.module.LoginUser;
 import com.junoyi.framework.security.module.TokenPair;
@@ -15,6 +16,8 @@ import com.junoyi.oauth.domain.vo.WeWorkConfigVO;
 import com.junoyi.oauth.enums.ThirdAuthType;
 import com.junoyi.oauth.service.IWeWorkService;
 import com.junoyi.platform.api.PlatformAuthServiceApi;
+import com.junoyi.platform.domain.OAuthUserInfo;
+import com.junoyi.platform.domain.WeWorkOauthConfig;
 import com.junoyi.platform.enums.ThirdPlatformType;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.po.SysUserThirdAuth;
@@ -27,8 +30,10 @@ import com.junoyi.system.helper.LoginUserBuilder;
 import com.junoyi.system.mapper.SysUserMapper;
 import com.junoyi.system.mapper.SysUserThirdAuthMapper;
 import lombok.RequiredArgsConstructor;
+import me.chanjar.weixin.cp.bean.WxCpOauth2UserInfo;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.UUID;
 
 /**
@@ -58,7 +63,8 @@ public class WeWorkServiceImpl implements IWeWorkService {
         try {
 
             // 生成随机 state 用于防止 CSRF 攻击
-            String state = UUID.randomUUID().toString().replace("-", "");
+            String random = UUID.randomUUID().toString().replace("-", "");
+            String state = "WEWORK:" + random;
             String authUrl = platformAuthServiceApi.getQrLoginUrl(ThirdPlatformType.WEWORK,state);
 
             log.info("企业微信授权", "生成授权URL: {}", authUrl);
@@ -82,27 +88,22 @@ public class WeWorkServiceImpl implements IWeWorkService {
      */
     @Override
     public WeWorkConfigVO getLoginConfig() {
-//        try {
-//            log.info("企业微信配置", "获取登录配置: corpId={}, agentId={}",
-//                    weWorkProperties.getCorpId(),
-//                    weWorkProperties.getAgentId());
-//
-//            weWorkProperties.validateRedirectUri();
-//
-//             生成随机 state 用于防止 CSRF 攻击
-//            String state = UUID.randomUUID().toString().replace("-", "");
-//
-//            return WeWorkConfigVO.builder()
-//                    .corpId(weWorkProperties.getCorpId())
-//                    .agentId(String.valueOf(weWorkProperties.getAgentId()))
-//                    .redirectUri(weWorkProperties.getRedirectUri())
-//                    .state(state)
-//                    .build();
-//        } catch (Exception e) {
-//            log.error("企业微信配置", "获取登录配置失败: {}", e.getMessage(), e);
-//            throw new RuntimeException("获取登录配置失败: " + e.getMessage(), e);
-//        }
-        return null;
+        try {
+            // 生成随机 state 用于防止 CSRF 攻击
+            String random = UUID.randomUUID().toString().replace("-", "");
+            String state = "WEWORK:" + random;
+            WeWorkOauthConfig weWorkOauthConfig = (WeWorkOauthConfig) platformAuthServiceApi.getOauthConfig(ThirdPlatformType.WEWORK);
+
+            return WeWorkConfigVO.builder()
+                    .corpId(weWorkOauthConfig.getCorpId())
+                    .agentId(String.valueOf(weWorkOauthConfig.getAgentId()))
+                    .redirectUri(weWorkOauthConfig.getRedirectUrl())
+                    .state(state)
+                    .build();
+        } catch (Exception e) {
+            log.error("企业微信配置", "获取登录配置失败: {}", e.getMessage(), e);
+            throw new RuntimeException("获取登录配置失败: " + e.getMessage(), e);
+        }
     }
 
 
@@ -114,63 +115,67 @@ public class WeWorkServiceImpl implements IWeWorkService {
      */
     @Override
     public AuthVO handleCallback(String code) {
-//        try {
+        try {
             // 通过code获取用户信息
-//            WxCpOauth2UserInfo userInfo = weWorkClient.getOauth2UserInfo(code);
-//            String weWorkUserId = userInfo.getUserId();
-//
-//            log.info("企业微信登录", "获取到用户信息: userId={}", weWorkUserId);
-//
+            OAuthUserInfo oauthUserInfo = platformAuthServiceApi.getOauthUserInfo(ThirdPlatformType.WEWORK, code);
+
+
+            // 判断一下获取的OauthUserInfo是否是企业微信平台的
+            if (oauthUserInfo.getPlatformType() != ThirdPlatformType.WEWORK)
+                throw new LoginException("非法平台");
+
+            // 获取企业微信用户唯一标识符
+            String weworkUserId = oauthUserInfo.getPlatformUserId();
+
             // 根据企业微信userId查找系统用户
-//            SysUser user = findUserByWeWorkUserId(weWorkUserId);
-//
-//            if (user == null) {
+            SysUser user = findUserByWeWorkUserId(weworkUserId);
+
+            if (user == null) {
                 // 用户未绑定，生成临时绑定令牌并缓存企业微信用户ID
-//                String bindToken = UUID.randomUUID().toString().replace("-", "");
-//                String cacheKey = "wework:bind:" + bindToken;
+                String bindToken = UUID.randomUUID().toString().replace("-", "");
+                String cacheKey = "wework:bind:" + bindToken;
 
                 // 缓存企业微信用户ID，有效期5分钟
-//                RedisUtils.setCacheObject(cacheKey, weWorkUserId, Duration.ofMinutes(5));
-//                log.info("企业微信登录", "已缓存绑定令牌: cacheKey={}, weWorkUserId={}", cacheKey, weWorkUserId);
+                RedisUtils.setCacheObject(cacheKey, weworkUserId, Duration.ofMinutes(5));
+                log.info("企业微信登录", "已缓存绑定令牌: cacheKey={}, weWorkUserId={}", cacheKey, weworkUserId);
 
                 // 返回特殊的AuthVO，前端根据此状态跳转到绑定页面
-//                AuthVO authVO = new AuthVO();
-//                authVO.setNeedBind(true);
-//                authVO.setWeWorkUserId(weWorkUserId);
-//                authVO.setCode(bindToken); // 使用 bindToken 而不是 OAuth code
-//                log.info("企业微信登录", "用户未绑定，需要跳转到绑定页面: weWorkUserId={}, bindToken={}", weWorkUserId, bindToken);
-//                return authVO;
-//            }
-//
+                AuthVO authVO = new AuthVO();
+                authVO.setNeedBind(true);
+                authVO.setWeWorkUserId(weworkUserId);
+                authVO.setCode(bindToken); // 使用 bindToken 而不是 OAuth code
+                log.info("企业微信登录", "用户未绑定，需要跳转到绑定页面: weWorkUserId={}, bindToken={}", weworkUserId, bindToken);
+                return authVO;
+            }
+
             // 校验用户状态
-//            validateUser(user);
-//
+            validateUser(user);
+
             // 获取请求信息
-//            String loginIp = ServletUtils.getClientIp();
-//            String userAgent = ServletUtils.getUserAgent();
-//            PlatformType platformType = PlatformType.ADMIN_WEB;
-//
-//             构建 LoginUser
-//            LoginUser loginUser = loginUserBuilder.build(user);
-//
-            // 调用 AuthHelper 登录
-//            TokenPair tokenPair = authHelper.login(loginUser, platformType, loginIp, userAgent);
+            String loginIp = ServletUtils.getClientIp();
+            String userAgent = ServletUtils.getUserAgent();
+            PlatformType platformType = PlatformType.ADMIN_WEB;
+
+             // 构建 LoginUser
+            LoginUser loginUser = loginUserBuilder.build(user);
+
+            //调用 AuthHelper 登录
+            TokenPair tokenPair = authHelper.login(loginUser, platformType, loginIp, userAgent);
 
             // 发布登录成功事件
-//            EventBus.get().callEvent(new UserLoginEvent(loginUser, loginIp, tokenPair.getTokenId(), "wework", userAgent));
+            EventBus.get().callEvent(new UserLoginEvent(loginUser, loginIp, tokenPair.getTokenId(), "wework", userAgent));
 
             // 构建返回结果
-//            AuthVO authVO = new AuthVO();
-//            authVO.setAccessToken(tokenPair.getAccessToken());
-//            authVO.setRefreshToken(tokenPair.getRefreshToken());
-//            authVO.setNeedBind(false);
-//
-//            return authVO;
-//
-//        } catch (WxErrorException e) {
-//            log.error("企业微信登录失败", "code={}, error={}", code, e.getMessage());
-//            throw new RuntimeException("企业微信登录失败: " + e.getError().getErrorMsg());
-//        }
+            AuthVO authVO = new AuthVO();
+            authVO.setAccessToken(tokenPair.getAccessToken());
+            authVO.setRefreshToken(tokenPair.getRefreshToken());
+            authVO.setNeedBind(false);
+
+            return authVO;
+
+        } catch (Exception e) {
+            log.error("企业微信登录失败", "code={}, error={}", code, e.getMessage());
+        }
         return null;
     }
 
@@ -213,28 +218,6 @@ public class WeWorkServiceImpl implements IWeWorkService {
         if (user.getStatus() == 2) {
             throw new UserStatusIsLockedException("用户已被锁定");
         }
-    }
-
-    /**
-     * 获取企业微信用户信息（用于绑定前预览）
-     *
-     * @param code 授权码
-     * @return 企业微信用户ID
-     */
-    @Override
-    public String getWeWorkUserInfo(String code) {
-//        try {
-            // 通过code获取用户信息
-//            WxCpOauth2UserInfo userInfo = weWorkClient.getOauth2UserInfo(code);
-//            String weWorkUserId = userInfo.getUserId();
-
-//            log.info("企业微信用户信息", "获取到用户ID: {}", weWorkUserId);
-//            return weWorkUserId;
-//        } catch (WxErrorException e) {
-//            log.error("获取企业微信用户信息失败", "code={}, error={}", code, e.getMessage());
-//            throw new RuntimeException("获取企业微信用户信息失败: " + e.getError().getErrorMsg());
-//        }
-        return null;
     }
 
     /**
