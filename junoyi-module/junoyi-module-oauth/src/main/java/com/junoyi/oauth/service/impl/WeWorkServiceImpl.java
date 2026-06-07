@@ -8,9 +8,12 @@ import com.junoyi.framework.log.core.JunoYiLogFactory;
 import com.junoyi.framework.redis.utils.RedisUtils;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.security.exception.LoginException;
+import com.junoyi.framework.security.exception.LoginPasswordWrongException;
 import com.junoyi.framework.security.helper.AuthHelper;
 import com.junoyi.framework.security.module.LoginUser;
 import com.junoyi.framework.security.module.TokenPair;
+import com.junoyi.framework.security.utils.PasswordUtils;
+import com.junoyi.oauth.domain.dto.BindOauthParamsDTO;
 import com.junoyi.oauth.domain.dto.OauthBindCacheDTO;
 import com.junoyi.oauth.domain.vo.ThirdAuthUrlVO;
 import com.junoyi.oauth.domain.vo.WeWorkConfigVO;
@@ -228,18 +231,15 @@ public class WeWorkServiceImpl implements IWeWorkService {
 
     /**
      * 绑定企业微信账号
-     *
-     * @param username 系统用户名
-     * @param password 系统密码
-     * @param bindToken 绑定令牌（从回调接口获取）
+     * @param dto 绑定并登录数据
      * @return 认证信息
      */
     @Override
-    public AuthVO bindAccount(String username, String password, String bindToken) {
+    public AuthVO bindAccount(BindOauthParamsDTO dto) {
         try {
-            // 1. 验证用户名和密码
+            // 验证用户名和密码
             LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysUser::getUserName, username)
+            wrapper.eq(SysUser::getUserName, dto.getUsername())
                     .eq(SysUser::isDelFlag, false);
 
             SysUser user = sysUserMapper.selectOne(wrapper);
@@ -248,24 +248,23 @@ public class WeWorkServiceImpl implements IWeWorkService {
                 throw new UserNotExistException("用户名或密码错误");
             }
 
-            // 验证密码（这里需要使用密码加密工具类，假设使用BCrypt）
-            // TODO: 根据实际项目的密码加密方式进行验证
-            // if (!passwordEncoder.matches(password, user.getPassword())) {
-            //     throw new RuntimeException("用户名或密码错误");
-            // }
-
             // 校验用户状态
             validateUser(user);
 
-            // 2. 从缓存中获取OAuth绑定信息（包含平台类型和用户ID）
-            String cacheKey = "oauth:bind:" + bindToken;
+            // 验证密码
+             if (!PasswordUtils.matches(dto.getPassword(), user.getSalt(), user.getPassword())) {
+                 throw new LoginPasswordWrongException("用户名或密码错误");
+             }
+
+            // 从缓存中获取OAuth绑定信息（包含平台类型和用户ID）
+            String cacheKey = "oauth:bind:" + dto.getCode();
             log.info("OAuth绑定", "尝试从缓存获取: cacheKey={}", cacheKey);
 
             OauthBindCacheDTO bindCacheDTO = RedisUtils.getCacheObject(cacheKey);
             log.info("OAuth绑定", "从缓存获取结果: {}", bindCacheDTO);
 
             if (bindCacheDTO == null || bindCacheDTO.getPlatformUserId() == null) {
-                log.error("OAuth绑定", "绑定令牌已失效或不存在: bindToken={}, cacheKey={}", bindToken, cacheKey);
+                log.error("OAuth绑定", "绑定令牌已失效或不存在: bindToken={}, cacheKey={}", dto.getCode(), cacheKey);
                 throw new RuntimeException("绑定令牌已失效，请重新扫码");
             }
 
@@ -282,9 +281,9 @@ public class WeWorkServiceImpl implements IWeWorkService {
             log.info("OAuth绑定", "已删除缓存: cacheKey={}", cacheKey);
 
             log.info("企业微信绑定", "用户{}准备绑定企业微信账号: platformType={}, platformUserId={}",
-                    username, bindCacheDTO.getPlatformType(), weWorkUserId);
+                    dto.getUsername(), bindCacheDTO.getPlatformType(), weWorkUserId);
 
-            // 3. 检查该企业微信账号是否已被其他用户绑定
+            // 检查该企业微信账号是否已被其他用户绑定
             LambdaQueryWrapper<SysUserThirdAuth> checkWrapper = new LambdaQueryWrapper<>();
             checkWrapper.eq(SysUserThirdAuth::getAuthType, ThirdAuthType.WEWORK.getCode())
                     .eq(SysUserThirdAuth::getAuthKey, weWorkUserId);
@@ -295,7 +294,7 @@ public class WeWorkServiceImpl implements IWeWorkService {
                 throw new RuntimeException("该企业微信账号已被其他用户绑定");
             }
 
-            // 4. 创建或更新绑定关系
+            // 创建或更新绑定关系
             if (existingAuth == null) {
                 SysUserThirdAuth thirdAuth = new SysUserThirdAuth();
                 thirdAuth.setUserId(user.getUserId());
@@ -307,7 +306,7 @@ public class WeWorkServiceImpl implements IWeWorkService {
                 log.info("企业微信绑定", "绑定关系已存在: userId={}, weWorkUserId={}", user.getUserId(), weWorkUserId);
             }
 
-            // 5. 执行登录流程
+            // 执行登录流程
             String loginIp = ServletUtils.getClientIp();
             String userAgent = ServletUtils.getUserAgent();
             PlatformType platformType = PlatformType.ADMIN_WEB;
@@ -326,10 +325,10 @@ public class WeWorkServiceImpl implements IWeWorkService {
             return authVO;
 
         } catch (UserNotExistException e) {
-            log.error("企业微信绑定失败", "username={}, error={}", username, e.getMessage());
+            log.error("企业微信绑定失败", "username={}, error={}", dto.getUsername(), e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("企业微信绑定失败", "username={}, error={}", username, e.getMessage());
+            log.error("企业微信绑定失败", "username={}, error={}", dto.getUsername(), e.getMessage());
             throw new RuntimeException("企业微信绑定失败: " + e.getMessage());
         }
     }

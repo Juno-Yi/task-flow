@@ -1,7 +1,10 @@
 package com.junoyi.oauth.controller;
 
+import com.alibaba.excel.util.StringUtils;
+import com.junoyi.framework.captcha.helper.CaptchaHelper;
 import com.junoyi.framework.core.domain.module.R;
 import com.junoyi.framework.web.domain.BaseController;
+import com.junoyi.oauth.domain.dto.BindOauthParamsDTO;
 import com.junoyi.oauth.domain.vo.ThirdAuthUrlVO;
 import com.junoyi.oauth.domain.vo.WeWorkConfigVO;
 import com.junoyi.oauth.service.IWeWorkService;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class WeWorkOAuthController extends BaseController {
 
     private final IWeWorkService weWorkService;
+    private final CaptchaHelper captchaHelper;
 
     /**
      * 获取企业微信授权URL
@@ -84,18 +88,17 @@ public class WeWorkOAuthController extends BaseController {
     /**
      * 绑定企业微信账号
      *
-     * @param username 系统用户名
-     * @param password 系统密码
-     * @param bindToken 绑定令牌（从回调接口获取）
-     * @return 认证信息
      */
     @PostMapping("/bind")
-    public R<AuthVO> bindAccount(
-            @RequestParam("username") String username,
-            @RequestParam("password") String password,
-            @RequestParam("code") String bindToken) {
-        log.info("企业微信绑定", "用户{}尝试绑定企业微信账号", username);
-        AuthVO authVO = weWorkService.bindAccount(username, password, bindToken);
+    public R<AuthVO> bindAccount(@RequestBody BindOauthParamsDTO dto) {
+        // 验证码校验
+        if (captchaHelper != null && !StringUtils.isBlank(dto.getCaptchaId())){
+            if (StringUtils.isBlank(dto.getCaptchaCode()))
+                return R.fail("验证码不能为空");
+            if (!captchaHelper.validate(dto.getCaptchaId(),dto.getCaptchaCode()))
+                return R.fail("验证码错误或已失效");
+        }
+        AuthVO authVO = weWorkService.bindAccount(dto);
         return R.ok(authVO);
     }
 }
