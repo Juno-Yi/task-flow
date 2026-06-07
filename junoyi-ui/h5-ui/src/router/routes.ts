@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 export const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/home',
+    redirect: '/loading',
     component: () => import('@/layout/index.vue'),
     children: [
       {
@@ -41,11 +41,11 @@ export const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    name: 'login',
-    path: '/login',
-    component: () => import('@/views/login/index.vue'),
+    name: 'oauth-loading',
+    path: '/loading',
+    component: () => import('@/views/oauth/oauth-loading/index.vue'),
     meta: {
-      title: '',
+      title: '加载中...',
       keepAlive: true,
     },
   },
