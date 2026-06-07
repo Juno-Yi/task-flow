@@ -11,6 +11,7 @@ import com.junoyi.framework.security.exception.LoginException;
 import com.junoyi.framework.security.helper.AuthHelper;
 import com.junoyi.framework.security.module.LoginUser;
 import com.junoyi.framework.security.module.TokenPair;
+import com.junoyi.oauth.domain.dto.OauthBindCacheDTO;
 import com.junoyi.oauth.domain.vo.ThirdAuthUrlVO;
 import com.junoyi.oauth.domain.vo.WeWorkConfigVO;
 import com.junoyi.oauth.enums.ThirdAuthType;
@@ -30,7 +31,6 @@ import com.junoyi.system.helper.LoginUserBuilder;
 import com.junoyi.system.mapper.SysUserMapper;
 import com.junoyi.system.mapper.SysUserThirdAuthMapper;
 import lombok.RequiredArgsConstructor;
-import me.chanjar.weixin.cp.bean.WxCpOauth2UserInfo;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -131,13 +131,19 @@ public class WeWorkServiceImpl implements IWeWorkService {
             SysUser user = findUserByWeWorkUserId(weworkUserId);
 
             if (user == null) {
-                // 用户未绑定，生成临时绑定令牌并缓存企业微信用户ID
+                // 用户未绑定，生成临时绑定令牌并缓存企业微信用户信息
                 String bindToken = UUID.randomUUID().toString().replace("-", "");
-                String cacheKey = "wework:bind:" + bindToken;
+                String cacheKey = "oauth:bind:" + bindToken;
 
-                // 缓存企业微信用户ID，有效期5分钟
-                RedisUtils.setCacheObject(cacheKey, weworkUserId, Duration.ofMinutes(5));
-                log.info("企业微信登录", "已缓存绑定令牌: cacheKey={}, weWorkUserId={}", cacheKey, weworkUserId);
+                // 创建绑定缓存数据对象，包含平台类型和用户ID
+                OauthBindCacheDTO bindCacheDTO = new OauthBindCacheDTO();
+                bindCacheDTO.setPlatformType(ThirdPlatformType.WEWORK);
+                bindCacheDTO.setPlatformUserId(weworkUserId);
+
+                // 缓存绑定信息，有效期5分钟
+                RedisUtils.setCacheObject(cacheKey, bindCacheDTO, Duration.ofMinutes(5));
+                log.info("企业微信登录", "已缓存绑定令牌: cacheKey={}, platformType={}, platformUserId={}",
+                        cacheKey, bindCacheDTO.getPlatformType(), bindCacheDTO.getPlatformUserId());
 
                 // 返回特殊的AuthVO，前端根据此状态跳转到绑定页面
                 AuthVO authVO = new AuthVO();
@@ -251,23 +257,32 @@ public class WeWorkServiceImpl implements IWeWorkService {
             // 校验用户状态
             validateUser(user);
 
-            // 2. 从缓存中获取企业微信用户ID
-            String cacheKey = "wework:bind:" + bindToken;
-            log.info("企业微信绑定", "尝试从缓存获取: cacheKey={}", cacheKey);
+            // 2. 从缓存中获取OAuth绑定信息（包含平台类型和用户ID）
+            String cacheKey = "oauth:bind:" + bindToken;
+            log.info("OAuth绑定", "尝试从缓存获取: cacheKey={}", cacheKey);
 
-            String weWorkUserId = RedisUtils.getCacheObject(cacheKey);
-            log.info("企业微信绑定", "从缓存获取结果: weWorkUserId={}", weWorkUserId);
+            OauthBindCacheDTO bindCacheDTO = RedisUtils.getCacheObject(cacheKey);
+            log.info("OAuth绑定", "从缓存获取结果: {}", bindCacheDTO);
 
-            if (weWorkUserId == null || weWorkUserId.isEmpty()) {
-                log.error("企业微信绑定", "绑定令牌已失效或不存在: bindToken={}, cacheKey={}", bindToken, cacheKey);
+            if (bindCacheDTO == null || bindCacheDTO.getPlatformUserId() == null) {
+                log.error("OAuth绑定", "绑定令牌已失效或不存在: bindToken={}, cacheKey={}", bindToken, cacheKey);
                 throw new RuntimeException("绑定令牌已失效，请重新扫码");
             }
 
+            // 验证平台类型
+            if (bindCacheDTO.getPlatformType() != ThirdPlatformType.WEWORK) {
+                log.error("OAuth绑定", "平台类型不匹配: expected=WEWORK, actual={}", bindCacheDTO.getPlatformType());
+                throw new RuntimeException("平台类型不匹配");
+            }
+
+            String weWorkUserId = bindCacheDTO.getPlatformUserId();
+
             // 删除缓存
             RedisUtils.deleteObject(cacheKey);
-            log.info("企业微信绑定", "已删除缓存: cacheKey={}", cacheKey);
+            log.info("OAuth绑定", "已删除缓存: cacheKey={}", cacheKey);
 
-            log.info("企业微信绑定", "用户{}准备绑定企业微信账号: {}", username, weWorkUserId);
+            log.info("企业微信绑定", "用户{}准备绑定企业微信账号: platformType={}, platformUserId={}",
+                    username, bindCacheDTO.getPlatformType(), weWorkUserId);
 
             // 3. 检查该企业微信账号是否已被其他用户绑定
             LambdaQueryWrapper<SysUserThirdAuth> checkWrapper = new LambdaQueryWrapper<>();

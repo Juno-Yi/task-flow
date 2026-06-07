@@ -4,7 +4,7 @@
     <el-result
         icon="info"
         title="登录处理中"
-        sub-title="正在验证身份..."
+        :sub-title="statusText"
     />
   </div>
 </template>
@@ -21,6 +21,8 @@
   const route = useRoute()
   const router = useRouter()
   const userStore = useUserStore()
+
+  const statusText = ref('正在验证授权信息...')
 
   onMounted(async () => {
     const code = route.query.code as string
@@ -65,6 +67,7 @@
     // 是否需要绑定账号
     if (data.needBind){
       // 携带参数跳转绑定账号页面
+      statusText.value = '该企业微信账号并没有绑定系统用户，请先绑定'
       ElNotification({
         title: '需要绑定账号',
         message: '该企业微信账号未绑定系统用户，请先绑定',
@@ -96,6 +99,7 @@
     userStore.setUserInfo(userInfo)
 
     // 登录成功提示
+    statusText.value = '验证成功，即将跳转...'
     ElNotification({
       title: '登录成功',
       message: `欢迎回来, ${userInfo.nickName}!`,
