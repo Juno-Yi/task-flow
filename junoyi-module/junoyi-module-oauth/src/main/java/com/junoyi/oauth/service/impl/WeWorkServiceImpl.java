@@ -127,9 +127,6 @@ public class WeWorkServiceImpl implements IWeWorkService {
             // 获取企业微信用户唯一标识符
             String weworkUserId = oauthUserInfo.getPlatformUserId();
 
-            log.info("测试","企业微信唯一标识符：" + weworkUserId);
-
-
             // 根据企业微信userId查找系统用户
             SysUser user = findUserByWeWorkUserId(weworkUserId);
 
@@ -221,28 +218,6 @@ public class WeWorkServiceImpl implements IWeWorkService {
         if (user.getStatus() == 2) {
             throw new UserStatusIsLockedException("用户已被锁定");
         }
-    }
-
-    /**
-     * 获取企业微信用户信息（用于绑定前预览）
-     *
-     * @param code 授权码
-     * @return 企业微信用户ID
-     */
-    @Override
-    public String getWeWorkUserInfo(String code) {
-//        try {
-            // 通过code获取用户信息
-//            WxCpOauth2UserInfo userInfo = weWorkClient.getOauth2UserInfo(code);
-//            String weWorkUserId = userInfo.getUserId();
-
-//            log.info("企业微信用户信息", "获取到用户ID: {}", weWorkUserId);
-//            return weWorkUserId;
-//        } catch (WxErrorException e) {
-//            log.error("获取企业微信用户信息失败", "code={}, error={}", code, e.getMessage());
-//            throw new RuntimeException("获取企业微信用户信息失败: " + e.getError().getErrorMsg());
-//        }
-        return null;
     }
 
     /**
