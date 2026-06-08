@@ -63,7 +63,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/auth/login',
     component: () => import('@/views/auth/login/index.vue'),
     meta: {
-      title: '登录与绑定',
+      title: '登录绑定',
       keepAlive: false,
     },
   },
