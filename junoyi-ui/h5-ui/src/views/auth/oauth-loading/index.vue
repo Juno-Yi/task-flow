@@ -39,6 +39,7 @@ const init = async () => {
       case ClientType.WEWORK:
         statusText.value = '当前运行环境为企业微信'
         // TODO: 获取企业微信code并登录
+        handleWeWork()
         break
       case ClientType.FEISHU:
         statusText.value = '当前运行环境为飞书'
@@ -51,6 +52,7 @@ const init = async () => {
       default:
         statusText.value = '当前运行环境为其他浏览器环境'
         // TODO: 处理其他浏览器环境
+        handleOtherBrowser()
         break
     }
 
@@ -59,6 +61,34 @@ const init = async () => {
     statusText.value = '初始化失败';
   }
 };
+
+/**
+ * 处理企业微信登录逻辑
+ */
+const handleWeWork = () => {
+  // 通过企业微信SDK按照流程获取授权code
+  // 如果绑定过该用户后端返回token对
+
+  // 如果没有绑定过，将bindToken存储到sessionStorage中临时存储，然后传递platform类型跳转到登录并绑定页面
+  sessionStorage.setItem("wework_bind_token", "test1234")
+  router.replace({
+    path: '/auth/login',
+    query: {
+      platform: 'wework'
+    }
+  })
+}
+
+/**
+ * 处理其他浏览器客户端登录逻辑
+ */
+const handleOtherBrowser = () => {
+  // 如果不是企微、飞书、钉钉，那么就没有自动获取code然后一键授权登录
+  // 默认跳转到登录绑定页面，跳转时候不提供绑定token
+  router.replace({
+    path: '/auth/login',
+  })
+}
 
 onMounted(() => {
   init();

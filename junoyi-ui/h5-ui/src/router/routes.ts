@@ -43,7 +43,7 @@ export const routes: RouteRecordRaw[] = [
   {
     name: 'oauth-loading',
     path: '/loading',
-    component: () => import('@/views/oauth/oauth-loading/index.vue'),
+    component: () => import('@/views/auth/oauth-loading/index.vue'),
     meta: {
       title: '加载中...',
       keepAlive: true,
@@ -52,18 +52,18 @@ export const routes: RouteRecordRaw[] = [
   {
     name: 'callback',
     path: '/auth/callback',
-    component: () => import('@/views/auth/callback.vue'),
+    component: () => import('@/views/auth2/callback.vue'),
     meta: {
       title: '登录中...',
       keepAlive: false,
     },
   },
   {
-    name: 'bind',
-    path: '/auth/bind',
-    component: () => import('@/views/auth/bind.vue'),
+    name: 'login',
+    path: '/auth/login',
+    component: () => import('@/views/auth/login/index.vue'),
     meta: {
-      title: '账号绑定',
+      title: '登录与绑定',
       keepAlive: false,
     },
   },

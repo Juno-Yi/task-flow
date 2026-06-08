@@ -9,7 +9,10 @@ const router: Router = createRouter({
 });
 
 // 白名单：不需要登录的页面
-const whiteList = ['/loading', '/auth/callback', '/auth/bind'];
+const whiteList = ['/loading',
+  '/auth/login',
+  '/auth/callback',
+];
 
 router.beforeEach(async (to, _from, next) => {
   // 在白名单中，直接放行
