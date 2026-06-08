@@ -3,19 +3,8 @@
   <div class="oauth-loading-container">
     <div class="loading-content">
       <van-loading size="48" vertical>
-        <template #icon>
-          <van-icon name="success" v-if="status === 'success'" color="#07c160" size="48" />
-          <van-icon name="warning" v-else-if="status === 'error'" color="#ee0a24" size="48" />
-        </template>
         {{ statusText }}
       </van-loading>
-
-      <div class="tips" v-if="errorMessage">
-        <p>{{ errorMessage }}</p>
-        <van-button type="primary" size="small" @click="retry" v-if="canRetry">
-          重试
-        </van-button>
-      </div>
     </div>
   </div>
 </template>
@@ -68,14 +57,21 @@ const init = async () => {
     statusText.value = '正在检测运行环境...';
 
     const type = getClientType()
-    if (type === ClientType.WEWORK)
-      statusText.value = '当前运行环境为企业微信'
-    if (type === ClientType.FEISHU)
-      statusText.value = '当前运行环境为飞书'
-    if (type === ClientType.DINGTALK)
-      statusText.value = '当前运行环境为钉钉'
-    if (type === ClientType.BROWSER)
-      statusText.value = '当前运行环境为其他浏览器环境'
+    switch (type){
+      case ClientType.WEWORK:
+        statusText.value = '当前运行环境为企业微信'
+        break
+      case ClientType.FEISHU:
+        statusText.value = '当前运行环境为飞书'
+        break
+      case ClientType.DINGTALK:
+        statusText.value = '当前运行环境为钉钉'
+        break;
+      default:
+        statusText.value = '当前运行环境为其他浏览器环境'
+        handleOtherBrowser();
+
+    }
 
 
   } catch (error: any) {
@@ -86,6 +82,13 @@ const init = async () => {
     canRetry.value = true;
   }
 };
+
+/**
+ * 其他浏览器监听
+ */
+const handleOtherBrowser = () => {
+
+}
 
 onMounted(() => {
   init();
