@@ -275,7 +275,7 @@ junoyi:
     web:
       redirect-url: https://web.dev-platform.junoyi.com/auth/callback
     h5:
-      redirect-url: https://h5.dev-platform.junoyi.com/auth/callback
+      redirect-url: https://h5.dev-platform.junoyi.com/loading
     # token 存储方式：memory / redis
     token-store-type: redis
     # Redis 中的 key 前缀
