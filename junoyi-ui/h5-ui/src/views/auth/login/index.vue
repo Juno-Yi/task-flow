@@ -98,7 +98,7 @@
   import {useUserStore} from "@/store/modules/user.ts";
   import {fetchGetCaptcha, fetchGetUserInfo, fetchLogin} from "@/api";
   import logo from '@/assets/image/LOGO.png'
-  import type {FormRules} from "element-plus";
+  import {ElMessage, type FormRules} from "element-plus";
 
   defineOptions({name: 'Login'})
 
@@ -185,14 +185,21 @@
       const userInfo = await fetchGetUserInfo()
       userStore.setInfo(userInfo)
 
-      // 调试用，从用户状态管理中获取userinfo各个字段数据
+      // 显示成功提示
+      const successMsg = platform.value
+          ? `${getPlatformName(platform.value)}账号绑定成功！`
+          : '登录成功！'
 
-      // 跳转到首页或原始目标页面
+      ElMessage.success(successMsg)
       setTimeout(() => {
         const redirect = (route.query.redirect as string) || '/home'
         router.replace(redirect)
       }, 1000)
+
+
     } catch (error: any) {
+      // 登录提交如果失败
+
       console.error('操作失败:', error)
       showToast(error.message || '操作失败，请重试')
 
@@ -200,6 +207,7 @@
       await getCaptchaImage()
       formData.captchaCode = ''
     } finally {
+
       loading.value = false
     }
   }
