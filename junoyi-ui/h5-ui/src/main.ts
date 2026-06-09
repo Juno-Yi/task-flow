@@ -6,10 +6,9 @@ import store from '@/store';
 import './assets/font/iconfont.css';
 import '@/styles/index.scss';
 
-import '@nutui/nutui/dist/packages/toast/style/css';
-import '@nutui/nutui/dist/packages/notify/style/css';
-import '@nutui/nutui/dist/packages/dialog/style/css';
-import '@nutui/nutui/dist/packages/imagepreview/style/css';
+// Element Plus
+import ElementPlus from 'element-plus';
+import 'element-plus/dist/index.css';
 
 const app = createApp(App);
 
@@ -18,6 +17,9 @@ app.use(store);
 
 // 路由
 app.use(router);
+
+// Element Plus
+app.use(ElementPlus);
 
 // 国际化
 await setupI18n(app);

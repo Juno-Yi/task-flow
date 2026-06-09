@@ -21,7 +21,6 @@ export default function ({ command, mode }: ConfigEnv): UserConfig {
     // 需要自动优化的 UI 库
     const uiLibraries = [
       { name: 'vant/es', path: 'node_modules/vant/es' },
-      { name: '@nutui/nutui/dist/packages', path: 'node_modules/@nutui/nutui/dist/packages' },
       { name: '@varlet/ui/es', path: 'node_modules/@varlet/ui/es' },
     ];
 
@@ -36,11 +35,7 @@ export default function ({ command, mode }: ConfigEnv): UserConfig {
             return isDir && !isExcluded;
           })
           .forEach((dirName) => {
-            if (lib.name === '@nutui/nutui/dist/packages') {
-              if (dirName !== 'locale') {
-                devOptimizeDepsInclude.push(`${lib.name}/${dirName}/style/css`);
-              }
-            } else if (lib.name === 'vant/es') {
+            if (lib.name === 'vant/es') {
               devOptimizeDepsInclude.push(`${lib.name}/${dirName}/style/index`);
             } else {
               devOptimizeDepsInclude.push(`${lib.name}/${dirName}/style/index.mjs`);
@@ -79,9 +74,9 @@ export default function ({ command, mode }: ConfigEnv): UserConfig {
     css: {
       preprocessorOptions: {
         scss: {
-          // 配置 nutui 全局 scss 变量
-         additionalData: `@use "@/styles/variable.scss" as *;@use "@nutui/nutui/dist/styles/variables.scss" as *;`,
-         quietDeps: true,
+          // 配置全局 scss 变量
+          additionalData: `@use "@/styles/variable.scss" as *;`,
+          quietDeps: true,
         },
       },
     },
