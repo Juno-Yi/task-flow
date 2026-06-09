@@ -20,6 +20,14 @@ public interface PlatformAuthServiceApi {
     String getQrLoginUrl(ThirdPlatformType thirdPlatformType, String state);
 
     /**
+     * 获取Oauth授权地址
+     * @param thirdPlatformType 平台类型
+     * @param state 防止伪造
+     * @return 授权地址
+     */
+    String getAuthorizeUrl(ThirdPlatformType thirdPlatformType, String state);
+
+    /**
      * 获取第三方平台的Oauth配置
      * @param thirdPlatformType 平台类型
      * @return Oauth配置

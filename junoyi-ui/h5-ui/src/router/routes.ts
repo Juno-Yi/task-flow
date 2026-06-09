@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 export const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/home',
+    redirect: '/loading',
     component: () => import('@/layout/index.vue'),
     children: [
       {
@@ -41,12 +41,30 @@ export const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    name: 'login',
-    path: '/login',
-    component: () => import('@/views/login/index.vue'),
+    name: 'oauth-loading',
+    path: '/loading',
+    component: () => import('@/views/auth/oauth-loading/index.vue'),
     meta: {
-      title: '',
+      title: '加载中...',
       keepAlive: true,
+    },
+  },
+  {
+    name: 'callback',
+    path: '/auth/callback',
+    component: () => import('@/views/auth2/callback.vue'),
+    meta: {
+      title: '登录中...',
+      keepAlive: false,
+    },
+  },
+  {
+    name: 'login',
+    path: '/auth/login',
+    component: () => import('@/views/auth/login/index.vue'),
+    meta: {
+      title: '登录绑定',
+      keepAlive: false,
     },
   },
   // 匹配不到重定向会主页

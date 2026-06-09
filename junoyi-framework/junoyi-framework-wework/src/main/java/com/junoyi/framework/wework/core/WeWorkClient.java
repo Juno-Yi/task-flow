@@ -40,15 +40,36 @@ public class WeWorkClient {
     }
 
     /**
-     * 构建扫码登录地址
+     * 构建扫码登录地址（Web 端）
      */
     public String buildQrConnectUrl(String state) {
-        properties.validateRedirectUri();
+        properties.validateWebRedirectUrl();
         return String.format(
                 "https://open.work.weixin.qq.com/wwopen/sso/qrConnect?appid=%s&agentid=%s&redirect_uri=%s&state=%s",
                 properties.getCorpId(),
                 properties.getAgentId(),
-                urlEncode(properties.getRedirectUri()),
+                urlEncode(properties.getWebRedirectUrl()),
+                state
+        );
+    }
+
+    /**
+     * 构建移动端授权地址（H5 端）
+     */
+    public String buildMobileAuthorizeUrl(String state) {
+        properties.validateH5RedirectUrl();
+        return String.format(
+                "https://open.weixin.qq.com/connect/oauth2/authorize" +
+                        "?appid=%s" +
+                        "&redirect_uri=%s" +
+                        "&response_type=code" +
+                        "&scope=snsapi_base" +
+                        "&agentid=%s" +
+                        "&state=%s" +
+                        "#wechat_redirect",
+                properties.getCorpId(),
+                urlEncode(properties.getH5RedirectUrl()),
+                properties.getAgentId(),
                 state
         );
     }

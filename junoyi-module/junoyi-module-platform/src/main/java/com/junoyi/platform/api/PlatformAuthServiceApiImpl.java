@@ -6,6 +6,7 @@ import com.junoyi.platform.enums.ThirdPlatformType;
 import com.junoyi.platform.factory.PlatformAuthFactory;
 import com.junoyi.platform.service.PlatformAuthService;
 import lombok.RequiredArgsConstructor;
+import org.simpleframework.xml.Order;
 import org.springframework.stereotype.Service;
 
 
@@ -29,6 +30,17 @@ public class PlatformAuthServiceApiImpl implements PlatformAuthServiceApi {
     @Override
     public String getQrLoginUrl(ThirdPlatformType thirdPlatformType, String state) {
         return platformAuthFactory.get(thirdPlatformType).getAuthorizeUrl(state);
+    }
+
+    /**
+     * 获取Oauth授权地址
+     * @param thirdPlatformType 平台类型
+     * @param state 防止伪造
+     * @return 授权地址
+     */
+    @Override
+    public String getAuthorizeUrl(ThirdPlatformType thirdPlatformType, String state){
+        return platformAuthFactory.get(thirdPlatformType).getMobileAuthorizeUrl(state);
     }
 
     /**

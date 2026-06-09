@@ -13,13 +13,13 @@ import '@nutui/nutui/dist/packages/imagepreview/style/css';
 
 const app = createApp(App);
 
+// 状态管理（必须在路由之前，因为路由守卫需要使用 store）
+app.use(store);
+
 // 路由
 app.use(router);
 
 // 国际化
 await setupI18n(app);
-
-// 状态管理
-app.use(store);
 
 app.mount('#app');

@@ -37,11 +37,29 @@ public class WeWorkClient {
     }
 
     /**
-     * 获取Oauth回调地址
+     * 获取Oauth回调地址（已废弃，请使用 getWebRedirectUrl 或 getH5RedirectUrl）
      * @return Oauth回调地址
      */
+    @Deprecated
     public String getRedirectUrl(){
         return properties.getRedirectUrl();
+    }
+
+
+    /**
+     * 获取 Web 端回调地址
+     * @return Web 端回调地址
+     */
+    public String getWebRedirectUrl(){
+        return properties.getWebRedirectUrl();
+    }
+
+    /**
+     * 获取 H5 端回调地址
+     * @return H5 端回调地址
+     */
+    public String getH5RedirectUrl(){
+        return properties.getH5RedirectUrl();
     }
 
     /**

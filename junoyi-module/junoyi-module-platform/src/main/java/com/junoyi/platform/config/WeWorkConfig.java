@@ -48,7 +48,8 @@ public class WeWorkConfig {
         configStorage.setCorpId(properties.getCorpId());
         configStorage.setAgentId(properties.getAgentId());
         configStorage.setCorpSecret(properties.getSecret());
-        configStorage.setOauth2redirectUri(properties.getRedirectUrl());
+        // 默认使用 Web 端回调地址，如果需要 H5 回调地址，请在具体业务中设置
+        configStorage.setOauth2redirectUri(properties.getWebRedirectUrl());
     }
 
 
