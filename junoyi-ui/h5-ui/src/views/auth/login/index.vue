@@ -18,11 +18,60 @@
 
       <!--   登录核心表单   -->
       <div class="form-box">
-        <nut-form ref="ruleForm" :model-value="formData">
-          <nut-form-item label="用户名" required prop="name" :rules="[{ required: true, message: '请输入用户名' }]">
-            <nut-input v-model="formData.username" placeholder="请输入账号" type="text" />
-          </nut-form-item>
-        </nut-form>
+        <ElForm
+            ref="formRef"
+            :model="formData"
+            :rules="rules"
+            :key="formKey"
+            @keyup.enter="handleSubmit"
+            style="margin-top: 10px"
+        >
+          <ElFormItem prop="username">
+            <ElInput
+                class="custom-height"
+                placeholder="请输入账号"
+                v-model.trim="formData.username"
+            />
+          </ElFormItem>
+          <ElFormItem prop="password">
+            <ElInput
+                class="custom-height"
+                placeholder="请输入密码"
+                v-model.trim="formData.password"
+                type="password"
+                autocomplete="off"
+                show-password
+            />
+          </ElFormItem>
+          <!-- 验证码 -->
+          <ElFormItem prop="code">
+            <div class="flex w-full gap-3">
+              <ElInput
+                  class="custom-height flex-1"
+                  placeholder="请输入验证码"
+                  v-model.trim="formData.captchaCode"
+              />
+              <div
+                  class="captcha-img cursor-pointer rounded-lg overflow-hidden flex-shrink-0"
+                  @click="getCaptchaImage"
+                  title="刷新验证码"
+              >
+                <img
+                    v-if="captchaImage"
+                    :src="'data:image/png;base64,' + captchaImage"
+                    alt="captcha"
+                    class="h-10 w-28 object-cover"
+                />
+                <div
+                    v-else
+                    class="h-10 w-28 bg-gray-100 flex items-center justify-center text-gray-400 text-sm"
+                >
+                  {{ captchaLoading ? '加载中...' : '点击获取' }}
+                </div>
+              </div>
+            </div>
+          </ElFormItem>
+        </ElForm>
       </div>
 
     </div>
@@ -41,6 +90,7 @@
   import {useUserStore} from "@/store/modules/user.ts";
   import {fetchGetCaptcha} from "@/api";
   import logo from '@/assets/image/LOGO.png'
+  import type {FormRules} from "element-plus";
 
   defineOptions({name: 'Bind'})
 
@@ -54,12 +104,20 @@
   const captchaImage = ref<string>()
 
   // 表单数据
+  const formKey = ref(0)
   const formData = reactive({
     username: '',
     password: '',
     captchaCode: '',
     captchaId: '',
   })
+
+  const rules = computed<FormRules>(() => ({
+    username: [{ required: true, message: '账号不能为空', trigger: 'blur' }],
+    password: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
+    code: [{ required: true, message: '验证码不能为空', trigger: 'blur' }]
+  }))
+
 
   // 从 URL 中获取参数
   const platform = computed(() => route.query.type as string)

@@ -39,6 +39,10 @@
         .form-box {
             height: 100px;
             border: red solid 1px;
+
+            .custom-height {
+                @apply !h-[40px];
+            }
         }
 
 
