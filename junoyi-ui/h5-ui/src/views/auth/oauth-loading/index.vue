@@ -82,10 +82,6 @@ const handleWeWork = async () => {
       // 调用后端登录接口
       const res = await fetchWeWorkCallback(code)
 
-      if (!res) {
-        throw new Error('企业微信登录回调异常')
-      }
-
       // 判断是否需要绑定账号
       if (res.needBind) {
         statusText.value = '该企业微信账号未绑定系统用户，请先绑定'
@@ -95,18 +91,11 @@ const handleWeWork = async () => {
           duration: 3000,
         })
 
-        // 将bindToken存储到sessionStorage
-        if (res.code) {
-          sessionStorage.setItem('wework_bind_token', res.code)
-        } else {
-          throw new Error('获取绑定令牌失败')
-        }
-
         // 跳转到绑定页面
         setTimeout(() => {
           router.replace({
             path: '/auth/bind',
-            query: { type: 'wework' },
+            query: { bindToken: res.code, platform: 'wework' },
           })
         }, 1500)
         return
