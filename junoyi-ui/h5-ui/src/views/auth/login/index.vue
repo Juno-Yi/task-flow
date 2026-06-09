@@ -12,6 +12,7 @@
 
 <script setup lang="ts">
   import { useRoute } from 'vue-router'
+  import { fetchBindWeWorkAccount} from "@/api/oauth/wework.ts";
 
   defineOptions({name: 'Bind'})
 
@@ -19,9 +20,8 @@
 
   // 从 URL 中获取 platform
   const platform = route.query.platform as string
-
   // 绑定token
-  const bindToken = ref<string>('')
+  const bindToken = route.query.bindToken as string
 
   /**
    * 初始化页面
@@ -29,10 +29,6 @@
   const init = async () => {
     if (!platform)
       return
-
-    // 通过platform来拼接key，然后通过sessionStorage获取bindToken
-    const key = `${platform}_bind_token`
-    bindToken.value = sessionStorage.getItem(key) || ''
   }
 
   onMounted(() => {
