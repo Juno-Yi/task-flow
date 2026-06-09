@@ -1,3 +1,61 @@
-.test {
+/* 登录页样式 */
+.login-page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .body-wrapper {
+        height: 80vh;
+        border: green solid 1px;
+        overflow-y: hidden;
+
+        .title-box {
+            width: 90vw;
+            .logo {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+
+                img {
+                    width: 200px;
+                }
+            }
+            .title {
+                /*border: yellow solid 1px;*/
+                height: 100px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+
+                h2 {
+
+                }
+            }
+
+        }
+
+        .form-box {
+            height: 100px;
+            border: red solid 1px;
+        }
+
+
+    }
+
+    .footer {
+        height: 5vh;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        p {
+            margin-top: 5px;
+            color: #ACAFB6;
+            font-size: 20px;
+        }
+    }
 
 }

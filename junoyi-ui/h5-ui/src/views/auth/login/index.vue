@@ -3,10 +3,36 @@
 <!-- 那么，url中携带后端传过来的bindToken，进行登录并绑定，-->
 <!-- 如果，url中没有携带bindToken，只说明用户没有在企业微信、飞书、钉钉平台上打开，在其他浏览器环境中打开，只需要正常登录即可-->
 <template>
-  <h1>登录与绑定页面</h1>
-  <p v-if="platform">{{platform}}</p>
-  <p v-else>其他浏览器环境</p>
+  <div class="login-page">
 
+    <div class="body-wrapper">
+      <!--   标题头   -->
+      <div class="title-box">
+        <div class="logo">
+          <img :src="logo" />
+        </div>
+        <div class="title">
+          <h2>钧逸研发协作管理平台</h2>
+        </div>
+      </div>
+
+      <!--   登录核心表单   -->
+      <div class="form-box">
+        <nut-form ref="ruleForm" :model-value="formData">
+          <nut-form-item label="用户名" required prop="name" :rules="[{ required: true, message: '请输入用户名' }]">
+            <nut-input v-model="formData.username" placeholder="请输入账号" type="text" />
+          </nut-form-item>
+        </nut-form>
+      </div>
+
+    </div>
+
+    <!--  底部版权  -->
+    <div class="footer">
+      <p>Copyright @ 2026 钧逸科技 所有</p>
+      <p>未经许可，不予商用或企业内部闭源使用</p>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -14,6 +40,7 @@
   import {type BindWeWorkAccountParams, fetchBindWeWorkAccount} from "@/api/oauth/wework.ts";
   import {useUserStore} from "@/store/modules/user.ts";
   import {fetchGetCaptcha} from "@/api";
+  import logo from '@/assets/image/LOGO.png'
 
   defineOptions({name: 'Bind'})
 
@@ -77,146 +104,146 @@
     return platformNames[platformType] || platformType
   }
 
-/**
- * 处理表单提交
- */
-const handleSubmit = async () => {
-  if (!formData.username || !formData.password || !formData.captchaCode) {
-    return
+  /**
+   * 处理表单提交
+   */
+  const handleSubmit = async () => {
+    if (!formData.username || !formData.password || !formData.captchaCode) {
+      return
+    }
+
+    try {
+
+      let accessToken = ''
+      let refreshToken = ''
+
+      // 判断是绑定还是普通登录
+      if (platform.value && bindToken.value) {
+        // 账号绑定逻辑
+        const result = await handleBind()
+        accessToken = result.accessToken
+        refreshToken = result.refreshToken
+      } else {
+        // 普通登录逻辑
+        const result = await handleLogin()
+        accessToken = result.accessToken
+        refreshToken = result.refreshToken
+      }
+
+      if (!accessToken) {
+        throw new Error('登录失败，未获取到 Token')
+      }
+
+      // 存储 token 和登录状态
+      userStore.setToken(accessToken, refreshToken)
+      userStore.setLoginStatus(true)
+
+      // 获取用户信息
+      // const userInfo = await fetchGetUserInfo()
+      // userStore.setInfo(userInfo)
+
+      // 显示成功提示
+      const successMsg = platform.value
+        ? `${getPlatformName(platform.value)}账号绑定成功！`
+        : '登录成功！'
+
+      showToast({
+        message: successMsg,
+        icon: 'success',
+      })
+
+      // 跳转到首页或原始目标页面
+      setTimeout(() => {
+        const redirect = (route.query.redirect as string) || '/home'
+        router.replace(redirect)
+      }, 1000)
+    } catch (error: any) {
+      console.error('操作失败:', error)
+      showToast(error.message || '操作失败，请重试')
+
+      // 刷新验证码
+      // getCaptcha()
+      formData.captchaCode = ''
+    } finally {
+      // loading.value = false
+    }
   }
 
-  try {
+  /**
+   * 处理账号绑定
+   */
+  const handleBind = async () => {
+    if (!platform.value || !bindToken.value) {
+      throw new Error('绑定信息不完整')
+    }
 
     let accessToken = ''
     let refreshToken = ''
 
-    // 判断是绑定还是普通登录
-    if (platform.value && bindToken.value) {
-      // 账号绑定逻辑
-      const result = await handleBind()
-      accessToken = result.accessToken
-      refreshToken = result.refreshToken
-    } else {
-      // 普通登录逻辑
-      const result = await handleLogin()
-      accessToken = result.accessToken
-      refreshToken = result.refreshToken
-    }
-
-    if (!accessToken) {
-      throw new Error('登录失败，未获取到 Token')
-    }
-
-    // 存储 token 和登录状态
-    userStore.setToken(accessToken, refreshToken)
-    userStore.setLoginStatus(true)
-
-    // 获取用户信息
-    // const userInfo = await fetchGetUserInfo()
-    // userStore.setInfo(userInfo)
-
-    // 显示成功提示
-    const successMsg = platform.value
-      ? `${getPlatformName(platform.value)}账号绑定成功！`
-      : '登录成功！'
-
-    showToast({
-      message: successMsg,
-      icon: 'success',
-    })
-
-    // 跳转到首页或原始目标页面
-    setTimeout(() => {
-      const redirect = (route.query.redirect as string) || '/home'
-      router.replace(redirect)
-    }, 1000)
-  } catch (error: any) {
-    console.error('操作失败:', error)
-    showToast(error.message || '操作失败，请重试')
-
-    // 刷新验证码
-    // getCaptcha()
-    formData.captchaCode = ''
-  } finally {
-    // loading.value = false
-  }
-}
-
-/**
- * 处理账号绑定
- */
-const handleBind = async () => {
-  if (!platform.value || !bindToken.value) {
-    throw new Error('绑定信息不完整')
-  }
-
-  let accessToken = ''
-  let refreshToken = ''
-
-  // 根据平台类型调用不同的绑定接口
-  switch (platform.value) {
-    case 'wework': {
-      const params: BindWeWorkAccountParams = {
-        username: formData.username,
-        password: formData.password,
-        code: bindToken.value,
-        captchaId: formData.captchaId,
-        captchaCode: formData.captchaCode,
+    // 根据平台类型调用不同的绑定接口
+    switch (platform.value) {
+      case 'wework': {
+        const params: BindWeWorkAccountParams = {
+          username: formData.username,
+          password: formData.password,
+          code: bindToken.value,
+          captchaId: formData.captchaId,
+          captchaCode: formData.captchaCode,
+        }
+        const res = await fetchBindWeWorkAccount(params)
+        accessToken = res.accessToken || ''
+        refreshToken = res.refreshToken || ''
+        break
       }
-      const res = await fetchBindWeWorkAccount(params)
-      accessToken = res.accessToken || ''
-      refreshToken = res.refreshToken || ''
-      break
+
+      case 'feishu': {
+        // const params: BindFeishuAccountParams = {
+        //   username: formData.username,
+        //   password: formData.password,
+        //   code: code.value,
+        //   captchaId: formData.captchaId,
+        //   captchaCode: formData.captchaCode,
+        // }
+        // const res = await fetchBindFeishuAccount(params)
+        // accessToken = res.accessToken || ''
+        // refreshToken = res.refreshToken || ''
+        break
+      }
+
+      case 'dingtalk': {
+        // const params: BindDingtalkAccountParams = {
+        //   username: formData.username,
+        //   password: formData.password,
+        //   code: code.value,
+        //   captchaId: formData.captchaId,
+        //   captchaCode: formData.captchaCode,
+        // }
+        // const res = await fetchBindDingtalkAccount(params)
+        // accessToken = res.accessToken || ''
+        // refreshToken = res.refreshToken || ''
+        break
+      }
+
+      default:
+        throw new Error(`不支持的绑定类型: ${platform.value}`)
     }
 
-    case 'feishu': {
-      // const params: BindFeishuAccountParams = {
-      //   username: formData.username,
-      //   password: formData.password,
-      //   code: code.value,
-      //   captchaId: formData.captchaId,
-      //   captchaCode: formData.captchaCode,
-      // }
-      // const res = await fetchBindFeishuAccount(params)
-      // accessToken = res.accessToken || ''
-      // refreshToken = res.refreshToken || ''
-      break
-    }
-
-    case 'dingtalk': {
-      // const params: BindDingtalkAccountParams = {
-      //   username: formData.username,
-      //   password: formData.password,
-      //   code: code.value,
-      //   captchaId: formData.captchaId,
-      //   captchaCode: formData.captchaCode,
-      // }
-      // const res = await fetchBindDingtalkAccount(params)
-      // accessToken = res.accessToken || ''
-      // refreshToken = res.refreshToken || ''
-      break
-    }
-
-    default:
-      throw new Error(`不支持的绑定类型: ${platform.value}`)
+    return { accessToken, refreshToken }
   }
 
-  return { accessToken, refreshToken }
-}
-
-/**
- * 处理普通登录
- */
-const handleLogin = async () => {
-  // const res = await fetchLogin({
-  //   username: formData.username,
-  //   password: formData.password,
-  //   code: formData.captchaCode,
-  //   captchaId: formData.captchaId,
-  // })
+  /**
+   * 处理普通登录
+   */
+  const handleLogin = async () => {
+    // const res = await fetchLogin({
+    //   username: formData.username,
+    //   password: formData.password,
+    //   code: formData.captchaCode,
+    //   captchaId: formData.captchaId,
+    // })
 
 
-}
+  }
 
   /**
    * 获取验证码
@@ -247,7 +274,7 @@ const handleLogin = async () => {
     }
 
     // 获取验证码
-    await getCaptchaImage()
+    // await getCaptchaImage()
 
   }
 
