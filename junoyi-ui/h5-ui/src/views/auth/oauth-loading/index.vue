@@ -85,16 +85,11 @@ const handleWeWork = async () => {
       // 判断是否需要绑定账号
       if (res.needBind) {
         statusText.value = '该企业微信账号未绑定系统用户，请先绑定'
-        showNotify({
-          type: 'warning',
-          message: '该企业微信账号未绑定系统用户，请先绑定',
-          duration: 3000,
-        })
 
         // 跳转到绑定页面
         setTimeout(() => {
           router.replace({
-            path: '/auth/bind',
+            path: '/auth/login',
             query: { bindToken: res.code, platform: 'wework' },
           })
         }, 1500)

@@ -100,7 +100,7 @@
   import logo from '@/assets/image/LOGO.png'
   import type {FormRules} from "element-plus";
 
-  defineOptions({name: 'Bind'})
+  defineOptions({name: 'Login'})
 
   const route = useRoute()
   const router = useRouter()
@@ -108,7 +108,9 @@
   const userStore = useUserStore()
 
   const loading = ref<boolean>(false)
-  const isBinding = ref<boolean>(false)
+  const isBinding = computed(() => {
+    return !!platform.value && !!bindToken.value
+  })
 
   // 验证码加载
   const captchaLoading = ref<boolean>(false)
@@ -126,14 +128,13 @@
   const rules = computed<FormRules>(() => ({
     username: [{ required: true, message: '账号不能为空', trigger: 'blur' }],
     password: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
-    code: [{ required: true, message: '验证码不能为空', trigger: 'blur' }]
+    captchaCode: [{ required: true, message: '验证码不能为空', trigger: 'blur' }]
   }))
 
 
   // 从 URL 中获取参数
-  const platform = computed(() => route.query.type as string)
+  const platform = computed(() => route.query.platform as string)
   const bindToken = computed(() => route.query.bindToken as string)
-
   /**
    * 获取平台名称
    */
@@ -185,7 +186,7 @@
       // userStore.setInfo(userInfo)
 
       // 显示成功提示
-      const successMsg = platform.value
+      const successMsg = platform
         ? `${getPlatformName(platform.value)}账号绑定成功！`
         : '登录成功！'
 
@@ -215,7 +216,7 @@
    * 处理账号绑定
    */
   const handleBind = async () => {
-    if (!platform.value || !bindToken.value) {
+    if (!platform || !bindToken) {
       throw new Error('绑定信息不完整')
     }
 
@@ -267,7 +268,7 @@
       }
 
       default:
-        throw new Error(`不支持的绑定类型: ${platform.value}`)
+        throw new Error(`不支持的绑定类型: ${platform}`)
     }
 
     return { accessToken, refreshToken }
@@ -314,10 +315,6 @@
       }, 1000)
       return
     }
-
-    // 判断当前业务逻辑是绑定还是普通登录
-    if (platform.value && bindToken.value)
-      isBinding.value = true
 
     // 获取验证码
     // await getCaptchaImage()
