@@ -9,27 +9,27 @@
       </RouterView>
       <RouterView v-if="!$route.meta.keepAlive" :key="$route.path" />
     </div>
-    <nut-tabbar
-      unactive-color="#364636"
-      active-color="#1989fa"
+    <van-tabbar
       v-model="activeTab"
       v-show="tabbarVisible"
-      @tab-switch="tabSwitch"
+      @change="tabSwitch"
       safe-area-inset-bottom
+      active-color="#1989fa"
+      inactive-color="#364636"
     >
-      <nut-tabbar-item v-for="item in tabItem" :key="item.key" :tab-title="$t(`common.tabbar.${item.key}`)" :icon="item.icon" />
-    </nut-tabbar>
+      <van-tabbar-item v-for="item in tabItem" :key="item.key" :icon="item.icon">
+        {{ $t(`common.tabbar.${item.key}`) }}
+      </van-tabbar-item>
+    </van-tabbar>
   </div>
 </template>
 
 <script lang="ts" setup name="BasicLayoutPage">
-  import { Home, Checklist, My, Category } from '@nutui/icons-vue';
-
   const tabItem = [
-    { key: 'home', icon: Home },
-    { key: 'my-task', icon: Checklist },
-    { key: 'my-project', icon: Category },
-    { key: 'me', icon: My },
+    { key: 'home', icon: 'home-o' },
+    { key: 'my-task', icon: 'completed' },
+    { key: 'my-project', icon: 'apps-o' },
+    { key: 'me', icon: 'user-o' },
   ];
 
   const router = useRouter();
@@ -64,10 +64,9 @@
     { immediate: true },
   );
 
-  const tabSwitch = (_item: any, index: number) => {
+  const tabSwitch = (index: number) => {
     const tab = tabItem[index];
     if (tab && index >= 0 && index < tabItem.length) {
-      activeTab.value = index;
       router.push(`/${tab.key}`);
     }
   };
@@ -78,7 +77,7 @@
 </script>
 
 <style scoped lang="scss">
-  .nut-navbar {
+  .van-nav-bar {
     margin-bottom: 0;
   }
 
