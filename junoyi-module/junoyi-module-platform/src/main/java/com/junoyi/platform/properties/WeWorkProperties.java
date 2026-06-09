@@ -35,9 +35,20 @@ public class WeWorkProperties {
     private String secret;
 
     /**
-     * Oauth回调地址
+     * Oauth回调地址（已废弃，请使用 web.redirectUrl 或 h5.redirectUrl）
      */
+    @Deprecated
     private String redirectUrl;
+
+    /**
+     * Web端回调配置
+     */
+    private RedirectConfig web = new RedirectConfig();
+
+    /**
+     * H5端回调配置
+     */
+    private RedirectConfig h5 = new RedirectConfig();
 
     /**
      * token 存储方式：memory / redis
@@ -81,7 +92,52 @@ public class WeWorkProperties {
         }
     }
 
+    /**
+     * 校验 Web 端登录回调配置
+     */
+    public void validateWebRedirectUrl() {
+        validate();
+        if (isBlank(web.getRedirectUrl())) {
+            throw new IllegalArgumentException("企业微信 Web 端 redirectUrl 未配置");
+        }
+    }
+
+    /**
+     * 校验 H5 端登录回调配置
+     */
+    public void validateH5RedirectUrl() {
+        validate();
+        if (isBlank(h5.getRedirectUrl())) {
+            throw new IllegalArgumentException("企业微信 H5 端 redirectUrl 未配置");
+        }
+    }
+
+    /**
+     * 获取 Web 端回调地址
+     */
+    public String getWebRedirectUrl() {
+        return web.getRedirectUrl();
+    }
+
+    /**
+     * 获取 H5 端回调地址
+     */
+    public String getH5RedirectUrl() {
+        return h5.getRedirectUrl();
+    }
+
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    /**
+     * 回调地址配置
+     */
+    @Data
+    public static class RedirectConfig {
+        /**
+         * 回调地址
+         */
+        private String redirectUrl;
     }
 }

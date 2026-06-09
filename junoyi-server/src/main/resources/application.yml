@@ -161,6 +161,7 @@ junoyi:
         - http://192.168.0.109:5173
         - https://demo.junoyi.com
         - https://web.dev-platform.junoyi.com
+        - https://h5.dev-platform.junoyi.com
       # 允许跨域的方法
       allowed-methods:
         - GET
@@ -271,7 +272,10 @@ junoyi:
     # 应用Secret
     secret: aKK3E-vUDUpjFWNES54YQUG2HVndZ1-iT5JcmSwR8aw
     # OAuth回调地址
-    redirect-url: https://web.dev-platform.junoyi.com/#/auth/callback
+    web:
+      redirect-url: https://web.dev-platform.junoyi.com/auth/callback
+    h5:
+      redirect-url: https://h5.dev-platform.junoyi.com/auth/callback
     # token 存储方式：memory / redis
     token-store-type: redis
     # Redis 中的 key 前缀

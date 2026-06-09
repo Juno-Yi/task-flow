@@ -34,7 +34,7 @@ public class WeWorkAuthServiceImpl implements PlatformAuthService {
     }
 
     /**
-     * 获取授权地址
+     * 获取授权地址（Web 端扫码登录）
      * @param state 状态防伪造
      * @return 授权地址
      */
@@ -44,14 +44,14 @@ public class WeWorkAuthServiceImpl implements PlatformAuthService {
                 "https://open.work.weixin.qq.com/wwopen/sso/qrConnect?appid=%s&agentid=%s&redirect_uri=%s&state=%s",
                 weWorkClient.getCorpId(),
                 weWorkClient.getAgentId(),
-                urlEncode(weWorkClient.getRedirectUrl()),
+                urlEncode(weWorkClient.getWebRedirectUrl()),
                 state
         );
     }
 
 
     /**
-     * 获取移动端授权地址URL
+     * 获取移动端授权地址URL（H5 端）
      * @param state state
      * @return 授权地址URL
      */
@@ -66,7 +66,7 @@ public class WeWorkAuthServiceImpl implements PlatformAuthService {
                         "&state=%s" +
                         "#wechat_redirect",
                 weWorkClient.getCorpId(),
-                urlEncode(weWorkClient.getRedirectUrl()),
+                urlEncode(weWorkClient.getH5RedirectUrl()),
                 weWorkClient.getAgentId(),
                 state
         );
@@ -81,7 +81,8 @@ public class WeWorkAuthServiceImpl implements PlatformAuthService {
         WeWorkOauthConfig weWorkOauthConfig = new WeWorkOauthConfig();
         weWorkOauthConfig.setCorpId(weWorkClient.getCorpId());
         weWorkOauthConfig.setAgentId(weWorkClient.getAgentId());
-        weWorkOauthConfig.setRedirectUrl(weWorkClient.getRedirectUrl());
+        // 默认返回 Web 端回调地址
+        weWorkOauthConfig.setRedirectUrl(weWorkClient.getWebRedirectUrl());
         return weWorkOauthConfig;
     }
 
