@@ -13,6 +13,7 @@
         </div>
         <div class="title">
           <h2>钧逸研发协作管理平台</h2>
+          <p v-if="isBinding">请输入账号密码进行登录绑定平台账号</p>
         </div>
       </div>
 
@@ -45,32 +46,39 @@
           </ElFormItem>
           <!-- 验证码 -->
           <ElFormItem prop="code">
-            <div class="flex w-full gap-3">
+            <div class="captcha-wrapper">
               <ElInput
-                  class="custom-height flex-1"
+                  class="custom-height captcha-input"
                   placeholder="请输入验证码"
                   v-model.trim="formData.captchaCode"
               />
               <div
-                  class="captcha-img cursor-pointer rounded-lg overflow-hidden flex-shrink-0"
+                  class="captcha-img"
                   @click="getCaptchaImage"
                   title="刷新验证码"
               >
                 <img
                     v-if="captchaImage"
                     :src="'data:image/png;base64,' + captchaImage"
-                    alt="captcha"
-                    class="h-10 w-28 object-cover"
+                    alt="验证码"
                 />
-                <div
-                    v-else
-                    class="h-10 w-28 bg-gray-100 flex items-center justify-center text-gray-400 text-sm"
-                >
+                <div v-else class="captcha-placeholder">
                   {{ captchaLoading ? '加载中...' : '点击获取' }}
                 </div>
               </div>
             </div>
           </ElFormItem>
+          <div class="submit-btn-wrapper">
+            <ElButton
+                class="submit-btn"
+                type="primary"
+                @click="handleSubmit"
+                :loading="loading"
+                v-ripple
+            >
+              {{ isBinding ? '登录并绑定' : '登录' }}
+            </ElButton>
+          </div>
         </ElForm>
       </div>
 
@@ -99,6 +107,9 @@
 
   const userStore = useUserStore()
 
+  const loading = ref<boolean>(false)
+  const isBinding = ref<boolean>(false)
+
   // 验证码加载
   const captchaLoading = ref<boolean>(false)
   const captchaImage = ref<string>()
@@ -122,33 +133,6 @@
   // 从 URL 中获取参数
   const platform = computed(() => route.query.type as string)
   const bindToken = computed(() => route.query.bindToken as string)
-
-  // 页面标题和副标题
-  const pageTitle = computed(() => {
-    if (platform.value) {
-      return `${getPlatformName(platform.value)}账号绑定`
-    }
-    return '欢迎登录'
-  })
-
-  const pageSubtitle = computed(() => {
-    if (platform.value) {
-      return '请登录系统账号完成绑定'
-    }
-    return '智能任务流程管理平台'
-  })
-
-  const submitButtonText = computed(() => {
-    return platform.value ? '登录并绑定' : '登录'
-  })
-
-  const bindTipText = computed(() => {
-    if (platform.value) {
-      return `该${getPlatformName(platform.value)}账号未绑定系统用户`
-    }
-    return ''
-  })
-
 
   /**
    * 获取平台名称
@@ -184,8 +168,8 @@
       } else {
         // 普通登录逻辑
         const result = await handleLogin()
-        accessToken = result.accessToken
-        refreshToken = result.refreshToken
+        // accessToken = result.accessToken
+        // refreshToken = result.refreshToken
       }
 
       if (!accessToken) {
@@ -330,6 +314,10 @@
       }, 1000)
       return
     }
+
+    // 判断当前业务逻辑是绑定还是普通登录
+    if (platform.value && bindToken.value)
+      isBinding.value = true
 
     // 获取验证码
     // await getCaptchaImage()
