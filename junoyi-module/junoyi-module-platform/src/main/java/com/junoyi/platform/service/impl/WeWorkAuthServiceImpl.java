@@ -49,6 +49,29 @@ public class WeWorkAuthServiceImpl implements PlatformAuthService {
         );
     }
 
+
+    /**
+     * 获取移动端授权地址URL
+     * @param state state
+     * @return 授权地址URL
+     */
+    public String getMobileAuthorizeUrl(String state) {
+        return String.format(
+                "https://open.weixin.qq.com/connect/oauth2/authorize" +
+                        "?appid=%s" +
+                        "&redirect_uri=%s" +
+                        "&response_type=code" +
+                        "&scope=snsapi_base" +
+                        "&agentid=%s" +
+                        "&state=%s" +
+                        "#wechat_redirect",
+                weWorkClient.getCorpId(),
+                urlEncode(weWorkClient.getRedirectUrl()),
+                weWorkClient.getAgentId(),
+                state
+        );
+    }
+
     /**
      * 获取该平台的Oauth配置
      * @return Oauth配置

@@ -12,6 +12,7 @@ import {onMounted, ref} from 'vue';
 import {useRouter} from 'vue-router';
 import {useUserStore} from '@/store/modules/user';
 import {ClientType, getClientType} from "@/utils/oauth";
+import {fetchGetWeWorkAuthUrl} from "@/api/oauth/wework.ts";
 
 defineOptions({name: 'OauthLoading'});
 
@@ -19,6 +20,7 @@ const router = useRouter();
 const userStore = useUserStore();
 
 const statusText = ref('正在初始化...');
+const test = ref('')
 
 // 初始化
 const init = async () => {
@@ -34,12 +36,13 @@ const init = async () => {
 
     statusText.value = '正在检测运行环境...';
 
+
     const type = getClientType()
     switch (type){
       case ClientType.WEWORK:
         statusText.value = '当前运行环境为企业微信'
         // TODO: 获取企业微信code并登录
-        handleWeWork()
+        await handleWeWork()
         break
       case ClientType.FEISHU:
         statusText.value = '当前运行环境为飞书'
@@ -65,20 +68,21 @@ const init = async () => {
 /**
  * 处理企业微信登录逻辑
  */
-const handleWeWork = () => {
-  // 通过企业微信SDK按照流程获取授权code
-  // 如果绑定过该用户后端返回token对
-
-  // 如果没有绑定过，将bindToken存储到sessionStorage中临时存储，然后传递platform类型跳转到登录并绑定页面
-  sessionStorage.setItem("wework_bind_token", "test1234")
-  router.replace({
-    path: '/auth/login',
-    query: {
-      platform: 'wework'
-    }
-  })
+const handleWeWork = async () => {
+  // 通过企业微信Oauth按照流程获取授权code
+  const urlParams = new URLSearchParams(window.location.search)
+  const code = urlParams.get('code')
+  if (code) {
+    statusText.value = '正在登录...'
+    console.log('获取到企业微信code', code)
+    // TODO
+    // 调后端登录接口
+    return
+  }
+  statusText.value = '正在获取授权...'
+  const res = await fetchGetWeWorkAuthUrl()
+  window.location.href = res.authUrl
 }
-
 /**
  * 处理其他浏览器客户端登录逻辑
  */

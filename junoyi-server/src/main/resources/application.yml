@@ -157,6 +157,8 @@ junoyi:
       # 允许跨域访问的源（Origin）
       allowed-origins:
         - http://localhost:3006
+        - http://localhost:5173
+        - http://192.168.0.109:5173
         - https://demo.junoyi.com
         - https://web.dev-platform.junoyi.com
       # 允许跨域的方法

@@ -26,7 +26,7 @@
   /**
    * 初始化页面
    */
-  const init = () => {
+  const init = async () => {
     if (!platform)
       return
 

@@ -4,14 +4,32 @@ import { showToast } from 'vant';
 import { useUserStore } from '@/store/modules/user';
 import { fetchRefreshToken } from '@/api/auth';
 
+// 环境变量
+const { VITE_API_URL, VITE_API_PREFIX, VITE_WITH_CREDENTIALS } = import.meta.env;
+
+/** 计算完整的 API 基础路径 */
+const getBaseURL = (): string => {
+  const apiUrl = (VITE_API_URL || '').trim();
+  const apiPrefix = (VITE_API_PREFIX || '').trim();
+
+  // 拼接 API URL 和 prefix
+  if (apiUrl.endsWith('/') && apiPrefix.startsWith('/')) {
+    return apiUrl + apiPrefix.slice(1);
+  }
+  if (!apiUrl.endsWith('/') && !apiPrefix.startsWith('/')) {
+    return apiUrl + '/' + apiPrefix;
+  }
+  return apiUrl + apiPrefix;
+};
+
 // 是否正在刷新 token
 let isRefreshing = false;
 // 刷新 token 失败的请求队列
 let requestQueue: Array<() => void> = [];
 
 const service: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '',
-  withCredentials: false,
+  baseURL: getBaseURL(),
+  withCredentials: VITE_WITH_CREDENTIALS === 'true',
   timeout: 15000,
 });
 

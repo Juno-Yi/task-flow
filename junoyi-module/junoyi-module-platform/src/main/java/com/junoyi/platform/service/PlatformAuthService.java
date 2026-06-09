@@ -26,6 +26,13 @@ public interface PlatformAuthService {
     String getAuthorizeUrl(String state);
 
     /**
+     * 获取移动端授权地址URL
+     * @param state state
+     * @return 授权地址URL
+     */
+    String getMobileAuthorizeUrl(String state);
+
+    /**
      * 获取该平台的Oauth配置
      * @return Oauth配置
      */
