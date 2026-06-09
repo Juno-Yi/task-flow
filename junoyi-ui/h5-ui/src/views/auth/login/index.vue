@@ -96,7 +96,7 @@
   import { useRoute } from 'vue-router'
   import {type BindWeWorkAccountParams, fetchBindWeWorkAccount} from "@/api/oauth/wework.ts";
   import {useUserStore} from "@/store/modules/user.ts";
-  import {fetchGetCaptcha} from "@/api";
+  import {fetchGetCaptcha, fetchGetUserInfo, fetchLogin} from "@/api";
   import logo from '@/assets/image/LOGO.png'
   import type {FormRules} from "element-plus";
 
@@ -161,7 +161,7 @@
       let refreshToken = ''
 
       // 判断是绑定还是普通登录
-      if (platform.value && bindToken.value) {
+      if (isBinding.value) {
         // 账号绑定逻辑
         const result = await handleBind()
         accessToken = result.accessToken
@@ -169,8 +169,8 @@
       } else {
         // 普通登录逻辑
         const result = await handleLogin()
-        // accessToken = result.accessToken
-        // refreshToken = result.refreshToken
+        accessToken = result.accessToken
+        refreshToken = result.refreshToken
       }
 
       if (!accessToken) {
@@ -182,18 +182,10 @@
       userStore.setLoginStatus(true)
 
       // 获取用户信息
-      // const userInfo = await fetchGetUserInfo()
-      // userStore.setInfo(userInfo)
+      const userInfo = await fetchGetUserInfo()
+      userStore.setInfo(userInfo)
 
-      // 显示成功提示
-      const successMsg = platform
-        ? `${getPlatformName(platform.value)}账号绑定成功！`
-        : '登录成功！'
-
-      showToast({
-        message: successMsg,
-        icon: 'success',
-      })
+      // 调试用，从用户状态管理中获取userinfo各个字段数据
 
       // 跳转到首页或原始目标页面
       setTimeout(() => {
@@ -205,10 +197,10 @@
       showToast(error.message || '操作失败，请重试')
 
       // 刷新验证码
-      // getCaptcha()
+      await getCaptchaImage()
       formData.captchaCode = ''
     } finally {
-      // loading.value = false
+      loading.value = false
     }
   }
 
@@ -278,14 +270,16 @@
    * 处理普通登录
    */
   const handleLogin = async () => {
-    // const res = await fetchLogin({
-    //   username: formData.username,
-    //   password: formData.password,
-    //   code: formData.captchaCode,
-    //   captchaId: formData.captchaId,
-    // })
-
-
+    const res = await fetchLogin({
+      username: formData.username,
+      password: formData.password,
+      code: formData.captchaCode,
+      captchaId: formData.captchaId,
+    })
+    return {
+      accessToken: res.accessToken,
+      refreshToken: res.refreshToken
+    }
   }
 
   /**
@@ -317,7 +311,7 @@
     }
 
     // 获取验证码
-    // await getCaptchaImage()
+    await getCaptchaImage()
 
   }
 
