@@ -14,7 +14,7 @@ import {useUserStore} from '@/store/modules/user';
 import {ClientType, getClientType} from "@/utils/oauth";
 import {fetchGetWeWorkAuthUrl, fetchWeWorkCallback} from "@/api/oauth/wework.ts";
 import {fetchGetUserInfo} from "@/api/auth.ts";
-import {showToast, showNotify} from 'vant';
+import {showToast} from 'vant';
 
 defineOptions({name: 'OauthLoading'});
 
@@ -28,11 +28,42 @@ const init = async () => {
   try {
     // 检查是否已登录
     if (userStore.isLogin && userStore.accessToken) {
-      statusText.value = '已登录，正在跳转...';
-      setTimeout(() => {
-        router.replace('/home');
-      }, 500);
-      return;
+      statusText.value = '检查登录状态...';
+
+      try {
+        // 调用获取用户信息接口，重新获取user判断token是否过期无效
+        const userInfo = await fetchGetUserInfo();
+
+        // Token 有效，更新用户信息
+        userStore.setInfo(userInfo);
+
+        statusText.value = '已登录，正在跳转...';
+        setTimeout(() => {
+          router.replace('/home');
+        }, 500);
+        return;
+      } catch (error: any) {
+        // Token 验证失败
+        // 这里不要手动清除用户信息！
+        // HTTP 拦截器会自动尝试刷新 Token，如果刷新失败会自动清除并跳转登录页
+        console.error('Token 验证失败，等待拦截器自动处理:', error);
+        statusText.value = '登录状态异常，正在处理...';
+
+        // 等待拦截器处理完成（最多等待 2 秒）
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // 检查拦截器是否已清除用户信息
+        if (!userStore.accessToken) {
+          console.log('Token 刷新失败，继续 OAuth 登录流程');
+          statusText.value = '重新登录...';
+          // 继续执行后续的登录流程
+        } else {
+          // Token 刷新成功，跳转首页
+          console.log('Token 已自动刷新，跳转首页');
+          router.replace('/home');
+          return;
+        }
+      }
     }
 
     statusText.value = '正在检测运行环境...';
@@ -85,16 +116,11 @@ const handleWeWork = async () => {
       // 判断是否需要绑定账号
       if (res.needBind) {
         statusText.value = '该企业微信账号未绑定系统用户，请先绑定'
-        showNotify({
-          type: 'warning',
-          message: '该企业微信账号未绑定系统用户，请先绑定',
-          duration: 3000,
-        })
 
         // 跳转到绑定页面
         setTimeout(() => {
           router.replace({
-            path: '/auth/bind',
+            path: '/auth/login',
             query: { bindToken: res.code, platform: 'wework' },
           })
         }, 1500)

@@ -25,12 +25,11 @@ export interface UserInfo {
   userId: number;
   userName: string;
   nickName: string;
-  avatar?: string;
   email?: string;
-  phone?: string;
-  sex?: string;
-  roles?: string[];
+  avatar?: string;
   permissions?: string[];
+  roles?: string[];
+  depts?: number[];
 }
 
 /**

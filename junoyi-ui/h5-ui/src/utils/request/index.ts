@@ -2,7 +2,25 @@ import axios from 'axios';
 import type { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { showToast } from 'vant';
 import { useUserStore } from '@/store/modules/user';
-import { fetchRefreshToken } from '@/api/auth';
+import router from '@/router';
+
+/** 请求配置常量 */
+const REQUEST_TIMEOUT = 15000;
+const LOGOUT_DELAY = 500;
+const UNAUTHORIZED_DEBOUNCE_TIME = 3000;
+
+/** 401 防抖状态 */
+let isUnauthorizedErrorShown = false;
+let unauthorizedTimer: NodeJS.Timeout | null = null;
+
+/** Token 刷新状态 */
+let isRefreshing = false;
+let refreshSubscribers: Array<(token: string) => void> = [];
+
+/** 扩展 AxiosRequestConfig */
+interface ExtendedAxiosRequestConfig extends AxiosRequestConfig {
+  _retry?: boolean; // 标记是否为重试请求
+}
 
 // 环境变量
 const { VITE_API_URL, VITE_API_PREFIX, VITE_WITH_CREDENTIALS } = import.meta.env;
@@ -22,21 +40,16 @@ const getBaseURL = (): string => {
   return apiUrl + apiPrefix;
 };
 
-// 是否正在刷新 token
-let isRefreshing = false;
-// 刷新 token 失败的请求队列
-let requestQueue: Array<() => void> = [];
-
 const service: AxiosInstance = axios.create({
   baseURL: getBaseURL(),
   withCredentials: VITE_WITH_CREDENTIALS === 'true',
-  timeout: 15000,
+  timeout: REQUEST_TIMEOUT,
 });
 
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const userStore = useUserStore();
-    // 使用 accessToken
+    // 自动添加 accessToken
     if (userStore.accessToken) {
       config.headers.Authorization = `Bearer ${userStore.accessToken}`;
     }
@@ -47,65 +60,136 @@ service.interceptors.request.use(
   },
 );
 
+/** 尝试刷新 Token 并重试请求 */
+async function tryRefreshToken(originalRequest: ExtendedAxiosRequestConfig): Promise<AxiosResponse | null> {
+  originalRequest._retry = true;
+
+  // 如果正在刷新，将请求加入订阅列表
+  if (isRefreshing) {
+    return new Promise((resolve) => {
+      refreshSubscribers.push((token: string) => {
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        resolve(service(originalRequest));
+      });
+    });
+  }
+
+  isRefreshing = true;
+
+  try {
+    const userStore = useUserStore();
+
+    // 检查 refreshToken 是否存在
+    if (!userStore.refreshToken) {
+      console.error('refreshToken 不存在，清除登录状态');
+      userStore.clearUser();
+      return null;
+    }
+
+    console.log('尝试刷新 Token');
+
+    // 动态导入 fetchRefreshToken 避免循环依赖
+    const { fetchRefreshToken } = await import('@/api/auth');
+    const { accessToken, refreshToken } = await fetchRefreshToken(userStore.refreshToken);
+
+    // 更新 Token
+    userStore.setToken(accessToken, refreshToken);
+
+    console.log('Token 刷新成功');
+
+    // 通知所有等待的请求
+    refreshSubscribers.forEach((callback) => callback(accessToken));
+    refreshSubscribers = [];
+
+    // 重试当前请求
+    originalRequest.headers = originalRequest.headers || {};
+    originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+    return service(originalRequest);
+  } catch (error: any) {
+
+    // Token 刷新失败，清除所有登录信息
+    const userStore = useUserStore();
+    userStore.clearUser();
+
+    // 清空订阅列表
+    refreshSubscribers = [];
+
+    return null;
+  } finally {
+    isRefreshing = false;
+  }
+}
+
+/** 处理 401 错误（带防抖） */
+function handleUnauthorizedError(message?: string): void {
+  if (!isUnauthorizedErrorShown) {
+    isUnauthorizedErrorShown = true;
+    const userStore = useUserStore();
+
+    showToast(message || '登录已过期，请重新登录');
+
+    // 清除用户信息
+    userStore.clearUser();
+
+    // 延迟跳转到登录页
+    setTimeout(() => {
+      router.push('/login');
+    }, LOGOUT_DELAY);
+
+    // 清除之前的定时器
+    if (unauthorizedTimer) {
+      clearTimeout(unauthorizedTimer);
+    }
+
+    // 设置防抖定时器
+    unauthorizedTimer = setTimeout(() => {
+      isUnauthorizedErrorShown = false;
+      unauthorizedTimer = null;
+    }, UNAUTHORIZED_DEBOUNCE_TIME);
+  }
+}
+
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     const res = response.data;
-    if (res.code !== 200) {
-      showToast(res.msg || 'Error');
-      return Promise.reject(new Error(res.msg || 'Error'));
+
+    // 业务成功
+    if (res.code === 200) {
+      return res.data;
     }
-    return res.data;
+
+    // 业务层面的 401
+    if (res.code === 401) {
+      const originalRequest = response.config as ExtendedAxiosRequestConfig;
+      if (!originalRequest._retry) {
+        // 尝试刷新 Token
+        return tryRefreshToken(originalRequest).then((retryResponse) => {
+          if (retryResponse) return retryResponse.data.data;
+          handleUnauthorizedError(res.msg);
+          return Promise.reject(new Error(res.msg || '未授权'));
+        });
+      }
+    }
+
+    // 其他业务错误
+    showToast(res.msg || 'Error');
+    return Promise.reject(new Error(res.msg || 'Error'));
   },
   async (error: AxiosError) => {
     const status = error.response?.status;
-    const config = error.config as InternalAxiosRequestConfig;
+    const originalRequest = error.config as ExtendedAxiosRequestConfig;
+    const errorMsg = (error.response?.data as any)?.msg || error.message;
 
-    // 401 未授权 - 尝试刷新 token
-    if (status === 401 && config) {
-      const userStore = useUserStore();
-
-      // 如果没有 refreshToken，直接跳转登录
-      if (!userStore.refreshToken) {
-        userStore.clearUser();
-        window.location.hash = '#/login';
-        return Promise.reject(error);
-      }
-
-      // 如果正在刷新 token，将请求加入队列
-      if (isRefreshing) {
-        return new Promise((resolve) => {
-          requestQueue.push(() => {
-            config.headers.Authorization = `Bearer ${userStore.accessToken}`;
-            resolve(service(config));
-          });
-        });
-      }
-
-      isRefreshing = true;
-
-      try {
-        // 刷新 token
-        const { accessToken, refreshToken } = await fetchRefreshToken(userStore.refreshToken);
-        userStore.setToken(accessToken, refreshToken);
-
-        // 重试队列中的请求
-        requestQueue.forEach((callback) => callback());
-        requestQueue = [];
-
-        // 重试当前请求
-        config.headers.Authorization = `Bearer ${accessToken}`;
-        return service(config);
-      } catch (refreshError) {
-        // 刷新 token 失败，清空用户信息并跳转登录页
-        userStore.clearUser();
-        window.location.hash = '#/login';
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
+    // HTTP 401 未授权
+    if (status === 401 && originalRequest && !originalRequest._retry) {
+      const retryResponse = await tryRefreshToken(originalRequest);
+      if (retryResponse) return retryResponse;
+      handleUnauthorizedError(errorMsg);
     }
 
-    const message = (error.response?.data as any)?.msg || error.message || 'Network Error';
+    // 其他错误
+    const message = errorMsg || 'Network Error';
     showToast(message);
     return Promise.reject(error);
   },
