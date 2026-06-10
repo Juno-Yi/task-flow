@@ -43,11 +43,26 @@ const init = async () => {
         }, 500);
         return;
       } catch (error: any) {
-        // Token 无效或过期，清除登录状态
-        console.error('Token 验证失败:', error);
-        userStore.clearUser();
-        statusText.value = 'Token 已过期，重新登录...';
-        // 继续执行后续的登录流程
+        // Token 验证失败
+        // 这里不要手动清除用户信息！
+        // HTTP 拦截器会自动尝试刷新 Token，如果刷新失败会自动清除并跳转登录页
+        console.error('Token 验证失败，等待拦截器自动处理:', error);
+        statusText.value = '登录状态异常，正在处理...';
+
+        // 等待拦截器处理完成（最多等待 2 秒）
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // 检查拦截器是否已清除用户信息
+        if (!userStore.accessToken) {
+          console.log('Token 刷新失败，继续 OAuth 登录流程');
+          statusText.value = '重新登录...';
+          // 继续执行后续的登录流程
+        } else {
+          // Token 刷新成功，跳转首页
+          console.log('Token 已自动刷新，跳转首页');
+          router.replace('/home');
+          return;
+        }
       }
     }
 
