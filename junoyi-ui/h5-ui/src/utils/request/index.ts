@@ -84,9 +84,24 @@ service.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        // 检查 refreshToken 是否存在
+        if (!userStore.refreshToken) {
+          console.error('refreshToken 不存在，清除用户信息');
+          userStore.clearUser();
+          isRefreshing = false;
+          return Promise.reject(error);
+        }
+
+        console.log('尝试刷新 Token，refreshToken:', userStore.refreshToken.substring(0, 20) + '...');
+
         // 刷新 token
-        const { accessToken, refreshToken } = await fetchRefreshToken(userStore.refreshToken);
+        const result = await fetchRefreshToken(userStore.refreshToken);
+        console.log('刷新 Token 接口返回:', result);
+
+        const { accessToken, refreshToken } = result;
         userStore.setToken(accessToken, refreshToken);
+
+        console.log('Token 刷新成功');
 
         // 重试队列中的请求
         requestQueue.forEach((callback) => callback());

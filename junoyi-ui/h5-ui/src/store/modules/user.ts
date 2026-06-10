@@ -18,10 +18,12 @@ export const useUserStore = defineStore('user', {
     getUserInfo(): any {
       return this.info || {};
     },
-    // 兼容旧代码的 token getter
-    token(): string {
+    getAccessToken(): string {
       return this.accessToken;
     },
+    getRefreshToken(): string {
+      return this.refreshToken
+    }
   },
   actions: {
     /**
@@ -41,11 +43,9 @@ export const useUserStore = defineStore('user', {
     /**
      * 设置令牌
      */
-    setToken(newAccessToken: string, newRefreshToken?: string) {
+    setToken(newAccessToken: string, newRefreshToken: string) {
       this.accessToken = newAccessToken;
-      if (newRefreshToken) {
-        this.refreshToken = newRefreshToken;
-      }
+      this.refreshToken = newRefreshToken;
     },
 
     /**

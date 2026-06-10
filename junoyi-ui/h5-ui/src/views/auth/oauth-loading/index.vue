@@ -14,7 +14,7 @@ import {useUserStore} from '@/store/modules/user';
 import {ClientType, getClientType} from "@/utils/oauth";
 import {fetchGetWeWorkAuthUrl, fetchWeWorkCallback} from "@/api/oauth/wework.ts";
 import {fetchGetUserInfo} from "@/api/auth.ts";
-import {showToast, showNotify} from 'vant';
+import {showToast} from 'vant';
 
 defineOptions({name: 'OauthLoading'});
 
@@ -28,11 +28,27 @@ const init = async () => {
   try {
     // 检查是否已登录
     if (userStore.isLogin && userStore.accessToken) {
-      statusText.value = '已登录，正在跳转...';
-      setTimeout(() => {
-        router.replace('/home');
-      }, 500);
-      return;
+      statusText.value = '检查登录状态...';
+
+      try {
+        // 调用获取用户信息接口，重新获取user判断token是否过期无效
+        const userInfo = await fetchGetUserInfo();
+
+        // Token 有效，更新用户信息
+        userStore.setInfo(userInfo);
+
+        statusText.value = '已登录，正在跳转...';
+        setTimeout(() => {
+          router.replace('/home');
+        }, 500);
+        return;
+      } catch (error: any) {
+        // Token 无效或过期，清除登录状态
+        console.error('Token 验证失败:', error);
+        userStore.clearUser();
+        statusText.value = 'Token 已过期，重新登录...';
+        // 继续执行后续的登录流程
+      }
     }
 
     statusText.value = '正在检测运行环境...';

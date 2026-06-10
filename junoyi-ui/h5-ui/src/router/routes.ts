@@ -18,7 +18,7 @@ export const routes: RouteRecordRaw[] = [
         path: 'my-task',
         component: () => import('@/views/my-task/index.vue'),
         meta: {
-          title: 'common.tabbar.task'
+          title: 'common.tabbar.my-task'
         }
       },
       {
