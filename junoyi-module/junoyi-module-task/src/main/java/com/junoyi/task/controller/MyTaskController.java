@@ -1,6 +1,7 @@
 package com.junoyi.task.controller;
 
 import com.junoyi.framework.core.domain.module.R;
+import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
@@ -37,6 +38,15 @@ public class MyTaskController extends BaseController {
             return R.fail("请登录后操作");
         }
         return R.ok(myTaskService.getCurrentMonthMyTask(userId));
+    }
+
+    /**
+     * 获取当前用户近一个月任务列表（按照状态查询并且分页）
+     */
+    @GetMapping("/list/{status}")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<PageResult<TaskItemVO>> getCurrentUserTaskListByStatus(@PathVariable("status") Integer status){
+        return R.ok();
     }
 
     /**
