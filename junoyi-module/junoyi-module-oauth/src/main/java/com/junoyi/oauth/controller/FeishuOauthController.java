@@ -1,16 +1,17 @@
 package com.junoyi.oauth.controller;
 
-
 import com.junoyi.framework.web.domain.BaseController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * H5应用登录控制器
+ * 飞书 Oauth控制器
+ *
+ * @author Fan
  */
 @RestController
-@RequestMapping
+@RequestMapping("/auth/feishu")
 @RequiredArgsConstructor
-public class H5ApplicationOauthController extends BaseController {
+public class FeishuOauthController extends BaseController {
 }

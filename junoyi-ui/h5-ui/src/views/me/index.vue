@@ -17,6 +17,8 @@
   <van-grid :column-num="5">
     <van-grid-item v-for="item in 10" :key="item" icon="star-o" text="文字" />
   </van-grid>
+
+  <button @click="test">退出登录</button>
 </template>
 
 <script setup lang="ts">
@@ -32,6 +34,10 @@
   const goLogin = () => {
     router.push('/login');
   };
+
+  const test = () => {
+    userStore.logout()
+  }
 </script>
 
 <style lang="scss">
