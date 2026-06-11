@@ -50,15 +50,6 @@ export const routes: RouteRecordRaw[] = [
     },
   },
   {
-    name: 'callback',
-    path: '/auth/callback',
-    component: () => import('@/views/auth2/callback.vue'),
-    meta: {
-      title: '登录中...',
-      keepAlive: false,
-    },
-  },
-  {
     name: 'login',
     path: '/auth/login',
     component: () => import('@/views/auth/login/index.vue'),
