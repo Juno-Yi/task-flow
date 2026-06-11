@@ -1,0 +1,23 @@
+.avatar-wrap {
+    display: flex;
+    align-items: center;
+    margin: 10px 40px;
+
+    .member-detail {
+        margin-left: 20px;
+
+        .nickname {
+            font-size: 32px;
+            font-weight: bold;
+
+            .van-button {
+                margin-left: 10px;
+            }
+        }
+
+        .info {
+            margin-top: 10px;
+            font-size: 24px;
+        }
+    }
+}
