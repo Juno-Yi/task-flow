@@ -41,6 +41,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -331,28 +332,49 @@ public class WeWorkServiceImpl implements IWeWorkService {
      * @param weWorkUserId 企业微信用户ID
      */
     private void checkAndBindAccount(Long userId, String weWorkUserId) {
+        // 检查该系统用户是否已绑定企业微信账号
+        LambdaQueryWrapper<SysUserThirdAuth> userBindingWrapper = new LambdaQueryWrapper<>();
+        userBindingWrapper.eq(SysUserThirdAuth::getUserId, userId)
+                .eq(SysUserThirdAuth::getAuthType, ThirdAuthType.WEWORK.getCode());
+
+        SysUserThirdAuth userBinding = sysUserThirdAuthMapper.selectOne(userBindingWrapper);
+
+        if (userBinding != null) {
+            // 如果已绑定的是同一个企业微信账号，直接返回
+            if (userBinding.getAuthKey().equals(weWorkUserId)) {
+                log.info("企业微信绑定", "绑定关系已存在: userId={}, weWorkUserId={}", userId, weWorkUserId);
+                return;
+            }
+            // 如果已绑定了不同的企业微信账号，抛出异常
+            throw new OauthAccountAlreadyBoundException("该系统账号已绑定其他企业微信账号");
+        }
+
         // 检查该企业微信账号是否已被其他用户绑定
-        LambdaQueryWrapper<SysUserThirdAuth> checkWrapper = new LambdaQueryWrapper<>();
-        checkWrapper.eq(SysUserThirdAuth::getAuthType, ThirdAuthType.WEWORK.getCode())
+        LambdaQueryWrapper<SysUserThirdAuth> weWorkBindingWrapper = new LambdaQueryWrapper<>();
+        weWorkBindingWrapper.eq(SysUserThirdAuth::getAuthType, ThirdAuthType.WEWORK.getCode())
                 .eq(SysUserThirdAuth::getAuthKey, weWorkUserId);
 
-        SysUserThirdAuth existingAuth = sysUserThirdAuthMapper.selectOne(checkWrapper);
+        SysUserThirdAuth weWorkBinding = sysUserThirdAuthMapper.selectOne(weWorkBindingWrapper);
 
-        if (existingAuth != null && !existingAuth.getUserId().equals(userId)) {
+        if (weWorkBinding != null && !weWorkBinding.getUserId().equals(userId)) {
             throw new OauthAccountAlreadyBoundException("该企业微信账号已被其他用户绑定");
         }
 
-        // 创建绑定关系（如果不存在）
-        if (existingAuth == null) {
-            SysUserThirdAuth thirdAuth = new SysUserThirdAuth();
-            thirdAuth.setUserId(userId);
-            thirdAuth.setAuthType(ThirdAuthType.WEWORK.getCode());
-            thirdAuth.setAuthKey(weWorkUserId);
-            sysUserThirdAuthMapper.insert(thirdAuth);
-            log.info("企业微信绑定", "创建绑定关系成功: userId={}, weWorkUserId={}", userId, weWorkUserId);
-        } else {
-            log.info("企业微信绑定", "绑定关系已存在: userId={}, weWorkUserId={}", userId, weWorkUserId);
-        }
+        // 创建绑定关系
+        SysUserThirdAuth thirdAuth = new SysUserThirdAuth();
+        thirdAuth.setUserId(userId);
+        thirdAuth.setAuthType(ThirdAuthType.WEWORK.getCode());
+        thirdAuth.setAuthKey(weWorkUserId);
+        thirdAuth.setCreateTime(new Date());
+        thirdAuth.setCreateBy("system");
+        thirdAuth.setUpdateTime(new Date());
+        thirdAuth.setUpdateBy("system");
+        // 如果有登录用户信息，设置创建者和更新者
+        // thirdAuth.setCreateBy(SecurityUtils.getUsername());
+        // thirdAuth.setUpdateBy(SecurityUtils.getUsername());
+
+        sysUserThirdAuthMapper.insert(thirdAuth);
+        log.info("企业微信绑定", "创建绑定关系成功: userId={}, weWorkUserId={}", userId, weWorkUserId);
     }
 
     /**
