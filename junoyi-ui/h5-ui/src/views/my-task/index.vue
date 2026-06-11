@@ -1,51 +1,144 @@
 <!-- tab页 - 我的任务 -->
 <template>
   <div class="my-task-page">
-    <van-tabs v-model:active="active">
-      <van-tab title="待处理" >
-        <van-list
-            :loading="loading"
-            :finished="finished"
-            finished-text="没有更多了"
-            :load="onLoad"
+      <van-tabs v-model:active="active" @change="onTabChange" animated>
+        <van-tab
+            v-for="tab in tabs"
+            :key="tab.status"
+            :title="tab.title"
         >
-        </van-list>
-      </van-tab>
+          <div class="task-list-container">
+            <van-pull-refresh
+                :v-model="refreshing"
+                @refresh="onRefresh"
+            >
+              <van-list
+                  :loading="loading"
+                  :finished="finished"
+                  finished-text="没有更多了"
+                  :load="onLoad"
+              >
+                <task-item v-for="item in list" :key="item.id" :data="item"/>
+              </van-list>
+            </van-pull-refresh>
+          </div>
+        </van-tab>
+      </van-tabs>
 
-      <van-tab title="进行中">
-        <h1>进行中任务</h1>
-      </van-tab>
-
-      <van-tab title="待验收">
-        <h1>待验收任务</h1>
-      </van-tab>
-
-      <van-tab title="已驳回">
-        <h1>已驳回任务</h1>
-      </van-tab>
-
-      <van-tab title="已完成">
-        <h1>已完成任务</h1>
-      </van-tab>
-
-    </van-tabs>
   </div>
 </template>
 
 <script setup lang="ts">
 
+  import TaskItem from "@/views/my-task/modules/task-item.vue";
+
   defineOptions({name:'MyTask'})
 
-  const loading = ref<boolean>(true);
+  const tabs = [
+    { title: '待处理', status: 0, count: 10 },
+    { title: '进行中', status: 1, count: 20 },
+    { title: '待验收', status: 2, count: 10 },
+    { title: '已驳回', status: 3, count: 22 },
+    { title: '已完成', status: 4, count: 0 }
+  ]
+
+  const loading = ref<boolean>(false);
   const finished = ref<boolean>(false);
+  const refreshing = ref<boolean>(false);
   const active = ref(0);
-  const list = ref([]);
+
+  const pageNum = ref(1)
+  const list = ref([
+    {
+      id: 1,
+      title: '测试1'
+    },
+    {
+      id: 2,
+      title: '测试2'
+    },
+    {
+      id: 3,
+      title: '测试3'
+    },
+    {
+      id: 4,
+      title: '测试4'
+    },
+    {
+      id: 5,
+      title: '测试5'
+    },
+    {
+      id: 6,
+      title: '测试6'
+    },
+    {
+      id: 6,
+      title: '测试6'
+    },
+    {
+      id: 6,
+      title: '测试6'
+    },
+    {
+      id: 6,
+      title: '测试6'
+    },
+    {
+      id: 6,
+      title: '测试6'
+    },
+    {
+      id: 6,
+      title: '测试6'
+    },
+    {
+      id: 6,
+      title: '测试6'
+    },
+    {
+      id: 6,
+      title: '测试6'
+    },
+    {
+      id: 6,
+      title: '测试6'
+    },
+  ]);
+
+  /**
+   * 当tab切换时候
+   * @param index tab索引
+   */
+  const onTabChange = (index: number) => {
+    console.log('tab索引：',index)
+  }
 
   /**
    * 数据加载
    */
   const onLoad = async () => {
 
+  }
+
+  /**
+   * 数据刷新
+   */
+  const onRefresh = async () => {
+    try {
+
+      finished.value = false
+      // 重置分页
+      pageNum.value = 1
+      // 清空数据
+      list.value = []
+      // 重新加载
+      await onLoad()
+
+    } finally {
+      refreshing.value = false
+    }
   }
 </script>
 
