@@ -309,7 +309,7 @@ public class WeWorkServiceImpl implements IWeWorkService {
 
         if (bindCacheDTO == null || bindCacheDTO.getPlatformUserId() == null) {
             log.error("OAuth绑定", "绑定令牌已失效或不存在: bindToken={}, cacheKey={}", code, cacheKey);
-            throw new OauthBindTokenExpiredException("绑定令牌已失效，请重新扫码");
+            throw new OauthBindTokenExpiredException("绑定令牌已失效，请重新重试");
         }
 
         return bindCacheDTO;
