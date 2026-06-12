@@ -73,7 +73,6 @@ const init = async () => {
     switch (type){
       case ClientType.WEWORK:
         statusText.value = '当前运行环境为企业微信'
-        // TODO: 获取企业微信code并登录
         await handleWeWork()
         break
       case ClientType.FEISHU:

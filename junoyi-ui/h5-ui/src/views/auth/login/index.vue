@@ -329,5 +329,5 @@
 </script>
 
 <style scoped>
-@import 'style.scss';
+@use 'style.scss';
 </style>

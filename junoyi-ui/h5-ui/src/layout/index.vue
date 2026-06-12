@@ -1,6 +1,6 @@
 <template>
   <div class="main-page">
-    <van-nav-bar :title="$t($route.meta.title as string)" :left-arrow="!tabbarVisible" @click-left="goBack" />
+    <van-nav-bar v-if="showNavBar" :title="$t($route.meta.title as string)" :left-arrow="!tabbarVisible" @click-left="goBack" />
     <div class="main-box" :class="{ tabbar: tabbarVisible, border: showBorder }">
       <RouterView v-slot="{ Component }" v-if="$route.meta.keepAlive">
         <keep-alive>
@@ -25,6 +25,8 @@
 </template>
 
 <script lang="ts" setup name="BasicLayoutPage">
+  import {ClientType, getClientType} from "@/utils/oauth";
+
   const tabItem = [
     { key: 'home', icon: 'home-o' },
     { key: 'my-task', icon: 'completed' },
@@ -74,6 +76,24 @@
   const goBack = () => {
     router.go(-1);
   };
+
+  /**
+   * 判断是否展现NavBar
+   * 如果是非企微、飞书、钉钉应用就展示navbar，如果不是就展示
+   */
+  const showNavBar = computed(() => {
+    const clientType = getClientType()
+    switch (clientType) {
+      case ClientType.WEWORK:
+        return false
+      case ClientType.DINGTALK:
+        return false
+      case ClientType.FEISHU:
+        return false
+      default:
+        return true
+    }
+  })
 </script>
 
 <style scoped lang="scss">
