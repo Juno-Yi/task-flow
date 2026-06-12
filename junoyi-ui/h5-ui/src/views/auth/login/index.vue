@@ -94,7 +94,7 @@
 
 <script setup lang="ts">
   import { useRoute } from 'vue-router'
-  import {type BindWeWorkAccountParams, fetchBindWeWorkAccount} from "@/api/oauth/wework.ts";
+  import {fetchBindWeWorkAccount} from "@/api/oauth/wework.ts";
   import {useUserStore} from "@/store/modules/user.ts";
   import {fetchGetCaptcha, fetchGetUserInfo, fetchLogin} from "@/api";
   import logo from '@/assets/image/LOGO.png'
@@ -329,5 +329,5 @@
 </script>
 
 <style scoped>
-@use 'style.scss';
+@import 'style.scss';
 </style>
