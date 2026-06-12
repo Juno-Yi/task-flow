@@ -45,23 +45,35 @@
         </div>
       </div>
 
-      <!-- 右侧：任务成员头像 -->
-      <div v-if="task.taskUserList && task.taskUserList.length > 0" class="task-users">
-        <van-image
-          v-for="user in task.taskUserList.slice(0, 3)"
+      <!-- 右侧：负责人 + 协作人头像 -->
+      <div v-if="avatarUsers.length > 0" class="task-users">
+        <template
+          v-for="user in avatarUsers.slice(0, 3)"
           :key="user.userId"
-          :src="user.avatar"
-          round
-          width="24"
-          height="24"
-          class="user-avatar"
         >
-          <template #error>
-            <van-icon name="user-circle-o" size="24" />
-          </template>
-        </van-image>
-        <span v-if="task.taskUserList.length > 3" class="more-users">
-          +{{ task.taskUserList.length - 3 }}
+          <van-image
+            v-if="user.avatar"
+            :src="user.avatar"
+            round
+            width="48"
+            height="48"
+            class="user-avatar"
+          >
+            <template #error>
+              <div class="user-avatar user-avatar-fallback">
+                {{ getUserInitial(user.nickName) }}
+              </div>
+            </template>
+          </van-image>
+          <div
+            v-else
+            class="user-avatar user-avatar-fallback"
+          >
+            {{ getUserInitial(user.nickName) }}
+          </div>
+        </template>
+        <span v-if="avatarUsers.length > 3" class="more-users">
+          +{{ avatarUsers.length - 3 }}
         </span>
       </div>
     </div>
@@ -82,6 +94,31 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   click: [];
 }>();
+
+/**
+ * 获取用户昵称首字作为默认头像
+ */
+const getUserInitial = (nickName?: string) => {
+  return nickName?.trim().charAt(0) || '?';
+};
+
+/**
+ * 头像列表：负责人在前，协作人在后，并按 userId 去重
+ */
+const avatarUsers = computed<Api.Task.TaskUser[]>(() => {
+  const users = [props.task.ownerUser, ...(props.task.taskUserList || [])].filter(Boolean) as Api.Task.TaskUser[];
+  const userMap = new Map<number, Api.Task.TaskUser>();
+
+  users.forEach(user => {
+    if (!userMap.has(user.userId)) {
+      userMap.set(user.userId, user);
+    }
+  });
+
+  return Array.from(userMap.values());
+});
+
+
 
 // 优先级配置
 const priorityConfig: Record<number, { type: 'default' | 'primary' | 'success' | 'warning' | 'danger'; text: string }> = {
@@ -269,7 +306,6 @@ const handleClick = () => {
     .task-users {
       display: flex;
       align-items: center;
-      gap: -8px;
       flex-shrink: 0;
 
       .user-avatar {
@@ -281,11 +317,25 @@ const handleClick = () => {
         }
       }
 
+      .user-avatar-fallback {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #f2f3f5;
+        color: #8f959e;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 1;
+      }
+
       .more-users {
         margin-left: 4px;
-        font-size: 13px;          // 12px → 13px 更大
-        font-weight: 500;         // 添加字重
-        color: #666666;           // #969799 → #666666 更深
+        font-size: 18px;       
+        font-weight: bold;   
+        color: #666666;       
       }
     }
   }
