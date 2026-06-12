@@ -6,13 +6,13 @@
  * @module utils/pagination
  */
 
-import type { PaginatedResponse, PageResult } from '@/types/common/response';
+import type { PageResult } from '@/types';
 
 /**
  * 标准分页响应适配器
  * 将不同格式的分页响应转换为统一格式
  */
-export function defaultPaginationAdapter<T>(response: any): PaginatedResponse<T> {
+export function defaultPaginationAdapter<T>(response: any): PageResult<T> {
   // 如果已经是标准格式
   if (response.list && response.total !== undefined) {
     return {
@@ -138,7 +138,7 @@ export function mergePaginationData<T>(
 /**
  * 创建空的分页响应
  */
-export function createEmptyPaginationResponse<T>(): PaginatedResponse<T> {
+export function createEmptyPaginationResponse<T>(): PageResult<T> {
   return {
     list: [],
     total: 0,
