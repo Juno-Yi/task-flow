@@ -1,5 +1,11 @@
 <template>
-<h1>首页</h1>
+  <div class="home-page">
+    <!--  顶部欢迎banner  -->
+
+    <!--  数据概览  -->
+
+    <!--  风险提醒  -->
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -10,5 +16,5 @@
 </script>
 
 <style lang="scss">
-
+@import './style.scss';
 </style>

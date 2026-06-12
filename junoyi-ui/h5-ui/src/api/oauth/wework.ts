@@ -1,73 +1,46 @@
-import { http } from '@/utils/request';
-
-/**
- * 第三方授权 URL VO
- */
-export interface ThirdAuthUrlVO {
-  authUrl: string;
-  authType: string;
-  state: string;
-}
-
-/**
- * 企业微信登录配置 VO
- */
-export interface WeWorkConfigVO {
-  corpId: string;
-  agentId: string;
-  redirectUri: string;
-  state: string;
-}
-
-/**
- * 企业微信登录/绑定响应
- */
-export interface WeWorkLoginResponse {
-  accessToken?: string;
-  refreshToken?: string;
-  needBind?: boolean;
-  code?: string;
-  weWorkUserId?: string;
-}
-
-/**
- * 绑定企业微信账号参数
- */
-export interface BindWeWorkAccountParams {
-  username: string;
-  password: string;
-  code: string;
-  captchaId: string;
-  captchaCode: string;
-}
+import request from '@/utils/request';
 
 /**
  * 获取企业微信授权URL
+ * @returns 授权URL信息
  */
 export function fetchGetWeWorkAuthUrl() {
-  return http.get<ThirdAuthUrlVO>('/auth/wework/authorize-url');
+  return request.get<Api.Oauth.ThirdAuthUrlVO>({
+    url: '/auth/wework/authorize-url'
+  });
 }
 
 /**
  * 获取企业微信登录配置
+ * @returns 企业微信配置
  */
 export function fetchGetWeWorkLoginConfig() {
-  return http.get<WeWorkConfigVO>('/auth/wework/login-config');
+  return request.get<Api.Oauth.WeWorkConfigVO>({
+    url: '/auth/wework/login-config'
+  });
 }
 
 /**
  * 企业微信OAuth回调处理
+ * @param code 授权码
+ * @returns 登录响应
  */
 export function fetchWeWorkCallback(code: string) {
-  return http.get<WeWorkLoginResponse>('/auth/wework/callback', {
+  return request.get<Api.Oauth.WeWorkLoginResponse>({
+    url: '/auth/wework/callback',
     params: { code }
   });
 }
 
 /**
  * 绑定企业微信账号
+ * @param params 绑定参数
+ * @returns 登录响应
  */
-export function fetchBindWeWorkAccount(params: BindWeWorkAccountParams) {
-  return http.post<WeWorkLoginResponse>('/auth/wework/bind', params);
+export function fetchBindWeWorkAccount(params: Api.Oauth.BindWeWorkAccountParams) {
+  return request.post<Api.Oauth.WeWorkLoginResponse>({
+    url: '/auth/wework/bind',
+    data: params
+  });
 }
 
