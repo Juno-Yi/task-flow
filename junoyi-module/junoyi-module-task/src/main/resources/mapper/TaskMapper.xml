@@ -309,6 +309,61 @@
         t.create_time DESC
     </select>
 
+    <!-- 查询当前月份指定状态的任务列表（分页）-->
+    <select id="selectCurrentMonthTaskListByStatusPage" resultMap="TaskItemVOResultMap">
+        SELECT
+        t.id,
+        t.title,
+        t.description,
+        t.status,
+        t.priority,
+        t.plan_start_time,
+        t.plan_end_time,
+        -- 计算是否逾期：已完成不算逾期，未完成且超过计划结束时间算逾期
+        CASE
+        WHEN t.status = 4 THEN FALSE
+        WHEN t.plan_end_time IS NULL THEN FALSE
+        WHEN NOW() > t.plan_end_time THEN TRUE
+        ELSE FALSE
+        END AS is_overdue,
+        t.remark,
+        -- 负责人信息（taskRole = 1 表示负责人）
+        owner_su.user_id AS owner_user_id,
+        owner_su.avatar AS owner_avatar,
+        owner_su.nick_name AS owner_nick_name
+        FROM task t
+        -- 关联负责人
+        LEFT JOIN task_user owner_tu ON owner_tu.task_id = t.id AND owner_tu.task_role = 1
+        LEFT JOIN sys_user owner_su ON owner_su.user_id = owner_tu.user_id AND owner_su.del_flag = 0
+        WHERE t.del_flag = 0
+        -- 用户是任务的参与者（负责人或协作人）
+        AND EXISTS (
+        SELECT 1
+        FROM task_user tu
+        WHERE tu.task_id = t.id
+        AND tu.user_id = #{userId}
+        )
+        -- 指定状态过滤（与 selectCurrentMonthTaskList 的唯一差异）
+        AND t.status = #{status}
+        -- 优化查询逻辑：显示所有未完成任务 + 当月已完成的任务（与 selectCurrentMonthTaskList 保持一致）
+        AND (
+        -- 未完成的任务（状态 0,1,2,3）全部显示
+        t.status IN (0, 1, 2, 3)
+        OR
+        -- 已完成的任务（状态 4）只显示当月完成的
+        (t.status = 4 AND t.update_time BETWEEN #{monthStart} AND #{monthEnd})
+        )
+        ORDER BY
+        -- 优先级排序：未完成任务在前，已完成任务在后
+        CASE WHEN t.status = 4 THEN 1 ELSE 0 END ASC,
+        -- 按优先级降序（紧急优先）
+        t.priority DESC,
+        -- 按计划开始时间升序
+        t.plan_start_time ASC,
+        -- 最后按创建时间降序
+        t.create_time DESC
+    </select>
+
     <!-- 根据任务ID查询TaskItem协作人列表 -->
     <select id="selectItemTaskUsersByTaskId" resultType="com.junoyi.task.domain.vo.TaskItemVO$TaskUser">
         SELECT

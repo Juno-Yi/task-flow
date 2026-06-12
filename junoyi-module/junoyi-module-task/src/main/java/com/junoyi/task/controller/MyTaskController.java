@@ -42,11 +42,20 @@ public class MyTaskController extends BaseController {
 
     /**
      * 获取当前用户近一个月任务列表（按照状态查询并且分页）
+     *
+     * @param status 任务状态
+     * @return 分页任务列表
      */
     @GetMapping("/list/{status}")
     @PlatformScope(PlatformType.ADMIN_WEB)
-    public R<PageResult<TaskItemVO>> getCurrentUserTaskListByStatus(@PathVariable("status") Integer status){
-        return R.ok();
+    public R<PageResult<TaskItemVO>> getCurrentUserTaskListByStatus(@PathVariable("status") Integer status) {
+        // 获取当前登录用户ID
+        Long userId = getUserId();
+        if (userId == null || userId == 0) {
+            return R.fail("请登录后操作");
+        }
+
+        return R.ok(myTaskService.getCurrentMonthMyTaskByStatus(userId, status, buildPage()));
     }
 
     /**

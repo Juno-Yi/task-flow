@@ -98,6 +98,22 @@ public interface TaskMapper extends BaseMapper<Task> {
                                                 @Param("monthStart") java.util.Date monthStart,
                                                 @Param("monthEnd") java.util.Date monthEnd);
 
+    /**
+     * 查询当前月份指定状态的任务列表（分页）
+     *
+     * @param page 分页对象
+     * @param userId 用户ID
+     * @param status 任务状态
+     * @param monthStart 当前月开始时间
+     * @param monthEnd 当前月结束时间
+     * @return 任务列表
+     */
+    IPage<TaskItemVO> selectCurrentMonthTaskListByStatusPage(IPage<TaskItemVO> page,
+                                                              @Param("userId") Long userId,
+                                                              @Param("status") Integer status,
+                                                              @Param("monthStart") java.util.Date monthStart,
+                                                              @Param("monthEnd") java.util.Date monthEnd);
+
     Long countTaskUserRelation(@Param("taskId") Long taskId, @Param("userId") Long userId);
 
     TaskItemVO.OwnerUser selectItemOwnerUserByTaskId(@Param("taskId") Long taskId);
