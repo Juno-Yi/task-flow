@@ -15,7 +15,14 @@
  */
 
 import { ref, reactive, computed } from 'vue';
-import type { PaginationParams, PaginatedResponse } from '@/types/common/response';
+import type { PageResult } from '@/types';
+
+/** 分页参数接口 */
+export interface PaginationParams {
+  current: number;
+  size: number;
+  total?: number;
+}
 
 /** 分页配置接口 */
 export interface UsePaginationConfig<TApiFn extends (params: any) => Promise<any>> {
@@ -30,7 +37,7 @@ export interface UsePaginationConfig<TApiFn extends (params: any) => Promise<any
   /** 数据转换函数 */
   dataTransformer?: <T>(data: T[]) => T[];
   /** 成功回调 */
-  onSuccess?: <T>(data: T[], response: PaginatedResponse<T>) => void;
+  onSuccess?: <T>(data: T[], response: PageResult<T>) => void;
   /** 错误回调 */
   onError?: (error: Error) => void;
 }
@@ -95,10 +102,10 @@ export function usePagination<TApiFn extends (params: any) => Promise<any>>(
       };
 
       const response = await apiFn(params);
-      
+
       // 处理响应数据
-      const { list = [], total = 0, current = 1 } = response as PaginatedResponse<TRecord>;
-      
+      const { list = [], total = 0, current = 1 } = response as PageResult<TRecord>;
+
       // 数据转换
       const transformedList = dataTransformer ? dataTransformer(list) : list;
 
@@ -117,7 +124,7 @@ export function usePagination<TApiFn extends (params: any) => Promise<any>>(
       finished.value = data.value.length >= total;
 
       // 成功回调
-      onSuccess?.(transformedList, response as PaginatedResponse<TRecord>);
+      onSuccess?.(transformedList, response as PageResult<TRecord>);
     } catch (err: any) {
       error.value = err;
       finished.value = true;

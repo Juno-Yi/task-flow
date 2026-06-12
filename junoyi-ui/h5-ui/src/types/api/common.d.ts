@@ -14,12 +14,12 @@ declare namespace Api {
       total?: number;
     }
 
-    /** 分页响应 */
+    /** 分页响应（与 web-ui 保持一致，使用 PageResult）*/
     interface PaginatedResponse<T = any> {
       list: T[];
       total: number;
-      current: number;
-      size: number;
+      current?: number;
+      size?: number;
       pages?: number;
     }
 
