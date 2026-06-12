@@ -226,7 +226,7 @@
     // 根据平台类型调用不同的绑定接口
     switch (platform.value) {
       case 'wework': {
-        const params: BindWeWorkAccountParams = {
+        const params: Api.Oauth.BindWeWorkAccountParams = {
           username: formData.username,
           password: formData.password,
           code: bindToken.value,
