@@ -144,5 +144,5 @@
 
 
 <style lang="scss" scoped>
-@import './style.scss';
+@import './style';
 </style>

@@ -195,22 +195,56 @@ service.interceptors.response.use(
   },
 );
 
+/** 请求函数 */
+async function request<T = any>(config: ExtendedAxiosRequestConfig): Promise<T> {
+  try {
+    const response = await service.request(config);
+    return response as T;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/** API 方法集合（统一风格：对象参数） */
+const api = {
+  get<T>(config: ExtendedAxiosRequestConfig): Promise<T> {
+    return request<T>({ ...config, method: 'GET' });
+  },
+
+  post<T>(config: ExtendedAxiosRequestConfig): Promise<T> {
+    return request<T>({ ...config, method: 'POST' });
+  },
+
+  put<T>(config: ExtendedAxiosRequestConfig): Promise<T> {
+    return request<T>({ ...config, method: 'PUT' });
+  },
+
+  delete<T>(config: ExtendedAxiosRequestConfig): Promise<T> {
+    return request<T>({ ...config, method: 'DELETE' });
+  },
+
+  request<T>(config: ExtendedAxiosRequestConfig): Promise<T> {
+    return request<T>(config);
+  }
+};
+
+export default api;
+
+/** 兼容旧代码的导出（逐步废弃） */
 export const http = {
   get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    return service.get(url, config);
+    return api.get<T>({ url, ...config });
   },
 
   post<T = any>(url: string, data?: object, config?: AxiosRequestConfig): Promise<T> {
-    return service.post(url, data, config);
+    return api.post<T>({ url, data, ...config });
   },
 
   put<T = any>(url: string, data?: object, config?: AxiosRequestConfig): Promise<T> {
-    return service.put(url, data, config);
+    return api.put<T>({ url, data, ...config });
   },
 
   delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    return service.delete(url, config);
+    return api.delete<T>({ url, ...config });
   },
 };
-
-export default service;
