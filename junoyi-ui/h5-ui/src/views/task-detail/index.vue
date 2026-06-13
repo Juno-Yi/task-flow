@@ -119,8 +119,8 @@
       </van-skeleton>
     </van-pull-refresh>
 
-    <div v-if="taskDetail?.status === 0" class="bottom-actions"><van-button block round type="primary" :loading="startLoading" @click="handleStartTask">开始任务</van-button></div>
-    <div v-else-if="taskDetail?.status === 1 || taskDetail?.status === 3" class="bottom-actions"><van-button block round type="warning" :loading="submitLoading" @click="submitVisible = true">提交任务</van-button></div>
+    <div v-if="taskDetail?.status === 0" class="bottom-actions"><van-button block round type="primary" size="large" :loading="startLoading" @click="handleStartTask">开始任务</van-button></div>
+    <div v-else-if="taskDetail?.status === 1 || taskDetail?.status === 3" class="bottom-actions"><van-button block size="large" round type="warning" :loading="submitLoading" @click="submitVisible = true">提交任务</van-button></div>
 
     <van-dialog v-model:show="submitVisible" title="提交任务" show-cancel-button :before-close="handleSubmitBeforeClose">
       <van-field v-model="submitRemark" rows="4" autosize type="textarea" placeholder="请输入提交说明" />

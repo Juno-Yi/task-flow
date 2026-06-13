@@ -311,13 +311,12 @@
     left: 0;
     z-index: 20;
     padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-    background: rgba(255, 255, 255, 0.96);
     box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.08);
     backdrop-filter: blur(10px);
 
     :deep(.van-button) {
-      height: 48px;
-      font-size: 20px;
+      height: 80px;
+      font-size: 22px;
       font-weight: 600;
     }
   }
