@@ -71,5 +71,26 @@ declare namespace Api.Task {
         attachments?: TaskRecordAttachment[]
     }
 
+    interface TaskRecordAttachment {
+        id?: number
+        taskId?: number
+        recordId?: number
+        fileName?: string
+        fileUrl?: string
+    }
+
+    interface TaskSubmitAttachment {
+        fileName?: string
+        fileUrl?: string
+        filePath?: string
+    }
+
+    interface TaskSubmitDTO {
+        taskId: number
+        remark?: string
+        attachments?: TaskSubmitAttachment[]
+    }
+
+
 
 }

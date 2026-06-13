@@ -37,6 +37,14 @@ export const routes: RouteRecordRaw[] = [
           keepAlive: true,
         },
       },
+      {
+        path: 'task/detail/:taskId',
+        component: () => import('@/views/task-detail/index.vue'),
+        meta: {
+          title: '任务详情',
+        }
+      },
+
 
     ],
   },
@@ -59,14 +67,6 @@ export const routes: RouteRecordRaw[] = [
       title: '登录绑定',
       keepAlive: false,
     },
-  },
-  {
-    path: '/task/detail/:taskId',
-    component: () => import('@/views/task-detail/index.vue'),
-    meta: {
-      title: '任务详情',
-    },
-
   },
 
 

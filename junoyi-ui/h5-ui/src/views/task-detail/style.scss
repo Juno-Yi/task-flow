@@ -1,5 +1,324 @@
 .task-detail-page {
+  min-height: 100vh;
+  padding: 12px 0 82px;
+  background: #f5f6f8;
+  box-sizing: border-box;
 
-  height: 100vh;
-  border: red solid 1px;
+  .overview-card,
+  .info-card {
+    margin: 0 12px 12px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(31, 41, 55, 0.05);
+  }
+
+  :deep(.van-cell) {
+    padding: 14px 16px;
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  :deep(.van-cell__title) {
+    color: #303133;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  :deep(.van-cell__value) {
+    color: #606266;
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  :deep(.van-cell__label) {
+    margin-top: 8px;
+    color: #666;
+    font-size: 20px;
+    line-height: 28px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  :deep(.van-icon) {
+    font-size: 22px;
+  }
+
+  :deep(.van-tag) {
+    font-size: 18px;
+    line-height: 22px;
+    padding: 3px 8px;
+  }
+
+
+  .overview-card {
+    color: #fff;
+    background: linear-gradient(135deg, #2979ff 0%, #4facfe 100%);
+
+    .overview-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .task-no {
+      font-size: 20px;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    .overview-tags {
+      display: flex;
+      flex-shrink: 0;
+      gap: 6px;
+    }
+
+    h1 {
+      margin: 14px 0 8px;
+      font-size: 28px;
+      line-height: 1.35;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .description {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 20px;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .metric-grid {
+      margin-top: 16px;
+      overflow: hidden;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.14);
+
+      :deep(.van-grid-item__content) {
+        padding: 14px 8px;
+        background: transparent;
+      }
+    }
+
+    .metric-item {
+      width: 100%;
+      text-align: center;
+
+      span,
+      strong {
+        display: block;
+      }
+
+      span {
+        margin-bottom: 8px;
+        font-size: 20px;
+        opacity: 0.86;
+      }
+
+      strong {
+        font-size: 22px;
+        font-weight: 700;
+      }
+    }
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    color: #1f2937;
+    font-size: 22px;
+    font-weight: 700;
+
+    .van-icon {
+      color: #1989fa;
+      font-size: 24px;
+    }
+  }
+
+  .project-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .project-name {
+    color: #1f2937;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .project-desc,
+  .empty-text {
+    margin-top: 8px;
+    color: #666;
+    font-size: 20px;
+    line-height: 1.6;
+  }
+
+  .user-block + .user-block {
+    margin-top: 14px;
+  }
+
+  .user-label {
+    margin-bottom: 8px;
+    color: #8a8f99;
+    font-size: 13px;
+  }
+
+  .user-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px 8px 8px;
+    border-radius: 999px;
+    background: #f6f7f9;
+    color: #303133;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .avatar-fallback {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e8eaee;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+
+  .field-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    &.compact {
+      gap: 10px;
+    }
+  }
+
+  .field-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    color: #8a8f99;
+    font-size: 13px;
+
+    span {
+      flex-shrink: 0;
+    }
+
+    strong {
+      color: #303133;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.5;
+      text-align: right;
+      word-break: break-word;
+    }
+  }
+
+  .remark-box {
+    padding: 12px;
+    border-radius: 10px;
+    background: #f7f8fa;
+    color: #606266;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .highlight-card {
+    border: 1px solid transparent;
+  }
+
+  .danger-card {
+    border-color: #ffe1e1;
+    background: #fff8f8;
+
+    .card-title,
+    .card-title .van-icon {
+      color: #ee0a24;
+    }
+  }
+
+  .primary-card {
+    border-color: #dcebff;
+    background: #f7fbff;
+  }
+
+  .record-card {
+    .record-title {
+      margin-bottom: 6px;
+      color: #1f2937;
+      font-size: 21px;
+      font-weight: 700;
+    }
+
+    .record-meta,
+    .record-remark {
+      color: #606266;
+      font-size: 20px;
+      line-height: 1.6;
+    }
+  }
+
+  .attachment-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+
+    a {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eef6ff;
+      color: #1989fa;
+      font-size: 18px;
+      text-decoration: none;
+    }
+  }
+
+  .danger-text {
+    color: #ffe1e1;
+  }
+
+  .success-text {
+    color: #d8ffe5;
+  }
+
+  .bottom-actions {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(10px);
+
+    :deep(.van-button) {
+      height: 48px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+  }
 }
