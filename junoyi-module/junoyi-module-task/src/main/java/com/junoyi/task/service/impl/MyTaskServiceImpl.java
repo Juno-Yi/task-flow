@@ -1,5 +1,8 @@
 package com.junoyi.task.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.task.domain.bo.TaskActionBO;
@@ -71,6 +74,48 @@ public class MyTaskServiceImpl implements IMyTaskService {
 
         // 返回结果（如果为空返回空列表）
         return taskList != null ? taskList : List.of();
+    }
+
+    /**
+     * 获取当前月的任务列表（按状态分页查询）
+     *
+     * @param userId 用户ID
+     * @param status 任务状态
+     * @param page   分页对象
+     * @return 分页任务列表
+     */
+    @Override
+    public PageResult<TaskItemVO> getCurrentMonthMyTaskByStatus(Long userId, Integer status, Page<Task> page) {
+        // 参数校验
+        if (userId == null || userId <= 0) {
+            throw new TaskException("用户ID不能为空");
+        }
+        if (status == null) {
+            throw new TaskException("任务状态不能为空");
+        }
+
+        // 计算当前月的起止时间
+        LocalDate currentDate = LocalDate.now();
+        LocalDate firstDayOfMonth = currentDate.withDayOfMonth(1);
+        int daysOfMonth = currentDate.lengthOfMonth();
+        LocalDate lastDayOfMonth = currentDate.withDayOfMonth(daysOfMonth);
+
+        LocalDateTime monthStartDateTime = firstDayOfMonth.atStartOfDay();
+        LocalDateTime monthEndDateTime = lastDayOfMonth.atTime(LocalTime.MAX);
+
+        Date monthStart = Date.from(monthStartDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        Date monthEnd = Date.from(monthEndDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+        IPage<TaskItemVO> voPage = new Page<>(page.getCurrent(), page.getSize());
+        IPage<TaskItemVO> resultPage = taskMapper.selectCurrentMonthTaskListByStatusPage(voPage, userId, status, monthStart, monthEnd);
+
+        // 封装分页结果
+        return PageResult.of(
+                resultPage.getRecords(),
+                resultPage.getTotal(),
+                (int) resultPage.getCurrent(),
+                (int) resultPage.getSize()
+        );
     }
 
     /**

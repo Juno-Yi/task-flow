@@ -94,7 +94,7 @@
 
 <script setup lang="ts">
   import { useRoute } from 'vue-router'
-  import {type BindWeWorkAccountParams, fetchBindWeWorkAccount} from "@/api/oauth/wework.ts";
+  import {fetchBindWeWorkAccount} from "@/api/oauth/wework.ts";
   import {useUserStore} from "@/store/modules/user.ts";
   import {fetchGetCaptcha, fetchGetUserInfo, fetchLogin} from "@/api";
   import logo from '@/assets/image/LOGO.png'
@@ -226,7 +226,7 @@
     // 根据平台类型调用不同的绑定接口
     switch (platform.value) {
       case 'wework': {
-        const params: BindWeWorkAccountParams = {
+        const params: Api.Oauth.BindWeWorkAccountParams = {
           username: formData.username,
           password: formData.password,
           code: bindToken.value,

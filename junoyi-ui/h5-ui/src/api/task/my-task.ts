@@ -27,3 +27,32 @@ export function fetchGetMyTaskList(params: MyTaskListParams) {
     }
   });
 }
+
+
+/**
+ * 获取我的任务详情
+ */
+export function fetchGetMyTaskDetail(taskId: number) {
+  return request.get<Api.Task.TaskListDetailVO>({
+    url: `/task/my-task/${taskId}`
+  });
+}
+
+/**
+ * 开始任务
+ */
+export function fetchStartMyTask(taskId: number) {
+  return request.put<void>({
+    url: `/task/my-task/start/${taskId}`
+  });
+}
+
+/**
+ * 提交任务
+ */
+export function fetchSubmitMyTask(data: Api.Task.TaskSubmitDTO) {
+  return request.post<void>({
+    url: '/task/my-task/commit',
+    data
+  });
+}

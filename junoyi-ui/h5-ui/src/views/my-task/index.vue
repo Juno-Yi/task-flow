@@ -1,148 +1,182 @@
 <!-- tab页 - 我的任务 -->
 <template>
   <div class="my-task-page">
-      <van-tabs v-model:active="active" @change="onTabChange" animated>
-        <van-tab
-            v-for="tab in tabs"
-            :key="tab.status"
-            :title="tab.title"
-        >
-          <div class="task-list-container">
-            <van-pull-refresh
-                :v-model="refreshing"
-                @refresh="onRefresh"
-            >
-              <van-list
-                  :loading="loading"
-                  :finished="finished"
-                  finished-text="没有更多了"
-                  :load="onLoad"
-              >
-                <task-item v-for="item in list" :key="item.id" :data="item"/>
-              </van-list>
-            </van-pull-refresh>
-          </div>
-        </van-tab>
-      </van-tabs>
+    <van-tabs v-model:active="activeTab" @change="onTabChange" animated>
+      <van-tab
+        v-for="tab in tabs"
+        :key="tab.status"
+        :title="tab.title"
+      />
+    </van-tabs>
 
+    <div class="task-list-container">
+      <van-pull-refresh
+        v-model="refreshing"
+        @refresh="onRefresh"
+      >
+        <van-list
+          v-model:loading="loading"
+          :finished="finished"
+          :immediate-check="false"
+          finished-text="没有更多了"
+          @load="onLoad"
+        >
+          <!-- 任务列表 -->
+          <TaskItem
+            v-for="item in currentTaskList"
+            :key="item.id"
+            :task="item"
+            @click="handleTaskClick(item)"
+          />
+
+          <!-- 空状态 -->
+          <van-empty
+            v-if="currentTaskList.length === 0 && !loading"
+            description="暂无任务"
+          />
+        </van-list>
+      </van-pull-refresh>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { showToast } from 'vant';
+import TaskItem from '@/views/my-task/modules/task-item.vue';
+import { fetchGetMyTaskList } from '@/api/task/my-task';
+import router from "@/router";
 
-  import TaskItem from "@/views/my-task/modules/task-item.vue";
+defineOptions({ name: 'MyTask' });
 
-  defineOptions({name:'MyTask'})
+// Tab 配置
+const tabs = [
+  { title: '待处理', status: 0 },
+  { title: '进行中', status: 1 },
+  { title: '待验收', status: 2 },
+  { title: '已驳回', status: 3 },
+  { title: '已完成', status: 4 }
+] as const;
 
-  const tabs = [
-    { title: '待处理', status: 0, count: 10 },
-    { title: '进行中', status: 1, count: 20 },
-    { title: '待验收', status: 2, count: 10 },
-    { title: '已驳回', status: 3, count: 22 },
-    { title: '已完成', status: 4, count: 0 }
-  ]
+type TaskStatus = (typeof tabs)[number]['status'];
 
-  const loading = ref<boolean>(false);
-  const finished = ref<boolean>(false);
-  const refreshing = ref<boolean>(false);
-  const active = ref(0);
+// 当前激活的 tab
+const activeTab = ref(0);
 
-  const pageNum = ref(1)
-  const list = ref([
-    {
-      id: 1,
-      title: '测试1'
-    },
-    {
-      id: 2,
-      title: '测试2'
-    },
-    {
-      id: 3,
-      title: '测试3'
-    },
-    {
-      id: 4,
-      title: '测试4'
-    },
-    {
-      id: 5,
-      title: '测试5'
-    },
-    {
-      id: 6,
-      title: '测试6'
-    },
-    {
-      id: 6,
-      title: '测试6'
-    },
-    {
-      id: 6,
-      title: '测试6'
-    },
-    {
-      id: 6,
-      title: '测试6'
-    },
-    {
-      id: 6,
-      title: '测试6'
-    },
-    {
-      id: 6,
-      title: '测试6'
-    },
-    {
-      id: 6,
-      title: '测试6'
-    },
-    {
-      id: 6,
-      title: '测试6'
-    },
-    {
-      id: 6,
-      title: '测试6'
-    },
-  ]);
+// 加载状态
+const loading = ref(false);
+const finished = ref(false);
+const refreshing = ref(false);
 
-  /**
-   * 当tab切换时候
-   * @param index tab索引
-   */
-  const onTabChange = (index: number) => {
-    console.log('tab索引：',index)
-  }
+// 分页参数
+const pageParams = ref({
+  current: 1,
+  size: 10
+});
 
-  /**
-   * 数据加载
-   */
-  const onLoad = async () => {
+// 任务列表数据 - 按状态存储
+const taskListMap = ref<Record<TaskStatus, Api.Task.TaskItemVO[]>>({
+  0: [],
+  1: [],
+  2: [],
+  3: [],
+  4: []
+});
 
-  }
+// 当前选中的任务状态
+const currentStatus = computed<TaskStatus>(() => tabs[activeTab.value]?.status ?? 0);
 
-  /**
-   * 数据刷新
-   */
-  const onRefresh = async () => {
-    try {
+// 当前显示的任务列表
+const currentTaskList = computed(() => taskListMap.value[currentStatus.value] || []);
 
-      finished.value = false
-      // 重置分页
-      pageNum.value = 1
-      // 清空数据
-      list.value = []
-      // 重新加载
-      await onLoad()
+/**
+ * 获取任务列表
+ */
+const getTaskList = async (isRefresh = false) => {
+  if (loading.value && !isRefresh) return;
 
-    } finally {
-      refreshing.value = false
+  const status = currentStatus.value;
+
+  try {
+    if (isRefresh) {
+      pageParams.value.current = 1;
+      taskListMap.value[status] = [];
+      finished.value = false;
     }
+
+    loading.value = true;
+
+    // request 已经解包响应 data，这里拿到的是分页对象 PageResult
+    const res = await fetchGetMyTaskList({
+      status,
+      current: pageParams.value.current,
+      size: pageParams.value.size
+    });
+
+    const { list = [], current = 1, pages = 1, total = 0 } = res;
+
+    taskListMap.value[status] = isRefresh
+      ? list
+      : [...taskListMap.value[status], ...list];
+
+    pageParams.value.current = current;
+    finished.value = current >= pages || taskListMap.value[status].length >= total;
+  } catch (error) {
+    console.error('获取任务列表失败:', error);
+    finished.value = true;
+  } finally {
+    loading.value = false;
+    refreshing.value = false;
   }
+};
+
+/**
+ * Tab 切换
+ */
+const onTabChange = (index: number) => {
+  const tab = tabs[index];
+  if (!tab) return;
+
+  console.log('切换到 tab:', tab.title);
+  pageParams.value.current = 1;
+  finished.value = false;
+  loading.value = false;
+
+  getTaskList(true);
+};
+
+/**
+ * 加载更多
+ */
+const onLoad = async () => {
+  if (finished.value || loading.value) return;
+
+  pageParams.value.current += 1;
+  await getTaskList(false);
+};
+
+/**
+ * 下拉刷新
+ */
+const onRefresh = async () => {
+  await getTaskList(true);
+};
+
+/**
+ * 任务点击
+ */
+const handleTaskClick = (task: Api.Task.TaskItemVO) => {
+  // 点击后跳转任务详情页面
+  router.push({
+    path: `/task/detail/${task.id}`
+  })
+};
+
+onMounted(() => {
+  getTaskList(true);
+});
 </script>
 
-
 <style lang="scss" scoped>
-@import './style';
+@use './style.scss' as *;
 </style>
