@@ -3,6 +3,7 @@ import type { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, Inte
 import { showToast } from 'vant';
 import { useUserStore } from '@/store/modules/user';
 import router from '@/router';
+import { encryptRequest, decryptResponse, isApiEncryptEnabled } from './crypto';
 
 /** 请求配置常量 */
 const REQUEST_TIMEOUT = 15000;
@@ -19,6 +20,7 @@ let refreshSubscribers: Array<(token: string) => void> = [];
 
 /** 扩展 AxiosRequestConfig */
 interface ExtendedAxiosRequestConfig extends AxiosRequestConfig {
+  noEncrypt?: boolean; // 禁用加密（针对单个请求）
   _retry?: boolean; // 标记是否为重试请求
 }
 
@@ -44,6 +46,30 @@ const service: AxiosInstance = axios.create({
   baseURL: getBaseURL(),
   withCredentials: VITE_WITH_CREDENTIALS === 'true',
   timeout: REQUEST_TIMEOUT,
+  transformResponse: [
+    (data, headers) => {
+      // 当开启加密时，自动解密响应
+      if (isApiEncryptEnabled() && typeof data === 'string' && data.length > 0) {
+        try {
+          const decryptedData = decryptResponse(data);
+          return JSON.parse(decryptedData);
+        } catch (e) {
+          console.error('响应解密失败:', e);
+          // 解密失败，尝试作为普通 JSON 解析
+        }
+      }
+
+      const contentType = headers?.['content-type'];
+      if (contentType?.includes('application/json')) {
+        try {
+          return JSON.parse(data);
+        } catch {
+          return data;
+        }
+      }
+      return data;
+    },
+  ],
 });
 
 service.interceptors.request.use(
@@ -53,6 +79,35 @@ service.interceptors.request.use(
     if (userStore.accessToken) {
       config.headers.Authorization = `Bearer ${userStore.accessToken}`;
     }
+
+    // 获取扩展配置
+    const extConfig = config as InternalAxiosRequestConfig & ExtendedAxiosRequestConfig;
+
+    // POST/PUT/PATCH/DELETE 请求：如果 params 有数据但 data 为空，自动转换到 data
+    // 这个转换必须在加密之前执行
+    if (
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(config.method?.toUpperCase() || '') &&
+      extConfig.params &&
+      !config.data
+    ) {
+      config.data = extConfig.params;
+      extConfig.params = undefined;
+    }
+
+    if (config.data && !(config.data instanceof FormData) && !config.headers['Content-Type']) {
+      config.headers.set('Content-Type', 'application/json');
+
+      // 加密请求数据
+      if (isApiEncryptEnabled() && !extConfig.noEncrypt) {
+        const jsonData = typeof config.data === 'string' ? config.data : JSON.stringify(config.data);
+        config.data = encryptRequest(jsonData);
+        config.headers.set('X-Encrypted', 'true');
+        config.headers.set('Content-Type', 'text/plain');
+      } else {
+        config.data = typeof config.data === 'string' ? config.data : JSON.stringify(config.data);
+      }
+    }
+
     return config;
   },
   (error: AxiosError) => {
