@@ -29,4 +29,47 @@ declare namespace Api.Task {
         nickName?: string
     }
 
+
+    interface TaskListDetailVO {
+        id: number
+        title: string
+        description?: string
+        status?: number
+        statusLabel?: string
+        statusType?: string
+        priority: number
+        priorityLabel?: string
+        priorityType?: string
+        taskUserList?: TaskUser[]
+        ownerUser?: OwnerUser
+        planStartTime?: string
+        planEndTime?: string
+        startTime?: string
+        endTime?: string
+        remark?: string
+        isOverdue?: boolean
+        projectId?: number
+        createBy?: string
+        createTime?: string
+        updateBy?: string
+        updateTime?: string
+        recordList?: TaskRecordItem[]
+        latestSubmitRecord?: TaskRecordItem
+        latestRejectRecord?: TaskRecordItem
+    }
+
+    interface TaskRecordItem {
+        id?: number
+        taskId?: number
+        operatorId?: number
+        operatorName?: string
+        operatorAvatar?: string
+        actionType?: number
+        actionTypeLabel?: string
+        remark?: string
+        createTime?: string
+        attachments?: TaskRecordAttachment[]
+    }
+
+
 }

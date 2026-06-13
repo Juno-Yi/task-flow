@@ -45,6 +45,7 @@ import { ref, computed, onMounted } from 'vue';
 import { showToast } from 'vant';
 import TaskItem from '@/views/my-task/modules/task-item.vue';
 import { fetchGetMyTaskList } from '@/api/task/my-task';
+import router from "@/router";
 
 defineOptions({ name: 'MyTask' });
 
@@ -167,8 +168,10 @@ const onRefresh = async () => {
  * 任务点击
  */
 const handleTaskClick = (task: Api.Task.TaskItemVO) => {
-  console.log('点击任务:', task.id, task.title);
-  showToast(`点击了任务：${task.title}`);
+  // 点击后跳转任务详情页面
+  router.push({
+    path: `/task/detail/${task.id}`
+  })
 };
 
 onMounted(() => {

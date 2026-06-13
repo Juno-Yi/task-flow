@@ -40,6 +40,8 @@ export const routes: RouteRecordRaw[] = [
 
     ],
   },
+
+  // 独立页面
   {
     name: 'oauth-loading',
     path: '/loading',
@@ -58,6 +60,16 @@ export const routes: RouteRecordRaw[] = [
       keepAlive: false,
     },
   },
+  {
+    path: '/task/detail/:taskId',
+    component: () => import('@/views/task-detail/index.vue'),
+    meta: {
+      title: '任务详情',
+    },
+
+  },
+
+
   // 匹配不到重定向会主页
   {
     // 找不到路由重定向到首页
