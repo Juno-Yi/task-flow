@@ -169,6 +169,11 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const priorityConfig = computed(() => getPriorityConfig(taskDetail.value?.priority));
 const statusConfig = computed(() => getStatusConfig(taskDetail.value?.status));
 
+/**
+ * 获取任务优先级配置
+ * @param priority - 优先级数值（1:低, 2:中, 3:高, 4:紧急）
+ * @returns 包含显示文本和样式类型的配置对象
+ */
 const getPriorityConfig = (priority?: number) => {
   const map = {
     1: { text: '低', type: 'default' },
@@ -179,6 +184,11 @@ const getPriorityConfig = (priority?: number) => {
   return map[priority as keyof typeof map] || { text: '-', type: 'default' as const };
 };
 
+/**
+ * 获取任务状态配置
+ * @param status - 状态数值（0:待处理, 1:进行中, 2:待验收, 3:已驳回, 4:已完成）
+ * @returns 包含显示文本和样式类型的配置对象
+ */
 const getStatusConfig = (status?: number) => {
   const map = {
     0: { text: '待处理', type: 'default' },
@@ -190,6 +200,9 @@ const getStatusConfig = (status?: number) => {
   return map[status as keyof typeof map] || { text: '-', type: 'default' as const };
 };
 
+/**
+ * 加载任务详情及关联项目信息
+ */
 const loadData = async () => {
   if (!taskId) return;
   loading.value = !refreshing.value;
@@ -204,6 +217,10 @@ const loadData = async () => {
   }
 };
 
+/**
+ * 处理开始任务操作
+ * 调用接口后刷新数据并跳转到任务列表页
+ */
 const handleStartTask = async () => {
   if (!taskDetail.value?.id || startLoading.value) return;
   startLoading.value = true;
@@ -218,6 +235,11 @@ const handleStartTask = async () => {
   }
 };
 
+/**
+ * 处理提交任务前的校验和提交逻辑
+ * @param action - 操作类型，'cancel' 表示取消操作
+ * @returns 是否允许关闭弹窗
+ */
 const handleSubmitBeforeClose = async (action: string) => {
   if (action === 'cancel') return true;
   if (!taskDetail.value?.id) return true;
@@ -241,6 +263,11 @@ const handleSubmitBeforeClose = async (action: string) => {
   }
 };
 
+/**
+ * 格式化时间为完整格式
+ * @param value - 时间字符串
+ * @returns 格式化后的时间字符串（YYYY-MM-DD HH:mm）或 '-'
+ */
 const formatTime = (value?: string) => {
   if (!value) return '-';
   const date = new Date(value);
@@ -249,6 +276,11 @@ const formatTime = (value?: string) => {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
 
+/**
+ * 格式化时间为紧凑格式
+ * @param value - 时间字符串
+ * @returns 格式化后的时间字符串（MM-DD HH:mm）或 '-'
+ */
 const formatCompactTime = (value?: string) => {
   if (!value) return '-';
   const date = new Date(value);
@@ -256,6 +288,12 @@ const formatCompactTime = (value?: string) => {
   return `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 };
 
+/**
+ * 格式化计划时间段
+ * @param startTime - 开始时间
+ * @param endTime - 结束时间
+ * @returns 格式化后的时间段字符串
+ */
 const formatPlanPeriod = (startTime?: string, endTime?: string) => {
   if (startTime && endTime) return `${formatCompactTime(startTime)} ~ ${formatCompactTime(endTime)}`;
   if (startTime) return `${formatCompactTime(startTime)} ~ 未设置`;
@@ -263,6 +301,12 @@ const formatPlanPeriod = (startTime?: string, endTime?: string) => {
   return '未设置';
 };
 
+/**
+ * 计算两个时间点之间的小时数差值
+ * @param startTime - 开始时间
+ * @param endTime - 结束时间
+ * @returns 格式化后的时长字符串（分钟/小时/天）或 '-'
+ */
 const calculateHours = (startTime?: string, endTime?: string) => {
   if (!startTime || !endTime) return '-';
   const diffHours = (new Date(endTime).getTime() - new Date(startTime).getTime()) / 36e5;
@@ -275,11 +319,22 @@ const calculateHours = (startTime?: string, endTime?: string) => {
   return hours > 0 ? `${days} 天 ${hours} 小时` : `${days} 天`;
 };
 
-
+/**
+ * 获取用户昵称的首字母
+ * @param nickName - 用户昵称
+ * @returns 首字母字符，如果为空则返回 '?'
+ */
 const getUserInitial = (nickName?: string) => nickName?.trim().charAt(0) || '?';
+
+/**
+ * 获取文件URL，如果为空则返回占位符
+ * @param url - 文件URL
+ * @returns 原始URL或占位符
+ */
 const getFileUrl = (url?: string) => url || 'javascript:void(0)';
 
 onMounted(loadData);
+
 </script>
 
 <style lang="scss" scoped>
