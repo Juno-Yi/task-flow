@@ -41,5 +41,5 @@
 </script>
 
 <style lang="scss">
-@use './style.scss';
+@use './style.scss' as *;
 </style>
