@@ -52,6 +52,11 @@ declare global {
     VITE_USE_REPORT: boolean;
     VITE_USE_HTTPS: boolean;
     VITE_USE_PWA: boolean;
+    VITE_API_URL: string;
+    VITE_API_PREFIX: string;
+    VITE_WITH_CREDENTIALS: string;
+    VITE_API_ENCRYPT: string;
+    VITE_API_ENCRYPT_PUBLIC_KEY: string;
   }
 
   declare function parseInt(s: string | number, radix?: number): number;
