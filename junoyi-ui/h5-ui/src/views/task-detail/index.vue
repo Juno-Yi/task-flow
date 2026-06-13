@@ -122,8 +122,24 @@
     <div v-if="taskDetail?.status === 0" class="bottom-actions"><van-button block round type="primary" size="large" :loading="startLoading" @click="handleStartTask">开始任务</van-button></div>
     <div v-else-if="taskDetail?.status === 1 || taskDetail?.status === 3" class="bottom-actions"><van-button block size="large" round type="warning" :loading="submitLoading" @click="submitVisible = true">提交任务</van-button></div>
 
-    <van-dialog v-model:show="submitVisible" title="提交任务" show-cancel-button :before-close="handleSubmitBeforeClose">
-      <van-field v-model="submitRemark" rows="4" autosize type="textarea" placeholder="请输入提交说明" />
+    <van-dialog
+      v-model:show="submitVisible"
+      title="提交任务"
+      class-name="submit-task-dialog"
+      show-cancel-button
+      :before-close="handleSubmitBeforeClose"
+    >
+      <div class="submit-dialog-content">
+        <div class="submit-label">提交说明</div>
+        <van-field
+          v-model="submitRemark"
+          class="submit-textarea"
+          rows="5"
+          autosize
+          type="textarea"
+          placeholder="请输入提交说明"
+        />
+      </div>
     </van-dialog>
   </div>
 </template>
@@ -148,6 +164,7 @@ const submitVisible = ref(false);
 const submitRemark = ref('');
 const taskDetail = ref<Api.Task.TaskListDetailVO>();
 const projectInfo = ref<Api.Project.ProjectInfoVO>();
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const priorityConfig = computed(() => getPriorityConfig(taskDetail.value?.priority));
 const statusConfig = computed(() => getStatusConfig(taskDetail.value?.status));
@@ -193,6 +210,8 @@ const handleStartTask = async () => {
   try {
     await fetchStartMyTask(taskDetail.value.id);
     showToast('任务已开始');
+    await loadData();
+    await delay(1200);
     router.replace('/my-task');
   } finally {
     startLoading.value = false;
@@ -210,8 +229,11 @@ const handleSubmitBeforeClose = async (action: string) => {
   submitLoading.value = true;
   try {
     await fetchSubmitMyTask({ taskId: taskDetail.value.id, remark: submitRemark.value.trim(), attachments: [] });
-    showToast('任务提交成功');
+    submitVisible.value = false;
     submitRemark.value = '';
+    showToast('任务提交成功');
+    await loadData();
+    await delay(1200);
     router.replace('/my-task');
     return true;
   } finally {

@@ -321,3 +321,51 @@
     }
   }
 }
+
+
+:global(.submit-task-dialog) {
+  width: 88vw;
+  border-radius: 18px;
+}
+
+:global(.submit-task-dialog .van-dialog__header) {
+  padding-top: 22px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 30px;
+}
+
+:global(.submit-task-dialog .van-dialog__content) {
+  padding: 18px 20px 8px;
+}
+
+:global(.submit-task-dialog .submit-label) {
+  margin-bottom: 10px;
+  color: #303133;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+:global(.submit-task-dialog .submit-textarea) {
+  padding: 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 10px;
+  background: #fff;
+}
+
+:global(.submit-task-dialog .submit-textarea .van-field__control) {
+  min-height: 130px;
+  color: #303133;
+  font-size: 20px;
+  line-height: 28px;
+}
+
+:global(.submit-task-dialog .van-dialog__footer) {
+  padding: 12px 16px 16px;
+}
+
+:global(.submit-task-dialog .van-dialog__footer .van-button) {
+  height: 48px;
+  border-radius: 10px;
+  font-size: 20px;
+}
