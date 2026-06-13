@@ -193,7 +193,7 @@ const handleStartTask = async () => {
   try {
     await fetchStartMyTask(taskDetail.value.id);
     showToast('任务已开始');
-    await loadData();
+    router.replace('/my-task');
   } finally {
     startLoading.value = false;
   }
@@ -212,7 +212,7 @@ const handleSubmitBeforeClose = async (action: string) => {
     await fetchSubmitMyTask({ taskId: taskDetail.value.id, remark: submitRemark.value.trim(), attachments: [] });
     showToast('任务提交成功');
     submitRemark.value = '';
-    await loadData();
+    router.replace('/my-task');
     return true;
   } finally {
     submitLoading.value = false;
@@ -255,7 +255,6 @@ const calculateHours = (startTime?: string, endTime?: string) => {
 
 
 const getUserInitial = (nickName?: string) => nickName?.trim().charAt(0) || '?';
-const getUserNames = (users?: Api.Task.TaskUser[]) => users?.map(item => item.nickName || `用户${item.userId}`).join('、') || '无';
 const getFileUrl = (url?: string) => url || 'javascript:void(0)';
 
 onMounted(loadData);
