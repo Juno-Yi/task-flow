@@ -123,7 +123,6 @@ const getTaskList = async (isRefresh = false) => {
     finished.value = current >= pages || taskListMap.value[status].length >= total;
   } catch (error) {
     console.error('获取任务列表失败:', error);
-    showToast('获取任务列表失败');
     finished.value = true;
   } finally {
     loading.value = false;
@@ -161,7 +160,6 @@ const onLoad = async () => {
  */
 const onRefresh = async () => {
   await getTaskList(true);
-  showToast('刷新成功');
 };
 
 /**
