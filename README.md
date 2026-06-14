@@ -31,6 +31,59 @@ API接口文档：https://lk458yviee.apifox.cn
 
 # 项目功能展示
 
+### H5移动端端
+<div align="center">
+<table width="100%">
+
+<tr>
+<td width="50%" align="center">
+<img src="doc/img/view_h5_login.png" alt="登录界面" width="100%" />
+手动输入账号密码登录界面（如果是企微等应用无登录页面自动登录认证）
+</td>
+<td width="50%" align="center">
+<img src="doc/img/view_h5_bind.png" alt="账号绑定" width="100%" />
+账号绑定
+</td>
+</tr>
+
+<tr>
+<td width="50%" align="center">
+<img src="doc/img/view_h5_login.png" alt="登录界面" width="100%" />
+首页 Tab
+</td>
+<td width="50%" align="center">
+<img src="doc/img/view_h5_my_task.png" alt="我的任务" width="100%" />
+我的任务 Tab
+</td>
+</tr>
+
+<tr>
+<td width="50%" align="center">
+<img src="doc/img/view_h5_login.png" alt="我的项目" width="100%" />
+我的项目 Tab
+</td>
+<td width="50%" align="center">
+<img src="doc/img/view_h5_my_task.png" alt="我的" width="100%" />
+我的 Tab
+</td>
+</tr>
+
+<tr>
+<td width="50%" align="center">
+<img src="doc/img/view_h5_login.png" alt="任务详情" width="100%" />
+任务详情
+</td>
+<td width="50%" align="center">
+<img src="doc/img/view_h5_my_task.png" alt="" width="100%" />
+</td>
+</tr>
+
+<tr>
+
+</table>
+</div>
+
+### Web端
 <div align="center">
 
 <table width="100%">
@@ -316,3 +369,14 @@ log:
 > 手机：13160393978
 > 
 > 微信公众号：钧逸网络科技
+
+
+# 版本更新日志
+
+> 版本顺序按照时间先后循序排序，最多展示 15 个版本更新日志
+> 
+> 更多详细更新日志，请关注公众号获取最新更新讯息
+
+### v1.0.0
+
+
