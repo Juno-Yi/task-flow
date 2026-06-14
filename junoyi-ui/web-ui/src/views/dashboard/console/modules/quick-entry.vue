@@ -74,9 +74,12 @@
 </template>
 
 <script setup lang="ts">
+import { usePermission } from '@/hooks/core/usePermission'
+
 defineOptions({ name: 'QuickEntry' })
 
 const router = useRouter()
+const { hasPermission } = usePermission()
 
 /** 应用项定义 */
 interface AppItem {
@@ -85,6 +88,8 @@ interface AppItem {
   icon: string
   bgColor: string
   category: string
+  /** 权限标识，为空则不做权限控制 */
+  permission?: string
 }
 
 /** 分类定义 */
@@ -104,7 +109,7 @@ interface AppGroup {
 const categories = ref<Category[]>([
   { key: 'all', label: '全部' },
   { key: 'work', label: '协作办公' },
-  { key: 'project', label: '项目管理' },
+  { key: 'project', label: '研发管理' },
   { key: 'system', label: '系统管理' },
 ])
 
@@ -113,33 +118,46 @@ const activeCategory = ref('all')
 
 /** 所有应用列表 */
 const appList = ref<AppItem[]>([
-  // 协作办公
+  // ========== 协作办公 ==========
   { name: '我的任务', path: '/dashboard/my-task', icon: 'ri:task-line', bgColor: '#409EFF', category: 'work' },
   { name: '项目动态', path: '/project/record', icon: 'ri:file-list-3-line', bgColor: '#F56C6C', category: 'work' },
-  { name: '项目排期', path: '/project/record', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
-  { name: '项目立项', path: '/project/setup', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
-  { name: '项目执行', path: '/project/execution', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
-  { name: '项目结项', path: '/project/acceptance', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
-  { name: '项目结后', path: '/project/end', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
-  { name: '项目归档', path: '/project/archived', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
+  { name: '项目排期', path: '/project/schedule', icon: 'ri:calendar-schedule-line', bgColor: '#909399', category: 'work' },
+  { name: '项目立项', path: '/project/setup', icon: 'ri:draft-line', bgColor: '#9B59B6', category: 'work' },
+  { name: '项目执行', path: '/project/execution', icon: 'ri:play-circle-line', bgColor: '#3498DB', category: 'work' },
+  { name: '项目结项', path: '/project/acceptance', icon: 'ri:checkbox-circle-line', bgColor: '#E67E22', category: 'work' },
+  { name: '项目结后', path: '/project/end', icon: 'ri:flag-2-line', bgColor: '#1ABC9C', category: 'work' },
+  { name: '项目归档', path: '/project/archived', icon: 'ri:archive-line', bgColor: '#7F8C8D', category: 'work'},
 
+  // ========== 研发管理 ==========
+  { name: '项目列表', path: '/project/list', icon: 'ri:folder-line', bgColor: '#67C23A', category: 'project', permission: 'project.ui.list.view' },
+  { name: '任务管理', path: '/task/list', icon: 'ri:list-check', bgColor: '#E6A23C', category: 'project', permission: 'task.ui.list.view' },
+  { name: '任务审批', path: '/task/approval', icon: 'ri:file-check-line', bgColor: '#F56C6C', category: 'project', permission: 'task.ui.approval.view' },
+  { name: '任务分析', path: '/task/analysis', icon: 'ri:pie-chart-line', bgColor: '#9B59B6', category: 'project', permission: 'task.ui.analysis.view' },
+  { name: '项目回收站', path: '/project/recycle', icon: 'ri:delete-bin-line', bgColor: '#909399', category: 'project', permission: 'project.ui.recycle.view' },
 
-  { name: '项目列表', path: '/project/list', icon: 'ri:folder-line', bgColor: '#67C23A', category: 'project' },
-  { name: '任务管理', path: '/task/list', icon: 'ri:list-check', bgColor: '#E6A23C', category: 'project' },
-  { name: '任务审批', path: '/task/approval', icon: 'ri:list-check', bgColor: '#E6A23C', category: 'project' },
-
-  // 系统管理
-  { name: '用户中心', path: '/user-center', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
-  { name: '用户管理', path: '/system/user', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
-  { name: '角色管理', path: '/system/role', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
-  { name: '部门管理', path: '/system/department', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
-  { name: '权限组管理', path: '/system/group', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
-  { name: '登录日志', path: '/system/log/auth-log', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
-  { name: '操作日志', path: '/system/log/oper-log', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
-
-  { name: '会话监控', path: '/monitor/session', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
-  { name: '缓存监控', path: '/monitor/cache', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
+  // ========== 系统管理 ==========
+  { name: '用户中心', path: '/system/user-center', icon: 'ri:user-heart-line', bgColor: '#00A870', category: 'system' },
+  { name: '用户管理', path: '/system/user', icon: 'ri:user-settings-line', bgColor: '#409EFF', category: 'system', permission: 'system.ui.user.view' },
+  { name: '角色管理', path: '/system/role', icon: 'ri:shield-user-line', bgColor: '#9B59B6', category: 'system', permission: 'system.ui.role.view' },
+  { name: '部门管理', path: '/system/department', icon: 'ri:building-line', bgColor: '#E6A23C', category: 'system', permission: 'system.ui.dept.view' },
+  { name: '权限组管理', path: '/system/permission', icon: 'ri:lock-line', bgColor: '#F56C6C', category: 'system', permission: 'system.ui.permission.view' },
+  { name: '登录日志', path: '/system/log/auth-log', icon: 'ri:login-box-line', bgColor: '#3498DB', category: 'system', permission: 'system.ui.auth-log.view' },
+  { name: '操作日志', path: '/system/log/oper-log', icon: 'ri:file-list-2-line', bgColor: '#1ABC9C', category: 'system', permission: 'system.ui.oper-log.view' },
+  { name: '会话监控', path: '/system/session', icon: 'ri:computer-line', bgColor: '#E67E22', category: 'system', permission: 'system.ui.session.view' },
+  { name: '缓存监控', path: '/system/cache', icon: 'ri:database-2-line', bgColor: '#7F8C8D', category: 'system', permission: 'system.ui.cache.view' },
 ])
+
+/**
+ * 根据权限过滤应用列表
+ * - 没有 permission 字段的应用：所有人可见
+ * - 有 permission 字段的应用：需要通过权限校验
+ */
+const visibleAppList = computed(() => {
+  return appList.value.filter(app => {
+    if (!app.permission) return true
+    return hasPermission(app.permission)
+  })
+})
 
 /** 按分类分组后的应用 */
 const appGroups = computed<AppGroup[]>(() => {
@@ -148,15 +166,15 @@ const appGroups = computed<AppGroup[]>(() => {
     .map(c => ({
       key: c.key,
       label: c.label,
-      apps: appList.value.filter(app => app.category === c.key),
+      apps: visibleAppList.value.filter(app => app.category === c.key),
     }))
     .filter(g => g.apps.length > 0)
 })
 
 /** 按当前分类过滤的应用 */
 const filteredApps = computed(() => {
-  if (activeCategory.value === 'all') return appList.value
-  return appList.value.filter(app => app.category === activeCategory.value)
+  if (activeCategory.value === 'all') return visibleAppList.value
+  return visibleAppList.value.filter(app => app.category === activeCategory.value)
 })
 
 const go = (path: string) => {
