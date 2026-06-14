@@ -115,15 +115,30 @@ const activeCategory = ref('all')
 const appList = ref<AppItem[]>([
   // 协作办公
   { name: '我的任务', path: '/dashboard/my-task', icon: 'ri:task-line', bgColor: '#409EFF', category: 'work' },
-  { name: '审批日志', path: '/approval/log', icon: 'ri:file-list-3-line', bgColor: '#F56C6C', category: 'work' },
-  { name: '变更日志', path: '/change/log', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
+  { name: '项目动态', path: '/project/record', icon: 'ri:file-list-3-line', bgColor: '#F56C6C', category: 'work' },
+  { name: '项目排期', path: '/project/record', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
+  { name: '项目立项', path: '/project/setup', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
+  { name: '项目执行', path: '/project/execution', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
+  { name: '项目结项', path: '/project/acceptance', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
+  { name: '项目结后', path: '/project/end', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
+  { name: '项目归档', path: '/project/archived', icon: 'ri:git-commit-line', bgColor: '#909399', category: 'work' },
 
-  // 项目管理
+
   { name: '项目列表', path: '/project/list', icon: 'ri:folder-line', bgColor: '#67C23A', category: 'project' },
   { name: '任务管理', path: '/task/list', icon: 'ri:list-check', bgColor: '#E6A23C', category: 'project' },
+  { name: '任务审批', path: '/task/approval', icon: 'ri:list-check', bgColor: '#E6A23C', category: 'project' },
 
   // 系统管理
-  { name: '用户中心', path: '/system/user-center', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
+  { name: '用户中心', path: '/user-center', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
+  { name: '用户管理', path: '/system/user', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
+  { name: '角色管理', path: '/system/role', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
+  { name: '部门管理', path: '/system/department', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
+  { name: '权限组管理', path: '/system/group', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
+  { name: '登录日志', path: '/system/log/auth-log', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
+  { name: '操作日志', path: '/system/log/oper-log', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
+
+  { name: '会话监控', path: '/monitor/session', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
+  { name: '缓存监控', path: '/monitor/cache', icon: 'ri:user-settings-line', bgColor: '#00A870', category: 'system' },
 ])
 
 /** 按分类分组后的应用 */
