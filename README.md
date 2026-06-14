@@ -48,7 +48,7 @@ API接口文档：https://lk458yviee.apifox.cn
 
 <tr>
 <td width="50%" align="center">
-<img src="doc/img/view_h5_login.png" alt="登录界面" width="100%" />
+<img src="doc/img/view_h5_home.png" alt="首页 Tab" width="100%" />
 首页 Tab
 </td>
 <td width="50%" align="center">
@@ -59,11 +59,11 @@ API接口文档：https://lk458yviee.apifox.cn
 
 <tr>
 <td width="50%" align="center">
-<img src="doc/img/view_h5_login.png" alt="我的项目" width="100%" />
+<img src="doc/img/view_h5_my_project.png" alt="我的项目 Tab" width="100%" />
 我的项目 Tab
 </td>
 <td width="50%" align="center">
-<img src="doc/img/view_h5_my_task.png" alt="我的" width="100%" />
+<img src="doc/img/view_h5_my.png" alt="我的 Tab" width="100%" />
 我的 Tab
 </td>
 </tr>
@@ -74,7 +74,7 @@ API接口文档：https://lk458yviee.apifox.cn
 任务详情（操作按钮是随任务状态动态变化）
 </td>
 <td width="50%" align="center">
-<img src="doc/img/view_h5_my_task.png" alt="" width="100%" />
+<img src="doc/img/view_h5_project_detail.png" alt="项目详情" width="100%" />
 项目详情（移动端由于布局大小，省略优化部分功能）
 </td>
 </tr>
