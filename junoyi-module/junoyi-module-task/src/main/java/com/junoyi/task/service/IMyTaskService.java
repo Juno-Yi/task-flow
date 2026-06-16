@@ -6,6 +6,7 @@ import com.junoyi.task.domain.bo.TaskActionBO;
 import com.junoyi.task.domain.po.Task;
 import com.junoyi.task.domain.vo.TaskItemVO;
 import com.junoyi.task.domain.vo.TaskListDetailVO;
+import com.junoyi.task.domain.vo.TaskMonthStatisticsVO;
 
 import java.util.List;
 
@@ -51,4 +52,11 @@ public interface IMyTaskService {
      * @param bo 任务操作BO
      */
     void submitTask(TaskActionBO bo);
+
+    /**
+     * 获取用户当前月任务统计数据
+     * @param userId 用户ID
+     * @return 当前月任务统计数据
+     */
+    TaskMonthStatisticsVO getTaskMonthStatistics(Long userId);
 }
