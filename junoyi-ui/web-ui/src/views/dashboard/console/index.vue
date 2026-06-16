@@ -1,26 +1,20 @@
 <!-- 工作台页面 -->
 <template>
   <div>
-    <CardList></CardList>
-
     <ElRow :gutter="20">
-      <ElCol :sm="24" :md="12" :lg="10">
-        <ActiveUser />
+      <ElCol :sm="24" :md="24" :lg="16">
+        <Banner />
       </ElCol>
-      <ElCol :sm="24" :md="12" :lg="14">
-        <SalesOverview />
+      <ElCol :sm="12" :md="12" :lg="4">
+      </ElCol>
+      <ElCol :sm="12" :md="12" :lg="4">
       </ElCol>
     </ElRow>
 
+    <!-- 应用工作台 -->
     <ElRow :gutter="20">
-      <ElCol :sm="24" :md="24" :lg="12">
-        <NewUser />
-      </ElCol>
-      <ElCol :sm="24" :md="12" :lg="6">
-        <Dynamic />
-      </ElCol>
-      <ElCol :sm="24" :md="12" :lg="6">
-        <TodoList />
+      <ElCol :span="24">
+        <QuickEntry />
       </ElCol>
     </ElRow>
 
@@ -29,16 +23,9 @@
 </template>
 
 <script setup lang="ts">
-  import CardList from './modules/card-list.vue'
-  import ActiveUser from './modules/active-user.vue'
-  import SalesOverview from './modules/sales-overview.vue'
-  import NewUser from './modules/new-user.vue'
-  import Dynamic from './modules/dynamic-stats.vue'
-  import TodoList from './modules/todo-list.vue'
   import DemoNotice from "@views/dashboard/console/modules/demo-notice.vue";
-  import AboutProject from './modules/about-project.vue'
+  import Banner from "@views/dashboard/console/modules/banner.vue";
+  import QuickEntry from "@views/dashboard/console/modules/quick-entry.vue";
 
   defineOptions({ name: 'Console' })
-
 </script>
-
