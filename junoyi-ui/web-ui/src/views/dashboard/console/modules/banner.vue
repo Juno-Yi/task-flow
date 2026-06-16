@@ -39,18 +39,22 @@
 <script setup lang="ts">
 import bannerCover from '@imgs/login/lf_icon2.webp'
 import { useUserStore } from '@/store/modules/user'
+import { fetchGetUserTaskMonthStatistics } from '@/api/task/my-task'
 
 const userStore = useUserStore()
 const userInfo = computed(() => userStore.getUserInfo)
-const taskList = ref<Api.Task.TaskItemVO[]>([])
 
-const monthTaskCount = computed(() => taskList.value.length)
-const pendingTaskCount = computed(() => taskList.value.filter(item => item.status !== 4).length)
-const completedTaskCount = computed(() => taskList.value.filter(item => item.status === 4).length)
+const pendingTaskCount = ref(0)
+const completedTaskCount = ref(0)
+const monthTaskCount = ref(0)
 
 const loadTaskStats = async () => {
-  // 加载数据
-  taskList.value = []
+  const data = await fetchGetUserTaskMonthStatistics()
+  if (data) {
+    pendingTaskCount.value = data.pendingTaskCount ?? 0
+    completedTaskCount.value = data.completedTaskCount ?? 0
+    monthTaskCount.value = data.monthTaskCount ?? 0
+  }
 }
 
 const handleBannerClick = (): void => {
