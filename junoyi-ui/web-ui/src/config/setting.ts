@@ -20,7 +20,6 @@
  * 3. 枚举类型的值需要与 src/enums/appEnum.ts 中的定义保持一致
  */
 
-import AppConfig from '@/config'
 import { SystemThemeEnum, MenuThemeEnum, MenuTypeEnum, ContainerWidthEnum } from '@/enums/appEnum'
 
 /**
@@ -28,7 +27,7 @@ import { SystemThemeEnum, MenuThemeEnum, MenuTypeEnum, ContainerWidthEnum } from
  */
 export const SETTING_DEFAULT_CONFIG = {
   /** 菜单类型 */
-  menuType: MenuTypeEnum.LEFT,
+  menuType: MenuTypeEnum.DUAL_MENU,
   /** 菜单展开宽度 */
   menuOpenWidth: 230,
   /** 菜单是否展开 */
@@ -36,13 +35,13 @@ export const SETTING_DEFAULT_CONFIG = {
   /** 双菜单是否显示文本 */
   dualMenuShowText: true,
   /** 系统主题类型 */
-  systemThemeType: SystemThemeEnum.AUTO,
+  systemThemeType: SystemThemeEnum.LIGHT,
   /** 系统主题模式 */
-  systemThemeMode: SystemThemeEnum.AUTO,
+  systemThemeMode: SystemThemeEnum.LIGHT,
   /** 菜单风格 */
   menuThemeType: MenuThemeEnum.DESIGN,
   /** 系统主题颜色 */
-  systemThemeColor: AppConfig.systemMainColor[0],
+  systemThemeColor: '#5D87FF',
   /** 是否显示菜单按钮 */
   showMenuButton: true,
   /** 是否显示刷新按钮 */
@@ -52,7 +51,7 @@ export const SETTING_DEFAULT_CONFIG = {
   /** 是否显示工作台标签 */
   showWorkTab: true,
   /** 是否显示语言切换 */
-  showLanguage: true,
+  showLanguage: false,
   /** 是否显示进度条 */
   showNprogress: true,
   /** 是否显示设置引导 */
@@ -72,17 +71,15 @@ export const SETTING_DEFAULT_CONFIG = {
   /** 边框模式 */
   boxBorderMode: true,
   /** 页面过渡效果 */
-  pageTransition: 'slide-left',
+  pageTransition: 'fade',
   /** 标签页样式 */
-  tabStyle: 'tab-default',
+  tabStyle: 'tab-google',
   /** 自定义圆角 */
   customRadius: '0.75',
   /** 容器宽度 */
   containerWidth: ContainerWidthEnum.FULL,
   /** 节日日期 */
   festivalDate: '',
-  /** 是否显示水印 */
-  watermarkVisible: true
 }
 
 /**

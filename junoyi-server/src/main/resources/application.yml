@@ -383,25 +383,9 @@ junoyi:
     field-permission-enable: true
 
 
-
-  # ==================== OAuth 第三方登录配置 ====================
-  oauth:
-    github:
-      # GitHub OAuth 应用配置
-      client-id: Ov23lix9ML2xzIWV1Hdx
-      client-secret: 9daca7da4dac909abdefd078258d53aaa178daa2
-      # 授权回调地址
-      redirect-uri: http://localhost:3006/auth/github/callback
-      # GitHub OAuth 授权地址
-      authorize-url: https://github.com/login/oauth/authorize
-      # GitHub OAuth Token 获取地址
-      access-token-url: https://github.com/login/oauth/access_token
-      # GitHub 用户信息获取地址
-      user-info-url: https://api.github.com/user
-
   # ==================== API 文档配置 ====================
   api-doc:
-    enable: true
+    enable: false
     title: JunoYi API 文档
     description: JunoYi 后台管理系统 API 接口文档
     version: ${junoyi.version}

@@ -4,11 +4,13 @@ import com.junoyi.framework.core.domain.module.R;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
+import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.task.domain.bo.TaskActionBO;
 import com.junoyi.task.domain.dto.TaskSubmitDTO;
 import com.junoyi.task.domain.vo.TaskItemVO;
 import com.junoyi.task.domain.vo.TaskListDetailVO;
+import com.junoyi.task.domain.vo.TaskMonthStatisticsVO;
 import com.junoyi.task.service.IMyTaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -99,5 +101,17 @@ public class MyTaskController extends BaseController {
                 .build();
         myTaskService.submitTask(bo);
         return R.ok();
+    }
+
+    /**
+     * 获取用户当前月任务统计数据
+     */
+    @GetMapping("/month/statistics")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<TaskMonthStatisticsVO> getTaskMonthStatistics(){
+        Long currentUserId = SecurityUtils.getUserId();
+        if (currentUserId == 0 || currentUserId == null)
+            return R.fail("非法请求");
+        return R.ok(myTaskService.getTaskMonthStatistics(currentUserId));
     }
 }

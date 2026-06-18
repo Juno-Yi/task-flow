@@ -57,3 +57,12 @@ export function fetchPassTaskApproval(data: Api.Task.TaskApprovalDTO) {
         data
     })
 }
+
+/**
+ * 获取用户当前月任务统计数据
+ */
+export function fetchGetUserTaskMonthStatistics(){
+    return request.get<Api.Task.TaskMonthStatisticsVO>({
+        url: '/task/my-task/month/statistics'
+    })
+}

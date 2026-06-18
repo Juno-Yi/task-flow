@@ -17,4 +17,12 @@ declare namespace Api.Task {
         remark?: string
     }
 
+    /**
+     * 当前月任务统计数据
+     */
+    interface TaskMonthStatisticsVO {
+        pendingTaskCount: number
+        completedTaskCount: number
+        monthTaskCount: number
+    }
 }

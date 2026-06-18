@@ -12,6 +12,7 @@ import com.junoyi.task.domain.po.TaskAttachment;
 import com.junoyi.task.domain.po.TaskRecord;
 import com.junoyi.task.domain.vo.TaskItemVO;
 import com.junoyi.task.domain.vo.TaskListDetailVO;
+import com.junoyi.task.domain.vo.TaskMonthStatisticsVO;
 import com.junoyi.task.exception.TaskException;
 import com.junoyi.task.mapper.TaskAttachmentMapper;
 import com.junoyi.task.mapper.TaskMapper;
@@ -254,5 +255,53 @@ public class MyTaskServiceImpl implements IMyTaskService {
             }
         }
 
+    }
+
+    /**
+     * 获取用户当前月任务统计数据
+     * @param userId 用户ID
+     * @return 当前月任务统计数据
+     */
+    @Override
+    public TaskMonthStatisticsVO getTaskMonthStatistics(Long userId) {
+        if (userId == null || userId <= 0) {
+            throw new TaskException("用户ID不能为空");
+        }
+
+        // 计算当前月的起止时间
+        LocalDate currentDate = LocalDate.now();
+        LocalDate firstDayOfMonth = currentDate.withDayOfMonth(1);
+        LocalDate lastDayOfMonth = currentDate.withDayOfMonth(currentDate.lengthOfMonth());
+
+        LocalDateTime monthStartDateTime = firstDayOfMonth.atStartOfDay();
+        LocalDateTime monthEndDateTime = lastDayOfMonth.atTime(LocalTime.MAX);
+
+        Date monthStart = Date.from(monthStartDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        Date monthEnd = Date.from(monthEndDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+        // 查询当前月用户参与的所有任务（未完成 + 当月已完成）
+        List<TaskItemVO> taskList = taskMapper.selectCurrentMonthTaskList(userId, monthStart, monthEnd);
+
+        // 统计各状态数量
+        int pendingCount = 0;
+        int completedCount = 0;
+
+        if (taskList != null) {
+            for (TaskItemVO task : taskList) {
+                if (Integer.valueOf(4).equals(task.getStatus())) {
+                    completedCount++;
+                } else {
+                    pendingCount++;
+                }
+            }
+        }
+
+        // 封装结果
+        TaskMonthStatisticsVO vo = new TaskMonthStatisticsVO();
+        vo.setPendingTaskCount(pendingCount);
+        vo.setCompletedTaskCount(completedCount);
+        vo.setMonthTaskCount(pendingCount + completedCount);
+
+        return vo;
     }
 }
