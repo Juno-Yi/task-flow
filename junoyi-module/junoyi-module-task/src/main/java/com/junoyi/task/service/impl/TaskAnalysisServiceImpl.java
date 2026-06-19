@@ -113,11 +113,18 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
             if (Integer.valueOf(3).equals(task.getStatus())) {
                 rejectedCount++;
             }
-            // 逾期：未完成且超过计划结束时间
-            if (!Integer.valueOf(4).equals(task.getStatus())
-                    && task.getPlanEndTime() != null
-                    && nowDate.after(task.getPlanEndTime())) {
-                overdueCount++;
+            // 逾期判断：
+            // 1. 没有计划结束时间：不算逾期
+            // 2. 已完成：实际结束时间超过计划结束时间算逾期
+            // 3. 未完成：当前时间超过计划结束时间算逾期
+            if (task.getPlanEndTime() != null) {
+                if (Integer.valueOf(4).equals(task.getStatus())) {
+                    if (task.getEndTime() != null && task.getEndTime().after(task.getPlanEndTime())) {
+                        overdueCount++;
+                    }
+                } else if (nowDate.after(task.getPlanEndTime())) {
+                    overdueCount++;
+                }
             }
         }
 
@@ -171,23 +178,62 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
      * 构建指定时间范围内的KPI项
      */
     private TaskCoreKpiVO.TaskCoreKpiItem buildKpiItem(LocalDate startDate, LocalDate endDate) {
-        Date start = null;
-        Date end = null;
+        final Date start = startDate != null
+                ? Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
+                : null;
+        final Date end = endDate != null
+                ? Date.from(endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant())
+                : null;
 
-        if (startDate != null) {
-            start = Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        }
-        if (endDate != null) {
-            end = Date.from(endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
-        }
+        // 查询与时间范围有关的所有未删除任务：
+        // 1. 创建时间在范围内（本期新增）
+        // 2. 计划结束时间在范围内
+        // 3. 实际结束时间在范围内（已完成但可能逾期）
+        // 4. 未完成且计划结束时间在范围结束之前（仍在逾期中）
+        LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<Task>()
+                .eq(Task::getDelFlag, false)
+                .and(start != null || end != null, w -> w
+                        // 创建时间在范围内
+                        .and(inner -> inner
+                                .ge(start != null, Task::getCreateTime, start)
+                                .le(end != null, Task::getCreateTime, end)
+                        )
+                        // 或者计划结束时间在范围内
+                        .or(inner -> inner
+                                .ge(start != null, Task::getPlanEndTime, start)
+                                .le(end != null, Task::getPlanEndTime, end)
+                        )
+                        // 或者实际结束时间在范围内（已完成的任务，判断是否逾期完成）
+                        .or(inner -> inner
+                                .ge(start != null, Task::getEndTime, start)
+                                .le(end != null, Task::getEndTime, end)
+                        )
+                        // 或者未完成且计划结束时间在范围结束之前（持续逾期中）
+                        .or(end != null, inner -> inner
+                                .ne(Task::getStatus, 4)
+                                .le(Task::getPlanEndTime, end)
+                                .isNotNull(Task::getPlanEndTime)
+                        )
+                );
 
-        // 查询时间范围内所有未删除任务
-        List<Task> tasks = taskMapper.selectList(
-                new LambdaQueryWrapper<Task>()
-                        .eq(Task::getDelFlag, false)
-                        .ge(start != null, Task::getCreateTime, start)
-                        .le(end != null, Task::getCreateTime, end)
-        );
+        List<Task> tasks = taskMapper.selectList(wrapper);
+
+        // 去重（同一个任务可能匹配多个条件）
+        tasks = tasks.stream()
+                .collect(java.util.stream.Collectors.collectingAndThen(
+                        java.util.stream.Collectors.toCollection(() -> new java.util.TreeSet<>(java.util.Comparator.comparing(Task::getId))),
+                        java.util.ArrayList::new
+                ));
+
+        // 统计本期新增任务数（仅按 createTime 在范围内）
+        int newTaskCount = (int) tasks.stream()
+                .filter(t -> {
+                    if (t.getCreateTime() == null) return false;
+                    if (start != null && t.getCreateTime().before(start)) return false;
+                    if (end != null && t.getCreateTime().after(end)) return false;
+                    return true;
+                })
+                .count();
 
         int totalCount = tasks.size();
         int completedCount = 0;
@@ -207,11 +253,18 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
                 }
             }
 
-            // 逾期：未完成且已超过计划结束时间
-            if (!Integer.valueOf(4).equals(task.getStatus())
-                    && task.getPlanEndTime() != null
-                    && nowDate.after(task.getPlanEndTime())) {
-                overdueCount++;
+            // 逾期判断：
+            // 1. 没有计划结束时间：不算逾期
+            // 2. 已完成：实际结束时间超过计划结束时间算逾期
+            // 3. 未完成：当前时间超过计划结束时间算逾期
+            if (task.getPlanEndTime() != null) {
+                if (Integer.valueOf(4).equals(task.getStatus())) {
+                    if (task.getEndTime() != null && task.getEndTime().after(task.getPlanEndTime())) {
+                        overdueCount++;
+                    }
+                } else if (nowDate.after(task.getPlanEndTime())) {
+                    overdueCount++;
+                }
             }
         }
 
@@ -231,7 +284,7 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
         item.setAvgProcessHours(Math.round(avgHours * 10) / 10.0);
 
         // 本期新增任务数
-        item.setNewTaskCount(totalCount);
+        item.setNewTaskCount(newTaskCount);
 
         return item;
     }
@@ -275,24 +328,49 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
      * @return 统计项
      */
     private TaskStatusOverviewVO.TaskStatusOverviewItem buildOverviewItem(LocalDate startDate, LocalDate endDate) {
-        Date start = null;
-        Date end = null;
+        final Date start = startDate != null
+                ? Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
+                : null;
+        final Date end = endDate != null
+                ? Date.from(endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant())
+                : null;
 
-        if (startDate != null) {
-            start = Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        }
-        if (endDate != null) {
-            end = Date.from(endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
-        }
-
-        // 查询时间范围内的所有未删除任务
+        // 查询与时间范围有关的所有未删除任务：
+        // 1. 创建时间在范围内（本期新增）
+        // 2. 计划结束时间在范围内
+        // 3. 实际结束时间在范围内（已完成但可能逾期）
+        // 4. 未完成且计划结束时间在范围结束之前（仍在逾期中）
         LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<Task>()
                 .eq(Task::getDelFlag, false)
-                .ge(start != null, Task::getCreateTime, start)
-                .le(end != null, Task::getCreateTime, end)
-                .select(Task::getStatus);
+                .and(start != null || end != null, w -> w
+                        .and(inner -> inner
+                                .ge(start != null, Task::getCreateTime, start)
+                                .le(end != null, Task::getCreateTime, end)
+                        )
+                        .or(inner -> inner
+                                .ge(start != null, Task::getPlanEndTime, start)
+                                .le(end != null, Task::getPlanEndTime, end)
+                        )
+                        .or(inner -> inner
+                                .ge(start != null, Task::getEndTime, start)
+                                .le(end != null, Task::getEndTime, end)
+                        )
+                        .or(end != null, inner -> inner
+                                .ne(Task::getStatus, 4)
+                                .le(Task::getPlanEndTime, end)
+                                .isNotNull(Task::getPlanEndTime)
+                        )
+                )
+                .select(Task::getId, Task::getStatus);
 
         List<Task> tasks = taskMapper.selectList(wrapper);
+
+        // 去重
+        tasks = tasks.stream()
+                .collect(java.util.stream.Collectors.collectingAndThen(
+                        java.util.stream.Collectors.toCollection(() -> new java.util.TreeSet<>(java.util.Comparator.comparing(Task::getId))),
+                        java.util.ArrayList::new
+                ));
 
         // 按状态统计
         int pendingCount = 0;
