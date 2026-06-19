@@ -41,24 +41,56 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
     }
 
     /**
-     * 构建核心KPI数据（基于当前维度为"本月"）
+     * 构建核心KPI数据（按维度）
      */
     private TaskCoreKpiVO buildCoreKpi() {
         TaskCoreKpiVO kpi = new TaskCoreKpiVO();
 
         LocalDate now = LocalDate.now();
+
+        // 当前月
         LocalDate monthStart = now.withDayOfMonth(1);
         LocalDate monthEnd = now.withDayOfMonth(now.lengthOfMonth());
+        kpi.setMonthData(buildKpiItem(monthStart, monthEnd));
 
-        Date start = Date.from(monthStart.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        Date end = Date.from(monthEnd.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
+        // 当前季度
+        int quarterStartMonth = (now.getMonthValue() - 1) / 3 * 3 + 1;
+        LocalDate quarterStart = now.withMonth(quarterStartMonth).withDayOfMonth(1);
+        LocalDate quarterEnd = quarterStart.plusMonths(2);
+        quarterEnd = quarterEnd.withDayOfMonth(quarterEnd.lengthOfMonth());
+        kpi.setQuarterData(buildKpiItem(quarterStart, quarterEnd));
 
-        // 查询本期所有未删除任务
+        // 当前年度
+        LocalDate yearStart = now.withMonth(1).withDayOfMonth(1);
+        LocalDate yearEnd = now.withMonth(12).withDayOfMonth(31);
+        kpi.setYearData(buildKpiItem(yearStart, yearEnd));
+
+        // 全部
+        kpi.setAllData(buildKpiItem(null, null));
+
+        return kpi;
+    }
+
+    /**
+     * 构建指定时间范围内的KPI项
+     */
+    private TaskCoreKpiVO.TaskCoreKpiItem buildKpiItem(LocalDate startDate, LocalDate endDate) {
+        Date start = null;
+        Date end = null;
+
+        if (startDate != null) {
+            start = Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        }
+        if (endDate != null) {
+            end = Date.from(endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
+        }
+
+        // 查询时间范围内所有未删除任务
         List<Task> tasks = taskMapper.selectList(
                 new LambdaQueryWrapper<Task>()
                         .eq(Task::getDelFlag, false)
-                        .ge(Task::getCreateTime, start)
-                        .le(Task::getCreateTime, end)
+                        .ge(start != null, Task::getCreateTime, start)
+                        .le(end != null, Task::getCreateTime, end)
         );
 
         int totalCount = tasks.size();
@@ -87,23 +119,25 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
             }
         }
 
+        TaskCoreKpiVO.TaskCoreKpiItem item = new TaskCoreKpiVO.TaskCoreKpiItem();
+
         // 完成率
         double completionRate = totalCount > 0 ? (double) completedCount / totalCount * 100 : 0;
-        kpi.setCompletionRate(Math.round(completionRate * 10) / 10.0);
+        item.setCompletionRate(Math.round(completionRate * 10) / 10.0);
 
         // 逾期任务数
-        kpi.setOverdueTaskCount(overdueCount);
+        item.setOverdueTaskCount(overdueCount);
 
         // 平均处理时长（天）
         double avgDays = processedCount > 0
                 ? (double) totalProcessMillis / processedCount / TimeUnit.DAYS.toMillis(1)
                 : 0;
-        kpi.setAvgProcessDays(Math.round(avgDays * 10) / 10.0);
+        item.setAvgProcessDays(Math.round(avgDays * 10) / 10.0);
 
         // 本期新增任务数
-        kpi.setNewTaskCount(totalCount);
+        item.setNewTaskCount(totalCount);
 
-        return kpi;
+        return item;
     }
 
     /**

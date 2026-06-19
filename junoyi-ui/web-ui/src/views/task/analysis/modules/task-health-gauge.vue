@@ -25,10 +25,24 @@ interface BaseChartProps {
   colors?: string[]
 }
 
+type Dimension = 'month' | 'quarter' | 'year' | 'all'
+
 const props = defineProps<{
-  /** 健康度分值 0-100 */
-  value?: number
+  dimension: Dimension
+  data?: Api.Task.TaskCoreKpiVO | null
 }>()
+
+/** 根据维度取对应完成率作为健康度 */
+const healthValue = computed(() => {
+  if (!props.data) return 0
+  switch (props.dimension) {
+    case 'month': return props.data.monthData?.completionRate ?? 0
+    case 'quarter': return props.data.quarterData?.completionRate ?? 0
+    case 'year': return props.data.yearData?.completionRate ?? 0
+    case 'all': return props.data.allData?.completionRate ?? 0
+    default: return 0
+  }
+})
 
 const chartProps: BaseChartProps = {
   height: '16rem',
@@ -38,9 +52,9 @@ const chartProps: BaseChartProps = {
 
 const { chartRef, isDark } = useChartComponent({
   props: chartProps,
-  watchSources: [() => props.value],
+  watchSources: [() => healthValue.value],
   generateOptions: (): EChartsOption => {
-    const val = props.value ?? 0
+    const val = healthValue.value
 
     // 根据分值确定颜色
     const getColor = (v: number): string => {
@@ -102,7 +116,7 @@ const { chartRef, isDark } = useChartComponent({
             fontSize: 28,
             fontWeight: 'bold',
             color: getColor(val),
-            formatter: `{value}%`,
+            formatter: `{value}分`,
           },
           data: [
             {

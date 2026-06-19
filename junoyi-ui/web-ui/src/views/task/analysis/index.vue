@@ -17,10 +17,10 @@
     <!-- 核心KPI + 任务健康度 -->
     <ElRow :gutter="20">
       <ElCol :xl="14" :lg="15" :xs="24">
-        <TaskCoreKpi :data="analysisData?.coreKpi" />
+        <TaskCoreKpi :dimension="activeDimension" :data="analysisData?.coreKpi" />
       </ElCol>
       <ElCol :xl="10" :lg="9" :xs="24">
-        <TaskHealthGauge :value="analysisData?.coreKpi?.completionRate" />
+        <TaskHealthGauge :dimension="activeDimension" :data="analysisData?.coreKpi" />
       </ElCol>
     </ElRow>
 

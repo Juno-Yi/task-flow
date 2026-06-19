@@ -16,7 +16,7 @@ declare namespace Api.Task {
         allData: TaskStatusOverviewItem
     }
 
-    interface TaskCoreKpiVO {
+    interface TaskCoreKpiItem {
         /** 任务完成率（百分比） */
         completionRate: number
         /** 逾期任务数 */
@@ -25,6 +25,13 @@ declare namespace Api.Task {
         avgProcessDays: number
         /** 本期新增任务数 */
         newTaskCount: number
+    }
+
+    interface TaskCoreKpiVO {
+        monthData: TaskCoreKpiItem
+        quarterData: TaskCoreKpiItem
+        yearData: TaskCoreKpiItem
+        allData: TaskCoreKpiItem
     }
 
     interface TaskAnalysisVO {

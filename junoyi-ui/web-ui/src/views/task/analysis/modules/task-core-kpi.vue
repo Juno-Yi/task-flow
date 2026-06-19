@@ -34,7 +34,10 @@
 <script setup lang="ts">
 defineOptions({ name: 'TaskCoreKpi' })
 
+type Dimension = 'month' | 'quarter' | 'year' | 'all'
+
 const props = defineProps<{
+  dimension: Dimension
   data?: Api.Task.TaskCoreKpiVO | null
 }>()
 
@@ -48,8 +51,20 @@ interface KpiItem {
   iconColor: string
 }
 
+/** 根据维度取对应数据 */
+const currentData = computed<Api.Task.TaskCoreKpiItem | null>(() => {
+  if (!props.data) return null
+  switch (props.dimension) {
+    case 'month': return props.data.monthData
+    case 'quarter': return props.data.quarterData
+    case 'year': return props.data.yearData
+    case 'all': return props.data.allData
+    default: return null
+  }
+})
+
 const kpiItems = computed<KpiItem[]>(() => {
-  const d = props.data
+  const d = currentData.value
   return [
     {
       label: '任务完成率',

@@ -11,23 +11,47 @@ import lombok.Data;
 public class TaskCoreKpiVO {
 
     /**
-     * 任务完成率（百分比）
+     * 当前月数据
      */
-    private Double completionRate;
+    private TaskCoreKpiItem monthData;
 
     /**
-     * 逾期任务数
+     * 当前季度数据
      */
-    private Integer overdueTaskCount;
+    private TaskCoreKpiItem quarterData;
 
     /**
-     * 平均处理时长（天）
+     * 当前年度数据
      */
-    private Double avgProcessDays;
+    private TaskCoreKpiItem yearData;
 
     /**
-     * 本期新增任务数
+     * 全部数据
      */
-    private Integer newTaskCount;
+    private TaskCoreKpiItem allData;
+
+    @Data
+    public static class TaskCoreKpiItem {
+
+        /**
+         * 任务完成率（百分比）
+         */
+        private Double completionRate;
+
+        /**
+         * 逾期任务数
+         */
+        private Integer overdueTaskCount;
+
+        /**
+         * 平均处理时长（天）
+         */
+        private Double avgProcessDays;
+
+        /**
+         * 本期新增任务数
+         */
+        private Integer newTaskCount;
+    }
 }
 
