@@ -3,7 +3,7 @@
   <div class="art-card p-5 mb-5 max-sm:mb-4">
     <div class="art-card-header">
       <div class="title">
-        <h4>任务状态总览</h4>
+        <h4>任务数据总览</h4>
       </div>
     </div>
 
