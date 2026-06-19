@@ -20,7 +20,7 @@
         <TaskCoreKpi :dimension="activeDimension" :data="analysisData?.coreKpi" />
       </ElCol>
       <ElCol :xl="10" :lg="9" :xs="24">
-        <TaskHealthGauge :dimension="activeDimension" :data="analysisData?.coreKpi" />
+        <TaskHealthGauge :dimension="activeDimension" :data="analysisData?.healthScore" />
       </ElCol>
     </ElRow>
 

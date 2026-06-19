@@ -19,4 +19,10 @@ public class TaskAnalysisVO {
      * 核心KPI数据
      */
     private TaskCoreKpiVO coreKpi;
+
+    /**
+     * 任务健康分（按维度）
+     */
+    private HealthScoreVO healthScore;
+
 }

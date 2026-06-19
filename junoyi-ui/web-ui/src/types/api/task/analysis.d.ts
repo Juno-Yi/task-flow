@@ -34,8 +34,16 @@ declare namespace Api.Task {
         allData: TaskCoreKpiItem
     }
 
+    interface HealthScoreVO {
+        monthData: number
+        quarterData: number
+        yearData: number
+        allData: number
+    }
+
     interface TaskAnalysisVO {
         statusOverview: TaskStatusOverviewVO
         coreKpi: TaskCoreKpiVO
+        healthScore: HealthScoreVO
     }
 }

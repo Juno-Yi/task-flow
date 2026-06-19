@@ -2,6 +2,7 @@ package com.junoyi.task.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.junoyi.task.domain.po.Task;
+import com.junoyi.task.domain.vo.HealthScoreVO;
 import com.junoyi.task.domain.vo.TaskAnalysisVO;
 import com.junoyi.task.domain.vo.TaskCoreKpiVO;
 import com.junoyi.task.domain.vo.TaskStatusOverviewVO;
@@ -37,7 +38,102 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
         TaskAnalysisVO vo = new TaskAnalysisVO();
         vo.setStatusOverview(buildStatusOverview());
         vo.setCoreKpi(buildCoreKpi());
+        vo.setHealthScore(buildHealthScore());
         return vo;
+    }
+
+    /**
+     * 构建任务健康分（按维度）
+     * 任务健康分 = 完成率 × 50% + (100 - 逾期率) × 30% + (100 - 驳回率) × 20%
+     */
+    private HealthScoreVO buildHealthScore() {
+        HealthScoreVO score = new HealthScoreVO();
+
+        LocalDate now = LocalDate.now();
+
+        // 当前月
+        LocalDate monthStart = now.withDayOfMonth(1);
+        LocalDate monthEnd = now.withDayOfMonth(now.lengthOfMonth());
+        score.setMonthData(calculateHealthPoint(monthStart, monthEnd));
+
+        // 当前季度
+        int quarterStartMonth = (now.getMonthValue() - 1) / 3 * 3 + 1;
+        LocalDate quarterStart = now.withMonth(quarterStartMonth).withDayOfMonth(1);
+        LocalDate quarterEnd = quarterStart.plusMonths(2);
+        quarterEnd = quarterEnd.withDayOfMonth(quarterEnd.lengthOfMonth());
+        score.setQuarterData(calculateHealthPoint(quarterStart, quarterEnd));
+
+        // 当前年度
+        LocalDate yearStart = now.withMonth(1).withDayOfMonth(1);
+        LocalDate yearEnd = now.withMonth(12).withDayOfMonth(31);
+        score.setYearData(calculateHealthPoint(yearStart, yearEnd));
+
+        // 全部
+        score.setAllData(calculateHealthPoint(null, null));
+
+        return score;
+    }
+
+    /**
+     * 计算指定时间范围的健康分
+     * 公式：完成率 × 50% + (100 - 逾期率) × 30% + (100 - 驳回率) × 20%
+     */
+    private Double calculateHealthPoint(LocalDate startDate, LocalDate endDate) {
+        Date start = null;
+        Date end = null;
+
+        if (startDate != null) {
+            start = Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        }
+        if (endDate != null) {
+            end = Date.from(endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
+        }
+
+        List<Task> tasks = taskMapper.selectList(
+                new LambdaQueryWrapper<Task>()
+                        .eq(Task::getDelFlag, false)
+                        .ge(start != null, Task::getCreateTime, start)
+                        .le(end != null, Task::getCreateTime, end)
+        );
+
+        int totalCount = tasks.size();
+        if (totalCount == 0) {
+            return 100.0;
+        }
+
+        int completedCount = 0;
+        int overdueCount = 0;
+        int rejectedCount = 0;
+        Date nowDate = new Date();
+
+        for (Task task : tasks) {
+            if (Integer.valueOf(4).equals(task.getStatus())) {
+                completedCount++;
+            }
+            if (Integer.valueOf(3).equals(task.getStatus())) {
+                rejectedCount++;
+            }
+            // 逾期：未完成且超过计划结束时间
+            if (!Integer.valueOf(4).equals(task.getStatus())
+                    && task.getPlanEndTime() != null
+                    && nowDate.after(task.getPlanEndTime())) {
+                overdueCount++;
+            }
+        }
+
+        // 完成率（0-100）
+        double completionRate = (double) completedCount / totalCount * 100;
+        // 逾期率（0-100）
+        double overdueRate = (double) overdueCount / totalCount * 100;
+        // 驳回率（0-100）
+        double rejectedRate = (double) rejectedCount / totalCount * 100;
+
+        // 健康分 = 完成率 × 50% + (100 - 逾期率) × 30% + (100 - 驳回率) × 20%
+        double healthPoint = completionRate * 0.5
+                + (100 - overdueRate) * 0.3
+                + (100 - rejectedRate) * 0.2;
+
+        return Math.round(healthPoint * 10) / 10.0;
     }
 
     /**

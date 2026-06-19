@@ -29,17 +29,17 @@ type Dimension = 'month' | 'quarter' | 'year' | 'all'
 
 const props = defineProps<{
   dimension: Dimension
-  data?: Api.Task.TaskCoreKpiVO | null
+  data?: Api.Task.HealthScoreVO | null
 }>()
 
-/** 根据维度取对应完成率作为健康度 */
+/** 根据维度取对应健康分 */
 const healthValue = computed(() => {
   if (!props.data) return 0
   switch (props.dimension) {
-    case 'month': return props.data.monthData?.completionRate ?? 0
-    case 'quarter': return props.data.quarterData?.completionRate ?? 0
-    case 'year': return props.data.yearData?.completionRate ?? 0
-    case 'all': return props.data.allData?.completionRate ?? 0
+    case 'month': return props.data.monthData ?? 0
+    case 'quarter': return props.data.quarterData ?? 0
+    case 'year': return props.data.yearData ?? 0
+    case 'all': return props.data.allData ?? 0
     default: return 0
   }
 })
