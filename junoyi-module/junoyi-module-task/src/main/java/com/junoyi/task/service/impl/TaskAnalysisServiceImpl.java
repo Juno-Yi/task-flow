@@ -113,11 +113,18 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
             if (Integer.valueOf(3).equals(task.getStatus())) {
                 rejectedCount++;
             }
-            // 逾期：未完成且超过计划结束时间
-            if (!Integer.valueOf(4).equals(task.getStatus())
-                    && task.getPlanEndTime() != null
-                    && nowDate.after(task.getPlanEndTime())) {
-                overdueCount++;
+            // 逾期判断：
+            // 1. 没有计划结束时间：不算逾期
+            // 2. 已完成：实际结束时间超过计划结束时间算逾期
+            // 3. 未完成：当前时间超过计划结束时间算逾期
+            if (task.getPlanEndTime() != null) {
+                if (Integer.valueOf(4).equals(task.getStatus())) {
+                    if (task.getEndTime() != null && task.getEndTime().after(task.getPlanEndTime())) {
+                        overdueCount++;
+                    }
+                } else if (nowDate.after(task.getPlanEndTime())) {
+                    overdueCount++;
+                }
             }
         }
 
@@ -207,11 +214,18 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
                 }
             }
 
-            // 逾期：未完成且已超过计划结束时间
-            if (!Integer.valueOf(4).equals(task.getStatus())
-                    && task.getPlanEndTime() != null
-                    && nowDate.after(task.getPlanEndTime())) {
-                overdueCount++;
+            // 逾期判断：
+            // 1. 没有计划结束时间：不算逾期
+            // 2. 已完成：实际结束时间超过计划结束时间算逾期
+            // 3. 未完成：当前时间超过计划结束时间算逾期
+            if (task.getPlanEndTime() != null) {
+                if (Integer.valueOf(4).equals(task.getStatus())) {
+                    if (task.getEndTime() != null && task.getEndTime().after(task.getPlanEndTime())) {
+                        overdueCount++;
+                    }
+                } else if (nowDate.after(task.getPlanEndTime())) {
+                    overdueCount++;
+                }
             }
         }
 
