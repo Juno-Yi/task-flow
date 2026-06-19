@@ -4,7 +4,6 @@
     <div class="art-card-header">
       <div class="title">
         <h4>任务状态总览</h4>
-        <p>各状态任务数量统计</p>
       </div>
     </div>
 
@@ -24,14 +23,13 @@
 </template>
 
 <script setup lang="ts">
-import { fetchGetTaskStatusOverview } from '@/api/task/analysis'
-
 defineOptions({ name: 'TaskStatusOverview' })
 
 type Dimension = 'month' | 'quarter' | 'year' | 'all'
 
 const props = defineProps<{
   dimension: Dimension
+  data?: Api.Task.TaskStatusOverviewVO | null
 }>()
 
 interface StatsItem {
@@ -41,16 +39,14 @@ interface StatsItem {
   iconStyle: string
 }
 
-const overviewData = ref<Api.Task.TaskStatusOverviewVO | null>(null)
-
 /** 根据维度取对应数据 */
 const currentData = computed<Api.Task.TaskStatusOverviewItem | null>(() => {
-  if (!overviewData.value) return null
+  if (!props.data) return null
   switch (props.dimension) {
-    case 'month': return overviewData.value.monthData
-    case 'quarter': return overviewData.value.quarterData
-    case 'year': return overviewData.value.yearData
-    case 'all': return overviewData.value.allData
+    case 'month': return props.data.monthData
+    case 'quarter': return props.data.quarterData
+    case 'year': return props.data.yearData
+    case 'all': return props.data.allData
     default: return null
   }
 })
@@ -66,11 +62,5 @@ const statsItems = computed<StatsItem[]>(() => {
     { label: '已完成', count: data?.completedTaskCount ?? 0, icon: 'ri:checkbox-circle-line', iconStyle: 'bg-success' },
   ]
 })
-
-const loadOverviewData = async () => {
-  overviewData.value = await fetchGetTaskStatusOverview()
-}
-
-onMounted(loadOverviewData)
 </script>
 

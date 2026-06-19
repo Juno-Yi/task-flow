@@ -12,7 +12,7 @@
     </div>
 
     <!-- 任务状态总览 -->
-    <TaskStatusOverview :dimension="activeDimension" />
+    <TaskStatusOverview :dimension="activeDimension" :data="analysisData?.statusOverview" />
 
     <ElRow :gutter="20">
       <h1>任务完成趋势折线图</h1>
@@ -25,10 +25,20 @@
 </template>
 
 <script setup lang="ts">
+import { fetchGetTaskAnalysis } from '@/api/task/analysis'
 import TaskStatusOverview from './modules/task-status-overview.vue'
 
 defineOptions({ name: 'TaskAnalysis' })
 
 /** 页面级维度筛选 */
 const activeDimension = ref<'month' | 'quarter' | 'year' | 'all'>('month')
+
+/** 页面综合数据 */
+const analysisData = ref<Api.Task.TaskAnalysisVO | null>(null)
+
+const loadData = async () => {
+  analysisData.value = await fetchGetTaskAnalysis()
+}
+
+onMounted(loadData)
 </script>

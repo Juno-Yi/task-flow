@@ -1,10 +1,10 @@
 import request from '@/utils/http'
 
 /**
- * 获取任务状态总览数据
+ * 获取任务分析综合数据
  */
-export function fetchGetTaskStatusOverview(){
-    return request.get<Api.Task.TaskStatusOverviewVO>({
-        url: '/task/analysis/status-overview'
+export function fetchGetTaskAnalysis(){
+    return request.get<Api.Task.TaskAnalysisVO>({
+        url: '/task/analysis'
     })
 }

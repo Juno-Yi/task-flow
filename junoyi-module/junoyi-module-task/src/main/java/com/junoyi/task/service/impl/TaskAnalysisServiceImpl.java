@@ -2,6 +2,7 @@ package com.junoyi.task.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.junoyi.task.domain.po.Task;
+import com.junoyi.task.domain.vo.TaskAnalysisVO;
 import com.junoyi.task.domain.vo.TaskStatusOverviewVO;
 import com.junoyi.task.mapper.TaskMapper;
 import com.junoyi.task.service.ITaskAnalysisService;
@@ -26,35 +27,45 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
     private final TaskMapper taskMapper;
 
     /**
-     * 获取任务状态总览统计数据
-     * @return 任务状态总览统计数据
+     * 获取任务分析综合数据
+     * @return 任务分析综合数据
      */
     @Override
-    public TaskStatusOverviewVO getTaskStatusOverview() {
-        TaskStatusOverviewVO vo = new TaskStatusOverviewVO();
+    public TaskAnalysisVO getTaskAnalysis() {
+        TaskAnalysisVO vo = new TaskAnalysisVO();
+        vo.setStatusOverview(buildStatusOverview());
+        return vo;
+    }
+
+    /**
+     * 构建任务状态总览数据
+     */
+    private TaskStatusOverviewVO buildStatusOverview() {
+        TaskStatusOverviewVO overview = new TaskStatusOverviewVO();
+
+        LocalDate now = LocalDate.now();
 
         // 当前月统计
-        LocalDate now = LocalDate.now();
         LocalDate monthStart = now.withDayOfMonth(1);
         LocalDate monthEnd = now.withDayOfMonth(now.lengthOfMonth());
-        vo.setMonthData(buildOverviewItem(monthStart, monthEnd));
+        overview.setMonthData(buildOverviewItem(monthStart, monthEnd));
 
         // 当前季度统计
         int quarterStartMonth = (now.getMonthValue() - 1) / 3 * 3 + 1;
         LocalDate quarterStart = now.withMonth(quarterStartMonth).withDayOfMonth(1);
         LocalDate quarterEnd = quarterStart.plusMonths(2);
         quarterEnd = quarterEnd.withDayOfMonth(quarterEnd.lengthOfMonth());
-        vo.setQuarterData(buildOverviewItem(quarterStart, quarterEnd));
+        overview.setQuarterData(buildOverviewItem(quarterStart, quarterEnd));
 
         // 当前年度统计
         LocalDate yearStart = now.withMonth(1).withDayOfMonth(1);
         LocalDate yearEnd = now.withMonth(12).withDayOfMonth(31);
-        vo.setYearData(buildOverviewItem(yearStart, yearEnd));
+        overview.setYearData(buildOverviewItem(yearStart, yearEnd));
 
         // 全部数据（不限时间范围）
-        vo.setAllData(buildOverviewItem(null, null));
+        overview.setAllData(buildOverviewItem(null, null));
 
-        return vo;
+        return overview;
     }
 
     /**

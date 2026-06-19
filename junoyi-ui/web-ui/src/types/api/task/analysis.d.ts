@@ -1,6 +1,5 @@
 declare namespace Api.Task {
 
-
     interface TaskStatusOverviewItem {
         pendingTaskCount: number
         ongoingTaskCount: number
@@ -14,5 +13,9 @@ declare namespace Api.Task {
         quarterData: TaskStatusOverviewItem
         yearData: TaskStatusOverviewItem
         allData: TaskStatusOverviewItem
+    }
+
+    interface TaskAnalysisVO {
+        statusOverview: TaskStatusOverviewVO
     }
 }

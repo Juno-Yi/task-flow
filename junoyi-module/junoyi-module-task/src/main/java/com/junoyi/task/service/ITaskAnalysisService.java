@@ -1,6 +1,6 @@
 package com.junoyi.task.service;
 
-import com.junoyi.task.domain.vo.TaskStatusOverviewVO;
+import com.junoyi.task.domain.vo.TaskAnalysisVO;
 
 /**
  * 任务分析业务接口
@@ -10,8 +10,8 @@ import com.junoyi.task.domain.vo.TaskStatusOverviewVO;
 public interface ITaskAnalysisService {
 
     /**
-     * 获取任务状态总览统计数据
-     * @return 任务状态总览统计数据
+     * 获取任务分析综合数据
+     * @return 任务分析综合数据
      */
-    TaskStatusOverviewVO getTaskStatusOverview();
+    TaskAnalysisVO getTaskAnalysis();
 }
