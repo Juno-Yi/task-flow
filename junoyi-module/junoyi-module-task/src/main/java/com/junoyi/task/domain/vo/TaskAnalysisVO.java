@@ -14,4 +14,15 @@ public class TaskAnalysisVO {
      * 任务状态总览数据
      */
     private TaskStatusOverviewVO statusOverview;
+
+    /**
+     * 核心KPI数据
+     */
+    private TaskCoreKpiVO coreKpi;
+
+    /**
+     * 任务健康分（按维度）
+     */
+    private HealthScoreVO healthScore;
+
 }
