@@ -5,7 +5,8 @@ import com.junoyi.framework.permission.annotation.Permission;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
-import com.junoyi.task.domain.vo.TaskAnalysisOverviewVO;
+import com.junoyi.task.domain.vo.TaskAnalysisVO;
+import com.junoyi.task.domain.vo.TaskStatusOverviewVO;
 import com.junoyi.task.service.ITaskAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,15 +26,24 @@ public class TaskAnalysisController extends BaseController {
 
     private final ITaskAnalysisService taskAnalysisService;
 
-    /**
-     * 获取任务分析总览数据
-     */
-    @GetMapping("/overview")
+    @GetMapping
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
             value = "task.ui.analysis.view"
     )
-    public R<TaskAnalysisOverviewVO> getTaskAnalysisOverview(){
-        return R.ok(taskAnalysisService.getTaskAnalysisOverview());
+    public R<TaskAnalysisVO> getTaskAnalysis(){
+        return R.ok();
+    }
+
+    /**
+     * 获取任务状态总览数据
+     */
+    @GetMapping("/status-overview")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = "task.ui.analysis.view"
+    )
+    public R<TaskStatusOverviewVO> getTaskStatusOverview(){
+        return R.ok(taskAnalysisService.getTaskStatusOverview());
     }
 }

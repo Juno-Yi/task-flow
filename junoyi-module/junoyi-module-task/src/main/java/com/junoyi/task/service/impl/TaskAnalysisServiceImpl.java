@@ -2,7 +2,7 @@ package com.junoyi.task.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.junoyi.task.domain.po.Task;
-import com.junoyi.task.domain.vo.TaskAnalysisOverviewVO;
+import com.junoyi.task.domain.vo.TaskStatusOverviewVO;
 import com.junoyi.task.mapper.TaskMapper;
 import com.junoyi.task.service.ITaskAnalysisService;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +26,12 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
     private final TaskMapper taskMapper;
 
     /**
-     * 获取任务分析总览统计数据
-     * @return 任务分析总览统计数据
+     * 获取任务状态总览统计数据
+     * @return 任务状态总览统计数据
      */
     @Override
-    public TaskAnalysisOverviewVO getTaskAnalysisOverview() {
-        TaskAnalysisOverviewVO vo = new TaskAnalysisOverviewVO();
+    public TaskStatusOverviewVO getTaskStatusOverview() {
+        TaskStatusOverviewVO vo = new TaskStatusOverviewVO();
 
         // 当前月统计
         LocalDate now = LocalDate.now();
@@ -64,7 +64,7 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
      * @param endDate   结束日期（null 表示不限）
      * @return 统计项
      */
-    private TaskAnalysisOverviewVO.TaskAnalysisOverviewItem buildOverviewItem(LocalDate startDate, LocalDate endDate) {
+    private TaskStatusOverviewVO.TaskStatusOverviewItem buildOverviewItem(LocalDate startDate, LocalDate endDate) {
         Date start = null;
         Date end = null;
 
@@ -103,7 +103,7 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
             }
         }
 
-        TaskAnalysisOverviewVO.TaskAnalysisOverviewItem item = new TaskAnalysisOverviewVO.TaskAnalysisOverviewItem();
+        TaskStatusOverviewVO.TaskStatusOverviewItem item = new TaskStatusOverviewVO.TaskStatusOverviewItem();
         item.setPendingTaskCount(pendingCount);
         item.setOngoingTaskCount(ongoingCount);
         item.setReviewTaskCount(reviewCount);
