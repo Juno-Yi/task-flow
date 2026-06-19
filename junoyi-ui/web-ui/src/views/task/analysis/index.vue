@@ -25,7 +25,6 @@
     </ElRow>
 
     <ElRow :gutter="20">
-      <h1>任务完成趋势</h1>
     </ElRow>
   </div>
 </template>
