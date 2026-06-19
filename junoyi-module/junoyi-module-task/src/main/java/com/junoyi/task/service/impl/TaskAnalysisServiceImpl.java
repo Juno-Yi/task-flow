@@ -328,24 +328,49 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
      * @return 统计项
      */
     private TaskStatusOverviewVO.TaskStatusOverviewItem buildOverviewItem(LocalDate startDate, LocalDate endDate) {
-        Date start = null;
-        Date end = null;
+        final Date start = startDate != null
+                ? Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
+                : null;
+        final Date end = endDate != null
+                ? Date.from(endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant())
+                : null;
 
-        if (startDate != null) {
-            start = Date.from(startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        }
-        if (endDate != null) {
-            end = Date.from(endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
-        }
-
-        // 查询时间范围内的所有未删除任务
+        // 查询与时间范围有关的所有未删除任务：
+        // 1. 创建时间在范围内（本期新增）
+        // 2. 计划结束时间在范围内
+        // 3. 实际结束时间在范围内（已完成但可能逾期）
+        // 4. 未完成且计划结束时间在范围结束之前（仍在逾期中）
         LambdaQueryWrapper<Task> wrapper = new LambdaQueryWrapper<Task>()
                 .eq(Task::getDelFlag, false)
-                .ge(start != null, Task::getCreateTime, start)
-                .le(end != null, Task::getCreateTime, end)
-                .select(Task::getStatus);
+                .and(start != null || end != null, w -> w
+                        .and(inner -> inner
+                                .ge(start != null, Task::getCreateTime, start)
+                                .le(end != null, Task::getCreateTime, end)
+                        )
+                        .or(inner -> inner
+                                .ge(start != null, Task::getPlanEndTime, start)
+                                .le(end != null, Task::getPlanEndTime, end)
+                        )
+                        .or(inner -> inner
+                                .ge(start != null, Task::getEndTime, start)
+                                .le(end != null, Task::getEndTime, end)
+                        )
+                        .or(end != null, inner -> inner
+                                .ne(Task::getStatus, 4)
+                                .le(Task::getPlanEndTime, end)
+                                .isNotNull(Task::getPlanEndTime)
+                        )
+                )
+                .select(Task::getId, Task::getStatus);
 
         List<Task> tasks = taskMapper.selectList(wrapper);
+
+        // 去重
+        tasks = tasks.stream()
+                .collect(java.util.stream.Collectors.collectingAndThen(
+                        java.util.stream.Collectors.toCollection(() -> new java.util.TreeSet<>(java.util.Comparator.comparing(Task::getId))),
+                        java.util.ArrayList::new
+                ));
 
         // 按状态统计
         int pendingCount = 0;
