@@ -1,7 +1,7 @@
 declare namespace Api.Task {
 
 
-    interface TaskAnalysisOverviewItem {
+    interface TaskStatusOverviewItem {
         pendingTaskCount: number
         ongoingTaskCount: number
         reviewTaskCount: number
@@ -9,10 +9,10 @@ declare namespace Api.Task {
         completedTaskCount: number
     }
 
-    interface TaskAnalysisOverviewVO {
-        monthData: TaskAnalysisOverviewItem
-        quarterData: TaskAnalysisOverviewItem
-        yearData: TaskAnalysisOverviewItem
-        allData: TaskAnalysisOverviewItem
+    interface TaskStatusOverviewVO {
+        monthData: TaskStatusOverviewItem
+        quarterData: TaskStatusOverviewItem
+        yearData: TaskStatusOverviewItem
+        allData: TaskStatusOverviewItem
     }
 }
