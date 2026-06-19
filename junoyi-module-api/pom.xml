@@ -16,6 +16,7 @@
     <modules>
         <module>junoyi-module-task-api</module>
         <module>junoyi-module-platform-api</module>
+        <module>junoyi-module-notification-api</module>
     </modules>
 
     <properties>

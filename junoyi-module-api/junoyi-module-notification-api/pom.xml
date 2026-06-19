@@ -5,23 +5,20 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.junoyi</groupId>
-        <artifactId>task-flow</artifactId>
+        <artifactId>junoyi-module-api</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>junoyi-module</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>junoyi-module-system</module>
-        <module>junoyi-module-task</module>
-        <module>junoyi-module-oauth</module>
-        <module>junoyi-module-project</module>
-        <module>junoyi-module-platform</module>
-        <module>junoyi-module-notification</module>
-    </modules>
+    <artifactId>junoyi-module-notification-api</artifactId>
+    <description> 站内信、邮件、企业微信、飞书、钉钉通知模块对外调用解耦模块 </description>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-boot-starter</artifactId>
+        </dependency>
 
     </dependencies>
 
