@@ -84,8 +84,8 @@ const kpiItems = computed<KpiItem[]>(() => {
     },
     {
       label: '平均处理时长',
-      value: d?.avgProcessDays ?? 0,
-      suffix: '天',
+      value: d?.avgProcessHours ?? 0,
+      suffix: 'h',
       decimals: 1,
       icon: 'ri:timer-line',
       iconBg: 'bg-warning/10',

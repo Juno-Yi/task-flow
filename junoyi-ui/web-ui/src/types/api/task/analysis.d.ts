@@ -21,8 +21,8 @@ declare namespace Api.Task {
         completionRate: number
         /** 逾期任务数 */
         overdueTaskCount: number
-        /** 平均处理时长（天） */
-        avgProcessDays: number
+        /** 平均处理时长（小时） */
+        avgProcessHours: number
         /** 本期新增任务数 */
         newTaskCount: number
     }

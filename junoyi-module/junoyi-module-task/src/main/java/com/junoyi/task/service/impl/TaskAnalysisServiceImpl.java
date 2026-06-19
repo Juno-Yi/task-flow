@@ -224,11 +224,11 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
         // 逾期任务数
         item.setOverdueTaskCount(overdueCount);
 
-        // 平均处理时长（天）
-        double avgDays = processedCount > 0
-                ? (double) totalProcessMillis / processedCount / TimeUnit.DAYS.toMillis(1)
+        // 平均处理时长（小时）
+        double avgHours = processedCount > 0
+                ? (double) totalProcessMillis / processedCount / TimeUnit.HOURS.toMillis(1)
                 : 0;
-        item.setAvgProcessDays(Math.round(avgDays * 10) / 10.0);
+        item.setAvgProcessHours(Math.round(avgHours * 10) / 10.0);
 
         // 本期新增任务数
         item.setNewTaskCount(totalCount);

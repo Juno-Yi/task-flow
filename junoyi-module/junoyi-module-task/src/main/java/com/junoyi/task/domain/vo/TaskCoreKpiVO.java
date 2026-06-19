@@ -44,9 +44,9 @@ public class TaskCoreKpiVO {
         private Integer overdueTaskCount;
 
         /**
-         * 平均处理时长（天）
+         * 平均处理时长（小时）
          */
-        private Double avgProcessDays;
+        private Double avgProcessHours;
 
         /**
          * 本期新增任务数
