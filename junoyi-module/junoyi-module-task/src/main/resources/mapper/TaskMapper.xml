@@ -36,14 +36,20 @@
             t.plan_end_time,
             t.start_time,
             t.end_time,
-            -- 计算是否逾期：已完成不算逾期，未完成且超过计划结束时间算逾期
+            -- 计算是否逾期：
+            -- 1. 没有计划结束时间：不算逾期
+            -- 2. 已完成（status=4）：比较实际完成时间(end_time)和计划结束时间
+            -- 3. 未完成：比较当前时间和计划结束时间
             CASE
-                WHEN t.status = 4 THEN FALSE
                 WHEN t.plan_end_time IS NULL THEN FALSE
+                WHEN t.status = 4 THEN
+                    CASE
+                        WHEN t.end_time IS NOT NULL AND t.end_time > t.plan_end_time THEN TRUE
+                        ELSE FALSE
+                    END
                 WHEN NOW() > t.plan_end_time THEN TRUE
                 ELSE FALSE
             END AS is_overdue,
-            -- 查询最近提交时间（如果有任务记录表的话）
             (
                 SELECT MAX(tr.create_time)
                 FROM task_record tr
@@ -144,10 +150,17 @@
             t.plan_end_time,
             t.start_time,
             t.end_time,
-            -- 计算是否逾期：已完成不算逾期，未完成且超过计划结束时间算逾期
+            -- 计算是否逾期：
+            -- 1. 没有计划结束时间：不算逾期
+            -- 2. 已完成（status=4）：比较实际完成时间(end_time)和计划结束时间
+            -- 3. 未完成：比较当前时间和计划结束时间
             CASE
-                WHEN t.status = 4 THEN FALSE
                 WHEN t.plan_end_time IS NULL THEN FALSE
+                WHEN t.status = 4 THEN
+                    CASE
+                        WHEN t.end_time IS NOT NULL AND t.end_time > t.plan_end_time THEN TRUE
+                        ELSE FALSE
+                    END
                 WHEN NOW() > t.plan_end_time THEN TRUE
                 ELSE FALSE
             END AS is_overdue,
@@ -266,12 +279,19 @@
         t.priority,
         t.plan_start_time,
         t.plan_end_time,
-        -- 计算是否逾期：已完成不算逾期，未完成且超过计划结束时间算逾期
+        -- 计算是否逾期：
+        -- 1. 没有计划结束时间：不算逾期
+        -- 2. 已完成（status=4）：比较实际完成时间(end_time)和计划结束时间
+        -- 3. 未完成：比较当前时间和计划结束时间
         CASE
-        WHEN t.status = 4 THEN FALSE
-        WHEN t.plan_end_time IS NULL THEN FALSE
-        WHEN NOW() > t.plan_end_time THEN TRUE
-        ELSE FALSE
+            WHEN t.plan_end_time IS NULL THEN FALSE
+            WHEN t.status = 4 THEN
+                CASE
+                    WHEN t.end_time IS NOT NULL AND t.end_time > t.plan_end_time THEN TRUE
+                    ELSE FALSE
+                END
+            WHEN NOW() > t.plan_end_time THEN TRUE
+            ELSE FALSE
         END AS is_overdue,
         t.remark,
         -- 负责人信息（taskRole = 1 表示负责人）
@@ -319,12 +339,19 @@
         t.priority,
         t.plan_start_time,
         t.plan_end_time,
-        -- 计算是否逾期：已完成不算逾期，未完成且超过计划结束时间算逾期
+        -- 计算是否逾期：
+        -- 1. 没有计划结束时间：不算逾期
+        -- 2. 已完成（status=4）：比较实际完成时间(end_time)和计划结束时间
+        -- 3. 未完成：比较当前时间和计划结束时间
         CASE
-        WHEN t.status = 4 THEN FALSE
-        WHEN t.plan_end_time IS NULL THEN FALSE
-        WHEN NOW() > t.plan_end_time THEN TRUE
-        ELSE FALSE
+            WHEN t.plan_end_time IS NULL THEN FALSE
+            WHEN t.status = 4 THEN
+                CASE
+                    WHEN t.end_time IS NOT NULL AND t.end_time > t.plan_end_time THEN TRUE
+                    ELSE FALSE
+                END
+            WHEN NOW() > t.plan_end_time THEN TRUE
+            ELSE FALSE
         END AS is_overdue,
         t.remark,
         -- 负责人信息（taskRole = 1 表示负责人）
