@@ -14,15 +14,18 @@
     <!-- 任务状态总览 -->
     <TaskStatusOverview :dimension="activeDimension" :data="analysisData?.statusOverview" />
 
+    <!-- 核心KPI + 任务健康度 -->
     <ElRow :gutter="20">
-      <!--   任务总数   -->
-
-      <!--   任务   -->
-
+      <ElCol :xl="14" :lg="15" :xs="24">
+        <TaskCoreKpi :data="analysisData?.coreKpi" />
+      </ElCol>
+      <ElCol :xl="10" :lg="9" :xs="24">
+        <TaskHealthGauge :value="analysisData?.coreKpi?.completionRate" />
+      </ElCol>
     </ElRow>
 
     <ElRow :gutter="20">
-      <h1>任务状态分析</h1>
+      <h1>任务完成趋势</h1>
     </ElRow>
   </div>
 </template>
@@ -30,6 +33,8 @@
 <script setup lang="ts">
 import { fetchGetTaskAnalysis } from '@/api/task/analysis'
 import TaskStatusOverview from './modules/task-status-overview.vue'
+import TaskCoreKpi from './modules/task-core-kpi.vue'
+import TaskHealthGauge from './modules/task-health-gauge.vue'
 
 defineOptions({ name: 'TaskAnalysis' })
 
