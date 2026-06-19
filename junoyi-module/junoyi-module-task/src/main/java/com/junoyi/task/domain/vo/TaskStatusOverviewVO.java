@@ -34,6 +34,11 @@ public class TaskStatusOverviewVO {
     public static class TaskStatusOverviewItem {
 
         /**
+         * 总任务量
+         */
+        private Integer totalTaskCount;
+
+        /**
          * 待完成任务数量
          */
         private Integer pendingTaskCount;

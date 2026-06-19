@@ -8,7 +8,7 @@
     </div>
 
     <div class="mt-5">
-      <div class="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-5">
+      <div class="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-6">
         <ArtStatsCard
           v-for="(item, index) in statsItems"
           :key="index"
@@ -55,6 +55,7 @@ const currentData = computed<Api.Task.TaskStatusOverviewItem | null>(() => {
 const statsItems = computed<StatsItem[]>(() => {
   const data = currentData.value
   return [
+    { label: '总任务量', count: data?.totalTaskCount ?? 0, icon: 'ri:list-check-3', iconStyle: 'bg-theme' },
     { label: '待处理', count: data?.pendingTaskCount ?? 0, icon: 'ri:time-line', iconStyle: 'bg-warning' },
     { label: '进行中', count: data?.ongoingTaskCount ?? 0, icon: 'ri:play-circle-line', iconStyle: 'bg-primary' },
     { label: '待审核', count: data?.reviewTaskCount ?? 0, icon: 'ri:file-search-line', iconStyle: 'bg-info' },

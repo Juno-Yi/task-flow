@@ -1,6 +1,7 @@
 declare namespace Api.Task {
 
     interface TaskStatusOverviewItem {
+        totalTaskCount: number
         pendingTaskCount: number
         ongoingTaskCount: number
         reviewTaskCount: number

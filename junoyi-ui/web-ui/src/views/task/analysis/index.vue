@@ -15,7 +15,10 @@
     <TaskStatusOverview :dimension="activeDimension" :data="analysisData?.statusOverview" />
 
     <ElRow :gutter="20">
-      <h1>任务完成趋势折线图</h1>
+      <!--   任务总数   -->
+
+      <!--   任务   -->
+
     </ElRow>
 
     <ElRow :gutter="20">

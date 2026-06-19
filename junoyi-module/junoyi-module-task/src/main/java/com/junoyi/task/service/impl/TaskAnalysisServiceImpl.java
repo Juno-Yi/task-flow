@@ -115,6 +115,7 @@ public class TaskAnalysisServiceImpl implements ITaskAnalysisService {
         }
 
         TaskStatusOverviewVO.TaskStatusOverviewItem item = new TaskStatusOverviewVO.TaskStatusOverviewItem();
+        item.setTotalTaskCount(tasks.size());
         item.setPendingTaskCount(pendingCount);
         item.setOngoingTaskCount(ongoingCount);
         item.setReviewTaskCount(reviewCount);
