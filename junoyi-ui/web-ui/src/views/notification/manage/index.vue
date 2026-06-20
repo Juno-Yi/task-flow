@@ -9,7 +9,14 @@
         v-model:columns="columnChecks"
         :loading="loading"
         @refresh="refreshData"
-      />
+      >
+        <template #left>
+          <ElSpace wrap>
+            <ElButton  @click=""  v-permission="'notification.ui.manage.publish.button'" v-ripple>发布通知</ElButton>
+            <ElButton  @click="goMyNotification"  v-ripple>我的收信箱</ElButton>
+          </ElSpace>
+        </template>
+      </ArtTableHeader>
 
       <ArtTable
         :loading="loading"
@@ -27,6 +34,7 @@
 import { ElTag } from 'element-plus'
 import { useTable } from '@/hooks/core/useTable'
 import { fetchGetNotificationList } from '@/api/notification/manage'
+import {router} from "@/router";
 
 defineOptions({ name: 'NotificationManager' })
 
@@ -136,6 +144,11 @@ const {
     ]
   }
 })
+
+
+const goMyNotification = () => {
+  router.push('/dashboard/notice')
+}
 </script>
 
 <style scoped lang="scss">

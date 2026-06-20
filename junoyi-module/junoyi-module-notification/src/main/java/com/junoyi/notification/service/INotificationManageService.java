@@ -2,6 +2,7 @@ package com.junoyi.notification.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.notification.domain.dto.NotificationDTO;
 import com.junoyi.notification.domain.po.Notification;
 import com.junoyi.notification.domain.vo.NotificationListVO;
 
@@ -18,4 +19,11 @@ public interface INotificationManageService {
      * @return 通知列表（分页）
      */
     PageResult<NotificationListVO> getNotificationList(Page<Notification> page);
+
+    /**
+     * 添加通知
+     * @param dto 通知DTO
+     */
+    void addNotification(NotificationDTO dto);
+
 }

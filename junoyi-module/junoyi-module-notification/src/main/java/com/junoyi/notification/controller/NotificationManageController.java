@@ -6,13 +6,11 @@ import com.junoyi.framework.permission.annotation.Permission;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
+import com.junoyi.notification.domain.dto.NotificationDTO;
 import com.junoyi.notification.domain.vo.NotificationListVO;
 import com.junoyi.notification.service.INotificationManageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 通知管理控制器
@@ -44,9 +42,10 @@ public class NotificationManageController extends BaseController {
     @PostMapping
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = "notification.ui.manage.view"
+            value = "notification.ui.manage.publish.button"
     )
-    public R<Void> addNotification(){
+    public R<Void> addNotification(@RequestBody NotificationDTO dto){
+        notificationManagerService.addNotification(dto);
         return R.ok();
     }
 }

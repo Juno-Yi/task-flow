@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.notification.converter.NotificationConverter;
+import com.junoyi.notification.domain.dto.NotificationDTO;
 import com.junoyi.notification.domain.po.Notification;
 import com.junoyi.notification.domain.vo.NotificationListVO;
 import com.junoyi.notification.mapper.NotificationMapper;
@@ -15,8 +17,10 @@ import com.junoyi.system.domain.vo.SysDictDataVO;
 import com.junoyi.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -114,5 +118,43 @@ public class NotificationManageServiceImpl implements INotificationManageService
         List<SysDictDataVO> dictList = sysDictApi.getDictDataByType(dictType);
         return dictList.stream()
                 .collect(Collectors.toMap(SysDictDataVO::getDictValue, dict -> dict, (v1, v2) -> v1));
+    }
+
+    /**
+     * 添加通知（立即发布或存储草稿）
+     * status: 0-草稿  1-已发布
+     * @param dto 通知DTO
+     */
+    @Override
+    public void addNotification(NotificationDTO dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("通知数据不能为空");
+        }
+        if (!StringUtils.hasText(dto.getTitle())) {
+            throw new IllegalArgumentException("通知标题不能为空");
+        }
+        if (dto.getType() == null) {
+            throw new IllegalArgumentException("通知类型不能为空");
+        }
+
+        Notification notification = new Notification();
+        notification.setTitle(dto.getTitle());
+        notification.setContent(dto.getContent());
+        notification.setType(dto.getType());
+        notification.setSenderId(SecurityUtils.getUserId());
+        notification.setCreateBy(SecurityUtils.getUserName());
+        notification.setCreateTime(new Date());
+
+        // 根据状态判断：1-立即发布，0-存草稿
+        if (Integer.valueOf(1).equals(dto.getStatus())) {
+            notification.setStatus(1);
+            notification.setPublishTime(new Date());
+
+            // TODO: 发布通知
+        } else {
+            notification.setStatus(0);
+        }
+
+        notificationMapper.insert(notification);
     }
 }
