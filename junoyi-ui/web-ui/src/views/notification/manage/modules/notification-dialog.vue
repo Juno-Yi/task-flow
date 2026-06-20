@@ -18,9 +18,9 @@
             <ElSelect v-model="form.type" placeholder="请选择通知类型" style="width: 100%">
               <ElOption
                 v-for="item in typeOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                :key="item.dictValue"
+                :label="item.dictLabel"
+                :value="Number(item.dictValue)"
               />
             </ElSelect>
           </ElFormItem>
@@ -121,7 +121,7 @@ const defaultForm = (): FormData => ({
   title: '',
   content: '',
   type: undefined,
-  targetType: undefined,
+  targetType: 0,
   targetIds: []
 })
 
@@ -135,7 +135,7 @@ const rules: FormRules = {
 }
 
 // 通知类型字典
-const typeOptions = ref<{ label: string; value: number }[]>([])
+const typeOptions = ref<Api.System.DictDataVO[]>([])
 
 // 部门树
 const deptTree = ref<any[]>([])
@@ -178,12 +178,12 @@ const initEditor = () => {
  * 加载选项数据
  */
 const loadOptions = async () => {
-  // 加载通知类型字典
-  const { data: typeData } = await fetchGetDictDataByType('notification_type')
-  typeOptions.value = (typeData || []).map((item: any) => ({
-    label: item.dictLabel,
-    value: Number(item.dictValue)
-  }))
+  try {
+    // 加载通知类型字典
+    typeOptions.value = await fetchGetDictDataByType('notification_type')
+  } catch (error) {
+    console.error('加载字典数据失败:', error)
+  }
 }
 
 /**
