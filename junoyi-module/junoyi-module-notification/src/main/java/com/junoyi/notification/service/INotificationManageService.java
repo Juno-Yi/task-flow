@@ -10,7 +10,7 @@ import com.junoyi.notification.domain.vo.NotificationListVO;
  *
  * @author Fan
  */
-public interface INotificationManagerService {
+public interface INotificationManageService {
 
     /**
      * 获取通知列表（分页）

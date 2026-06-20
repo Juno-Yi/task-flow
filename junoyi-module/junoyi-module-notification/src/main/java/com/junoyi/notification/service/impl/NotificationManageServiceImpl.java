@@ -8,7 +8,7 @@ import com.junoyi.notification.converter.NotificationConverter;
 import com.junoyi.notification.domain.po.Notification;
 import com.junoyi.notification.domain.vo.NotificationListVO;
 import com.junoyi.notification.mapper.NotificationMapper;
-import com.junoyi.notification.service.INotificationManagerService;
+import com.junoyi.notification.service.INotificationManageService;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class NotificationManagerServiceImpl implements INotificationManagerService {
+public class NotificationManageServiceImpl implements INotificationManageService {
 
     private final NotificationMapper notificationMapper;
     private final SysUserMapper sysUserMapper;

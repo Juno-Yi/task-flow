@@ -7,7 +7,7 @@ import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.notification.domain.vo.NotificationListVO;
-import com.junoyi.notification.service.INotificationManagerService;
+import com.junoyi.notification.service.INotificationManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/notification")
 @RequiredArgsConstructor
-public class NotificationManagerController extends BaseController {
+public class NotificationManageController extends BaseController {
 
-    private final INotificationManagerService notificationManagerService;
+    private final INotificationManageService notificationManagerService;
 
     /**
      * 获取通知列表
