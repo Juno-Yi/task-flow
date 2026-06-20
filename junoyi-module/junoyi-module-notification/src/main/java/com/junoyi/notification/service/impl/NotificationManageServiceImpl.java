@@ -8,21 +8,27 @@ import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.notification.converter.NotificationConverter;
 import com.junoyi.notification.domain.dto.NotificationDTO;
 import com.junoyi.notification.domain.po.Notification;
+import com.junoyi.notification.domain.po.NotificationTarget;
+import com.junoyi.notification.domain.po.NotificationUserState;
 import com.junoyi.notification.domain.vo.NotificationListVO;
 import com.junoyi.notification.mapper.NotificationMapper;
+import com.junoyi.notification.mapper.NotificationTargetMapper;
+import com.junoyi.notification.mapper.NotificationUserStateMapper;
 import com.junoyi.notification.service.INotificationManageService;
 import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.domain.po.SysUser;
+import com.junoyi.system.domain.po.SysUserDept;
+import com.junoyi.system.domain.po.SysUserRole;
 import com.junoyi.system.domain.vo.SysDictDataVO;
+import com.junoyi.system.mapper.SysUserDeptMapper;
 import com.junoyi.system.mapper.SysUserMapper;
+import com.junoyi.system.mapper.SysUserRoleMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -35,7 +41,11 @@ import java.util.stream.Collectors;
 public class NotificationManageServiceImpl implements INotificationManageService {
 
     private final NotificationMapper notificationMapper;
+    private final NotificationTargetMapper notificationTargetMapper;
+    private final NotificationUserStateMapper notificationUserStateMapper;
     private final SysUserMapper sysUserMapper;
+    private final SysUserDeptMapper sysUserDeptMapper;
+    private final SysUserRoleMapper sysUserRoleMapper;
     private final SysDictApi sysDictApi;
 
     /**
@@ -123,9 +133,11 @@ public class NotificationManageServiceImpl implements INotificationManageService
     /**
      * 添加通知（立即发布或存储草稿）
      * status: 0-草稿  1-已发布
+     * targetType: 0-全部 1-部门 2-角色 3-指定用户
      * @param dto 通知DTO
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void addNotification(NotificationDTO dto) {
         if (dto == null) {
             throw new IllegalArgumentException("通知数据不能为空");
@@ -136,7 +148,16 @@ public class NotificationManageServiceImpl implements INotificationManageService
         if (dto.getType() == null) {
             throw new IllegalArgumentException("通知类型不能为空");
         }
+        if (dto.getTargetType() == null) {
+            throw new IllegalArgumentException("通知目标范围不能为空");
+        }
+        // 非全部时，目标ID列表不能为空
+        if (!Integer.valueOf(0).equals(dto.getTargetType())
+                && (dto.getTargetIds() == null || dto.getTargetIds().isEmpty())) {
+            throw new IllegalArgumentException("请选择通知目标");
+        }
 
+        // 1. 插入通知主表
         Notification notification = new Notification();
         notification.setTitle(dto.getTitle());
         notification.setContent(dto.getContent());
@@ -149,12 +170,96 @@ public class NotificationManageServiceImpl implements INotificationManageService
         if (Integer.valueOf(1).equals(dto.getStatus())) {
             notification.setStatus(1);
             notification.setPublishTime(new Date());
-
-            // TODO: 发布通知
         } else {
             notification.setStatus(0);
         }
 
         notificationMapper.insert(notification);
+
+        // 2. 插入通知目标表
+        if (Integer.valueOf(0).equals(dto.getTargetType())) {
+            // 全部用户：插入一条 targetType=0, targetId=null 的记录
+            NotificationTarget target = new NotificationTarget();
+            target.setNotificationId(notification.getId());
+            target.setTargetType(0);
+            notificationTargetMapper.insert(target);
+        } else {
+            // 部门/角色/指定用户：每个目标ID插一条记录
+            for (Long targetId : dto.getTargetIds()) {
+                NotificationTarget target = new NotificationTarget();
+                target.setNotificationId(notification.getId());
+                target.setTargetType(dto.getTargetType());
+                target.setTargetId(targetId);
+                notificationTargetMapper.insert(target);
+            }
+        }
+
+        // 3. 如果是立即发布，解析目标用户并批量插入用户通知状态
+        if (Integer.valueOf(1).equals(dto.getStatus())) {
+            List<Long> userIds = resolveTargetUserIds(dto.getTargetType(), dto.getTargetIds());
+            Date now = new Date();
+            for (Long userId : userIds) {
+                NotificationUserState userState = new NotificationUserState();
+                userState.setNotificationId(notification.getId());
+                userState.setUserId(userId);
+                userState.setIsRead(false);
+                userState.setIsDelete(false);
+                userState.setCreateTime(now);
+                notificationUserStateMapper.insert(userState);
+            }
+        }
+    }
+
+    /**
+     * 根据目标类型和目标ID列表解析出实际用户ID列表
+     *
+     * @param targetType 目标类型（0-全部 1-部门 2-角色 3-指定用户）
+     * @param targetIds  目标ID列表
+     * @return 去重后的用户ID列表
+     */
+    private List<Long> resolveTargetUserIds(Integer targetType, List<Long> targetIds) {
+        Set<Long> userIdSet = new HashSet<>();
+
+        switch (targetType) {
+            case 0 -> {
+                // 全部用户
+                List<SysUser> allUsers = sysUserMapper.selectList(
+                        new LambdaQueryWrapper<SysUser>()
+                                .eq(SysUser::isDelFlag, false)
+                                .eq(SysUser::getStatus, 0)
+                                .select(SysUser::getUserId)
+                );
+                allUsers.forEach(u -> userIdSet.add(u.getUserId()));
+            }
+            case 1 -> {
+                // 按部门：查询部门下所有用户
+                if (targetIds != null && !targetIds.isEmpty()) {
+                    List<SysUserDept> userDepts = sysUserDeptMapper.selectList(
+                            new LambdaQueryWrapper<SysUserDept>()
+                                    .in(SysUserDept::getDeptId, targetIds)
+                    );
+                    userDepts.forEach(ud -> userIdSet.add(ud.getUserId()));
+                }
+            }
+            case 2 -> {
+                // 按角色：查询角色下所有用户
+                if (targetIds != null && !targetIds.isEmpty()) {
+                    List<SysUserRole> userRoles = sysUserRoleMapper.selectList(
+                            new LambdaQueryWrapper<SysUserRole>()
+                                    .in(SysUserRole::getRoleId, targetIds)
+                    );
+                    userRoles.forEach(ur -> userIdSet.add(ur.getUserId()));
+                }
+            }
+            case 3 -> {
+                // 指定用户
+                if (targetIds != null) {
+                    userIdSet.addAll(targetIds);
+                }
+            }
+            default -> {}
+        }
+
+        return new ArrayList<>(userIdSet);
     }
 }
