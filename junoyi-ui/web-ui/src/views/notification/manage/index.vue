@@ -40,6 +40,7 @@ import { useTable } from '@/hooks/core/useTable'
 import { fetchGetNotificationList } from '@/api/notification/manage'
 import { router } from "@/router"
 import NotificationDialog from './modules/notification-dialog.vue'
+import ArtButtonMore, {ButtonMoreItem} from "@/components/core/forms/art-button-more/index.vue";
 
 defineOptions({ name: 'NotificationManager' })
 
@@ -145,11 +146,42 @@ const {
         headerAlign: 'center',
         width: 180,
         formatter: (row: NotificationListVO) => formatTime(row.updateTime)
+      },
+      {
+        prop: 'operation',
+        label: '操作',
+        width: 80,
+        align: 'center',
+        headerAlign: 'center',
+        fixed: 'right',
+        formatter: (row: any) => {
+          const list: ButtonMoreItem[] = [
+            {
+              key: 'view',
+              label: '查看详情',
+              icon: 'ri:eye-line'
+            },
+            {
+              key: 'archive',
+              label: '归档',
+              icon: 'ri:archive-line',
+              auth: 'project.ui.list.archive.button'
+            },
+          ]
+
+          return h(ArtButtonMore, {
+            list,
+            onClick: (item: ButtonMoreItem) => handleButtonMoreClick(item, row)
+          })
+        }
       }
     ]
   }
 })
 
+const handleButtonMoreClick = () => {
+
+}
 
 const goMyNotification = () => {
   router.push('/dashboard/notice')
