@@ -10,6 +10,7 @@ import com.junoyi.notification.domain.vo.NotificationListVO;
 import com.junoyi.notification.service.INotificationManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,5 +36,17 @@ public class NotificationManageController extends BaseController {
     )
     public R<PageResult<NotificationListVO>> getList(){
         return R.ok(notificationManagerService.getNotificationList(buildPage()));
+    }
+
+    /**
+     * 添加通知（立即发布或者存储草稿）
+     */
+    @PostMapping
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = "notification.ui.manage.view"
+    )
+    public R<Void> addNotification(){
+        return R.ok();
     }
 }
