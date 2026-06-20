@@ -1,17 +1,15 @@
 <template>
-  <ElDialog v-model="visible" title="发布通知" width="680px" @close="handleClose">
+  <ElDialog v-model="visible" title="发布通知" width="860px" @close="handleClose">
     <ElForm ref="formRef" :model="form" :rules="rules" label-width="100px">
       <ElFormItem label="通知标题" prop="title">
         <ElInput v-model="form.title" placeholder="请输入通知标题" maxlength="100" show-word-limit />
       </ElFormItem>
 
       <ElFormItem label="通知内容" prop="content">
-        <ElInput
-          v-model="form.content"
-          type="textarea"
-          :rows="6"
-          placeholder="请输入通知内容（支持 Markdown 格式）"
-        />
+        <div class="w-full rounded-lg border border-gray-200 bg-white p-3">
+          <div class="mb-3 text-sm font-medium text-gray-700">Markdown 文档</div>
+          <div ref="editorRef" class="min-h-[420px]"></div>
+        </div>
       </ElFormItem>
 
       <ElRow :gutter="16">
@@ -90,7 +88,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, nextTick } from 'vue'
+import Vditor from 'vditor'
+import 'vditor/dist/index.css'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { fetchAddNotification } from '@/api/notification/manage'
@@ -106,6 +106,8 @@ const emit = defineEmits<{
 const visible = ref(false)
 const submitting = ref(false)
 const formRef = ref<FormInstance>()
+const editorRef = ref<HTMLElement>()
+const vditor = ref<Vditor>()
 
 interface FormData {
   title: string
@@ -152,6 +154,24 @@ const open = async () => {
   visible.value = true
   Object.assign(form, defaultForm())
   await loadOptions()
+  await nextTick()
+  initEditor()
+}
+
+/**
+ * 初始化 Vditor 编辑器
+ */
+const initEditor = () => {
+  if (!editorRef.value) return
+  vditor.value = new Vditor(editorRef.value, {
+    height: 420,
+    mode: 'ir',
+    placeholder: '请输入通知内容...',
+    cache: { enable: false },
+    after: () => {
+      vditor.value?.setValue(form.content || '')
+    }
+  })
 }
 
 /**
@@ -218,11 +238,14 @@ const handleSubmit = async (status: number) => {
     return
   }
 
+  // 从编辑器获取内容
+  const content = vditor.value?.getValue() || ''
+
   submitting.value = true
   try {
     await fetchAddNotification({
       title: form.title,
-      content: form.content,
+      content,
       type: form.type!,
       status,
       targetType: form.targetType!,
@@ -242,6 +265,10 @@ const handleSaveDraft = () => handleSubmit(0)
 const handleClose = () => {
   visible.value = false
   formRef.value?.resetFields()
+  if (vditor.value) {
+    vditor.value.destroy()
+    vditor.value = undefined
+  }
 }
 
 defineExpose({ open })
