@@ -13,7 +13,7 @@ import java.util.Date;
  */
 @Data
 @TableName("notification_user")
-public class NotificationUser {
+public class NotificationUserState {
 
     /**
      * 主键ID
@@ -22,14 +22,14 @@ public class NotificationUser {
     private Long id;
 
     /**
-     * 用户ID
-     */
-    private Long userId;
-
-    /**
      * 通知ID
      */
     private Long notificationId;
+
+    /**
+     * 用户ID
+     */
+    private Long userId;
 
     /**
      * 是否已读
@@ -40,6 +40,16 @@ public class NotificationUser {
      * 查看读取时间
      */
     private Date readTime;
+
+    /**
+     * 是否删除
+     */
+    private Boolean isDelete;
+
+    /**
+     * 删除时间
+     */
+    private Date deleteTime;
 
     /**
      * 通知发布时间
