@@ -55,8 +55,20 @@
 
       <!-- 角色选择 -->
       <ElFormItem v-if="form.targetType === 2" label="选择角色" prop="targetIds">
-        <ElSelect v-model="form.targetIds" multiple collapse-tags collapse-tags-tooltip placeholder="请选择角色" style="width: 100%">
-          <ElOption v-for="item in roleOptions" :key="item.value" :label="item.label" :value="item.value" />
+        <ElSelect
+          v-model="form.targetIds"
+          multiple
+          collapse-tags
+          collapse-tags-tooltip
+          placeholder="请选择角色"
+          style="width: 100%"
+        >
+          <ElOption
+            v-for="item in roleOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
         </ElSelect>
       </ElFormItem>
 
@@ -202,7 +214,7 @@ const handleTargetTypeChange = async () => {
     const data = await fetchGetRoleOptions()
     roleOptions.value = (data || []).map((item: any) => ({
       label: item.roleName,
-      value: item.roleId
+      value: item.id
     }))
   }
 }
