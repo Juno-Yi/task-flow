@@ -12,8 +12,8 @@
       >
         <template #left>
           <ElSpace wrap>
-            <ElButton  @click=""  v-permission="'notification.ui.manage.publish.button'" v-ripple>发布通知</ElButton>
-            <ElButton  @click="goMyNotification"  v-ripple>我的收信箱</ElButton>
+            <ElButton type="primary" @click="handleAdd" v-permission="'notification.ui.manage.publish.button'" v-ripple>发布通知</ElButton>
+            <ElButton @click="goMyNotification" v-ripple>我的收信箱</ElButton>
           </ElSpace>
         </template>
       </ArtTableHeader>
@@ -27,14 +27,19 @@
         @pagination:current-change="handleCurrentChange"
       />
     </ElCard>
+
+    <!-- 发布通知弹窗 -->
+    <NotificationDialog ref="dialogRef" @success="refreshData" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { ElTag } from 'element-plus'
 import { useTable } from '@/hooks/core/useTable'
 import { fetchGetNotificationList } from '@/api/notification/manage'
-import {router} from "@/router";
+import { router } from "@/router"
+import NotificationDialog from './modules/notification-dialog.vue'
 
 defineOptions({ name: 'NotificationManager' })
 
@@ -148,6 +153,12 @@ const {
 
 const goMyNotification = () => {
   router.push('/dashboard/notice')
+}
+
+const dialogRef = ref<InstanceType<typeof NotificationDialog>>()
+
+const handleAdd = () => {
+  dialogRef.value?.open()
 }
 </script>
 
