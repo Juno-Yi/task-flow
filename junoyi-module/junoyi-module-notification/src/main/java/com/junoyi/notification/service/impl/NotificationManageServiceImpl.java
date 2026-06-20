@@ -133,7 +133,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
     /**
      * 添加通知（立即发布或存储草稿）
      * status: 0-草稿  1-已发布
-     * targetType: 0-全部 1-部门 2-角色 3-指定用户
+     * targetType: 0-全部 1-部门 2-角色 3-指定用户 4-项目组
      * @param dto 通知DTO
      */
     @Override
@@ -157,7 +157,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
             throw new IllegalArgumentException("请选择通知目标");
         }
 
-        // 1. 插入通知主表
+        // 插入通知主表
         Notification notification = new Notification();
         notification.setTitle(dto.getTitle());
         notification.setContent(dto.getContent());
@@ -176,7 +176,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
 
         notificationMapper.insert(notification);
 
-        // 2. 插入通知目标表
+        // 插入通知目标表
         if (Integer.valueOf(0).equals(dto.getTargetType())) {
             // 全部用户：插入一条 targetType=0, targetId=null 的记录
             NotificationTarget target = new NotificationTarget();
@@ -194,7 +194,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
             }
         }
 
-        // 3. 如果是立即发布，解析目标用户并批量插入用户通知状态
+        // 如果是立即发布，解析目标用户并批量插入用户通知状态
         if (Integer.valueOf(1).equals(dto.getStatus())) {
             List<Long> userIds = resolveTargetUserIds(dto.getTargetType(), dto.getTargetIds());
             Date now = new Date();
