@@ -27,8 +27,8 @@
         </div>
 
         <ElAlert
-            title="当前为官方演示站环境"
-            type="warning"
+            title="当前版本为社区版"
+            type="success"
             :closable="false"
             show-icon
         />
@@ -37,50 +37,46 @@
         <div class="license-box">
 
           <div class="license-title">
-            开源协议与商业授权说明
+            开源协议说明
           </div>
 
           <div class="license-desc">
-            本项目基于 AGPL-3.0 协议开源。
+            本项目基于 MIT 协议免费开源，您可以自由使用、修改和分发。
           </div>
 
           <div class="license-section">
             <div class="section-title success">
-              以下场景可免费使用
+              MIT 协议允许您
             </div>
 
             <div class="license-item">
-              • 个人学习、研究用途
+              • 个人或企业免费使用
             </div>
 
             <div class="license-item">
-              • 非商业性质项目
+              • 用于商业项目
             </div>
 
             <div class="license-item">
-              • 企业内部使用且保持项目开源
+              • 自由修改和二次开发
+            </div>
+
+            <div class="license-item">
+              • 闭源使用或开源分发
             </div>
           </div>
 
           <div class="license-section">
-            <div class="section-title danger">
-              以下情况属于商业使用，需获得商业授权
+            <div class="section-title warning">
+              使用须知
             </div>
 
             <div class="license-item">
-              • 企业内部闭源使用本系统
+              • 请保留原始版权声明和许可证
             </div>
 
             <div class="license-item">
-              • 用于商业项目或收费系统
-            </div>
-
-            <div class="license-item">
-              • 提供 SaaS / 在线服务
-            </div>
-
-            <div class="license-item">
-              • 二次开发后闭源使用
+              • 本软件按"原样"提供，不附带任何担保
             </div>
           </div>
 
@@ -245,6 +241,10 @@ const handleCopy = async () => {
 
     &.success {
       color: #67c23a;
+    }
+
+    &.warning {
+      color: #e6a23c;
     }
 
     &.danger {
