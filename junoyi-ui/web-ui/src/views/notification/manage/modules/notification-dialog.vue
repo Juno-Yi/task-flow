@@ -46,8 +46,9 @@
           :render-after-expand="false"
           placeholder="请选择部门"
           node-key="id"
-          :props="{ label: 'deptName', children: 'children' }"
+          :props="{ label: 'name', children: 'children' }"
           check-strictly
+          show-checkbox
           style="width: 100%"
         />
       </ElFormItem>
@@ -193,12 +194,12 @@ const handleTargetTypeChange = async () => {
   form.targetIds = []
 
   if (form.targetType === 1 && deptTree.value.length === 0) {
-    const { data } = await fetchGetDeptTree()
+    const data = await fetchGetDeptTree()
     deptTree.value = data || []
   }
 
   if (form.targetType === 2 && roleOptions.value.length === 0) {
-    const { data } = await fetchGetRoleOptions()
+    const data = await fetchGetRoleOptions()
     roleOptions.value = (data || []).map((item: any) => ({
       label: item.roleName,
       value: item.roleId
@@ -216,7 +217,7 @@ const handleUserSearch = async (query: string) => {
   }
   userLoading.value = true
   try {
-    const { data } = await fetchGetUserOptions({ nickName: query })
+    const data = await fetchGetUserOptions({ nickName: query })
     userOptions.value = (data || []).map((item: any) => ({
       label: item.nickName,
       value: item.userId
