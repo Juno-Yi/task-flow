@@ -26,4 +26,10 @@ public interface INotificationManageService {
      */
     void addNotification(NotificationDTO dto);
 
+    /**
+     * 修改通知
+     * @param dto 通知DTO
+     */
+    void updateNotification(NotificationDTO dto);
+
 }

@@ -48,4 +48,17 @@ public class NotificationManageController extends BaseController {
         notificationManagerService.addNotification(dto);
         return R.ok();
     }
+
+    /**
+     * 修改通知
+     */
+    @PutMapping
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = "notification.ui.manage.edit.button"
+    )
+    public R<Void> updateNotification(@RequestBody NotificationDTO dto){
+        notificationManagerService.updateNotification(dto);
+        return R.ok();
+    }
 }

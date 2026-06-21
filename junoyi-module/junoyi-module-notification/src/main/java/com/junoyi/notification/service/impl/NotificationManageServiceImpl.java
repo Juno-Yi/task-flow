@@ -262,4 +262,13 @@ public class NotificationManageServiceImpl implements INotificationManageService
 
         return new ArrayList<>(userIdSet);
     }
+
+    /**
+     * 修改通知
+     * @param dto 通知DTO
+     */
+    @Override
+    public void updateNotification(NotificationDTO dto) {
+
+    }
 }
