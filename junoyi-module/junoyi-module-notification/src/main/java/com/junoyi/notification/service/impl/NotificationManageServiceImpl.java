@@ -268,7 +268,110 @@ public class NotificationManageServiceImpl implements INotificationManageService
      * @param dto 通知DTO
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateNotification(NotificationDTO dto) {
+        if (dto == null || dto.getId() == null) {
+            throw new IllegalArgumentException("通知ID不能为空");
+        }
+        if (!StringUtils.hasText(dto.getTitle())) {
+            throw new IllegalArgumentException("通知标题不能为空");
+        }
+        if (dto.getType() == null) {
+            throw new IllegalArgumentException("通知类型不能为空");
+        }
+        if (dto.getTargetType() == null) {
+            throw new IllegalArgumentException("通知目标范围不能为空");
+        }
+        // 非全部时，目标ID列表不能为空
+        if (!Integer.valueOf(0).equals(dto.getTargetType())
+                && (dto.getTargetIds() == null || dto.getTargetIds().isEmpty())) {
+            throw new IllegalArgumentException("请选择通知目标");
+        }
 
+        // 查询原通知信息
+        Notification existingNotification = notificationMapper.selectById(dto.getId());
+        if (existingNotification == null) {
+            throw new IllegalArgumentException("通知不存在");
+        }
+
+        Integer oldStatus = existingNotification.getStatus();
+
+        // 更新通知主表
+        Notification notification = new Notification();
+        notification.setId(dto.getId());
+        notification.setTitle(dto.getTitle());
+        notification.setContent(dto.getContent());
+        notification.setType(dto.getType());
+        notification.setUpdateBy(SecurityUtils.getUserName());
+        notification.setUpdateTime(new Date());
+
+        // 根据状态判断：1-立即发布，0-存草稿
+        if (Integer.valueOf(1).equals(dto.getStatus())) {
+            notification.setStatus(1);
+            // 如果原来是草稿，现在发布，设置发布时间
+            if (!Integer.valueOf(1).equals(oldStatus)) {
+                notification.setPublishTime(new Date());
+            }
+        } else {
+            notification.setStatus(0);
+            // 如果从发布改为草稿，清空发布时间
+            if (Integer.valueOf(1).equals(oldStatus)) {
+                notification.setPublishTime(null);
+            }
+        }
+
+        notificationMapper.updateById(notification);
+
+        // 删除旧的通知目标关系
+        notificationTargetMapper.delete(
+                new LambdaQueryWrapper<NotificationTarget>()
+                        .eq(NotificationTarget::getNotificationId, dto.getId())
+        );
+
+        // 插入新的通知目标表
+        if (Integer.valueOf(0).equals(dto.getTargetType())) {
+            // 全部用户：插入一条 targetType=0, targetId=null 的记录
+            NotificationTarget target = new NotificationTarget();
+            target.setNotificationId(dto.getId());
+            target.setTargetType(0);
+            notificationTargetMapper.insert(target);
+        } else {
+            // 部门/角色/指定用户：每个目标ID插一条记录
+            for (Long targetId : dto.getTargetIds()) {
+                NotificationTarget target = new NotificationTarget();
+                target.setNotificationId(dto.getId());
+                target.setTargetType(dto.getTargetType());
+                target.setTargetId(targetId);
+                notificationTargetMapper.insert(target);
+            }
+        }
+
+        // 如果是已发布状态，重新生成用户通知状态
+        if (Integer.valueOf(1).equals(dto.getStatus())) {
+            // 删除旧的用户通知状态
+            notificationUserStateMapper.delete(
+                    new LambdaQueryWrapper<NotificationUserState>()
+                            .eq(NotificationUserState::getNotificationId, dto.getId())
+            );
+
+            // 解析目标用户并批量插入用户通知状态
+            List<Long> userIds = resolveTargetUserIds(dto.getTargetType(), dto.getTargetIds());
+            Date now = new Date();
+            for (Long userId : userIds) {
+                NotificationUserState userState = new NotificationUserState();
+                userState.setNotificationId(dto.getId());
+                userState.setUserId(userId);
+                userState.setIsRead(false);
+                userState.setIsDelete(false);
+                userState.setCreateTime(now);
+                notificationUserStateMapper.insert(userState);
+            }
+        } else if (Integer.valueOf(1).equals(oldStatus)) {
+            // 如果从发布改为草稿，删除所有用户通知状态
+            notificationUserStateMapper.delete(
+                    new LambdaQueryWrapper<NotificationUserState>()
+                            .eq(NotificationUserState::getNotificationId, dto.getId())
+            );
+        }
     }
 }
