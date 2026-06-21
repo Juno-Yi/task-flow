@@ -74,4 +74,17 @@ public class NotificationManageController extends BaseController {
         notificationManagerService.updateNotification(dto);
         return R.ok();
     }
+
+    /**
+     * 发布通知
+     */
+    @PostMapping("/{notificationId}/publish")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = "notification.ui.manage.publish.button"
+    )
+    public R<Void> publishNotification(@PathVariable("notificationId") Long notificationId){
+        notificationManagerService.publishNotification(notificationId);
+        return R.ok();
+    }
 }

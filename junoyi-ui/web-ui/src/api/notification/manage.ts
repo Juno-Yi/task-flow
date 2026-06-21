@@ -38,3 +38,12 @@ export function  fetchUpdateNotification(data: Api.Notification.NotificationDTO)
         data
     })
 }
+
+/**
+ * 发布通知（将草稿改为已发布）
+ */
+export function fetchPublishNotification(notificationId: number) {
+    return request.post<void>({
+        url: `/notification/${notificationId}/publish`
+    })
+}

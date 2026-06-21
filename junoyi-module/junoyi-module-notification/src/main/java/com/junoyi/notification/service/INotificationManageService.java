@@ -40,4 +40,10 @@ public interface INotificationManageService {
      */
     void updateNotification(NotificationDTO dto);
 
+    /**
+     * 发布通知（将草稿状态改为已发布）
+     * @param notificationId 通知ID
+     */
+    void publishNotification(Long notificationId);
+
 }

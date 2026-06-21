@@ -453,4 +453,71 @@ public class NotificationManageServiceImpl implements INotificationManageService
             );
         }
     }
+
+    /**
+     * 发布通知（将草稿状态改为已发布）
+     * @param notificationId 通知ID
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void publishNotification(Long notificationId) {
+        if (notificationId == null) {
+            throw new IllegalArgumentException("通知ID不能为空");
+        }
+
+        // 查询通知
+        Notification notification = notificationMapper.selectById(notificationId);
+        if (notification == null) {
+            throw new IllegalArgumentException("通知不存在");
+        }
+
+        // 检查状态
+        if (Integer.valueOf(1).equals(notification.getStatus())) {
+            throw new IllegalArgumentException("通知已发布，无需重复操作");
+        }
+
+        // 更新通知状态为已发布
+        Notification updateNotification = new Notification();
+        updateNotification.setId(notificationId);
+        updateNotification.setStatus(1);
+        updateNotification.setPublishTime(new Date());
+        updateNotification.setUpdateBy(SecurityUtils.getUserName());
+        updateNotification.setUpdateTime(new Date());
+        notificationMapper.updateById(updateNotification);
+
+        // 查询通知目标信息
+        List<NotificationTarget> targets = notificationTargetMapper.selectList(
+                new LambdaQueryWrapper<NotificationTarget>()
+                        .eq(NotificationTarget::getNotificationId, notificationId)
+        );
+
+        if (targets.isEmpty()) {
+            throw new IllegalArgumentException("通知目标信息缺失");
+        }
+
+        // 解析目标类型和目标ID
+        NotificationTarget firstTarget = targets.get(0);
+        Integer targetType = firstTarget.getTargetType();
+        List<Long> targetIds = null;
+
+        if (!Integer.valueOf(0).equals(targetType)) {
+            targetIds = targets.stream()
+                    .map(NotificationTarget::getTargetId)
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+
+        // 解析目标用户并生成用户通知状态
+        List<Long> userIds = resolveTargetUserIds(targetType, targetIds);
+        Date now = new Date();
+        for (Long userId : userIds) {
+            NotificationUserState userState = new NotificationUserState();
+            userState.setNotificationId(notificationId);
+            userState.setUserId(userId);
+            userState.setIsRead(false);
+            userState.setIsDelete(false);
+            userState.setCreateTime(now);
+            notificationUserStateMapper.insert(userState);
+        }
+    }
 }
