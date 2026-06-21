@@ -10,6 +10,7 @@ import com.junoyi.notification.domain.dto.NotificationDTO;
 import com.junoyi.notification.domain.po.Notification;
 import com.junoyi.notification.domain.po.NotificationTarget;
 import com.junoyi.notification.domain.po.NotificationUserState;
+import com.junoyi.notification.domain.vo.NotificationDetailVO;
 import com.junoyi.notification.domain.vo.NotificationListVO;
 import com.junoyi.notification.mapper.NotificationMapper;
 import com.junoyi.notification.mapper.NotificationTargetMapper;
@@ -128,6 +129,84 @@ public class NotificationManageServiceImpl implements INotificationManageService
         List<SysDictDataVO> dictList = sysDictApi.getDictDataByType(dictType);
         return dictList.stream()
                 .collect(Collectors.toMap(SysDictDataVO::getDictValue, dict -> dict, (v1, v2) -> v1));
+    }
+
+    /**
+     * 获取通知详情
+     * @param id 通知ID
+     * @return 通知详情
+     */
+    @Override
+    public NotificationDetailVO getNotificationById(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("通知ID不能为空");
+        }
+
+        // 查询通知基本信息
+        Notification notification = notificationMapper.selectById(id);
+        if (notification == null) {
+            throw new IllegalArgumentException("通知不存在");
+        }
+
+        // 组装详情VO
+        NotificationDetailVO detailVO = new NotificationDetailVO();
+        detailVO.setId(notification.getId());
+        detailVO.setTitle(notification.getTitle());
+        detailVO.setContent(notification.getContent());
+        detailVO.setType(notification.getType());
+        detailVO.setStatus(notification.getStatus());
+        detailVO.setSenderId(notification.getSenderId());
+        detailVO.setPublishTime(notification.getPublishTime());
+        detailVO.setUpdateTime(notification.getUpdateTime());
+
+        // 查询字典翻译
+        List<SysDictDataVO> typeDict = sysDictApi.getDictDataByType("notification_type");
+        typeDict.stream()
+                .filter(d -> d.getDictValue().equals(String.valueOf(notification.getType())))
+                .findFirst()
+                .ifPresent(d -> {
+                    detailVO.setTypeLabel(d.getDictLabel());
+                    detailVO.setTypeType(d.getListClass());
+                });
+
+        List<SysDictDataVO> statusDict = sysDictApi.getDictDataByType("notification_status");
+        statusDict.stream()
+                .filter(d -> d.getDictValue().equals(String.valueOf(notification.getStatus())))
+                .findFirst()
+                .ifPresent(d -> {
+                    detailVO.setStatusLabel(d.getDictLabel());
+                    detailVO.setStatusType(d.getListClass());
+                });
+
+        // 查询发送者昵称
+        if (notification.getSenderId() != null) {
+            SysUser sender = sysUserMapper.selectById(notification.getSenderId());
+            if (sender != null) {
+                detailVO.setSenderNickName(sender.getNickName());
+            }
+        }
+
+        // 查询通知目标信息
+        List<NotificationTarget> targets = notificationTargetMapper.selectList(
+                new LambdaQueryWrapper<NotificationTarget>()
+                        .eq(NotificationTarget::getNotificationId, id)
+        );
+
+        if (!targets.isEmpty()) {
+            NotificationTarget firstTarget = targets.get(0);
+            detailVO.setTargetType(firstTarget.getTargetType());
+
+            // 如果不是全部用户，收集目标ID列表
+            if (!Integer.valueOf(0).equals(firstTarget.getTargetType())) {
+                List<Long> targetIds = targets.stream()
+                        .map(NotificationTarget::getTargetId)
+                        .filter(java.util.Objects::nonNull)
+                        .collect(Collectors.toList());
+                detailVO.setTargetIds(targetIds);
+            }
+        }
+
+        return detailVO;
     }
 
     /**

@@ -7,6 +7,7 @@ import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.notification.domain.dto.NotificationDTO;
+import com.junoyi.notification.domain.vo.NotificationDetailVO;
 import com.junoyi.notification.domain.vo.NotificationListVO;
 import com.junoyi.notification.service.INotificationManageService;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,18 @@ public class NotificationManageController extends BaseController {
     )
     public R<PageResult<NotificationListVO>> getList(){
         return R.ok(notificationManagerService.getNotificationList(buildPage()));
+    }
+
+    /**
+     * 获取通知详情
+     */
+    @GetMapping("/{id}")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = "notification.ui.manage.view"
+    )
+    public R<NotificationDetailVO> getById(@PathVariable Long id){
+        return R.ok(notificationManagerService.getNotificationById(id));
     }
 
     /**

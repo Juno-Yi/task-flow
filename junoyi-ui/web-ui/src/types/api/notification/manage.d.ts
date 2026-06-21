@@ -20,6 +20,27 @@ declare namespace Api.Notification {
     }
 
     /**
+     * 通知详情 VO
+     */
+    interface NotificationDetailVO {
+        id: number
+        title: string
+        content: string
+        type: number
+        typeLabel: string
+        typeType: string
+        status: number
+        statusLabel: string
+        statusType: string
+        senderId: number
+        senderNickName: string
+        targetType: number
+        targetIds?: number[]
+        publishTime: string
+        updateTime: string
+    }
+
+    /**
      * 通知 DTO（添加/修改）
      */
     interface NotificationDTO {

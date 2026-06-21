@@ -157,15 +157,16 @@ const {
         formatter: (row: any) => {
           const list: ButtonMoreItem[] = [
             {
-              key: 'view',
-              label: '查看详情',
-              icon: 'ri:eye-line'
+              key: 'edit',
+              label: '编辑',
+              icon: 'ri:edit-line',
+              auth: 'notification.ui.manage.edit.button'
             },
             {
-              key: 'archive',
-              label: '归档',
-              icon: 'ri:archive-line',
-              auth: 'project.ui.list.archive.button'
+              key: 'delete',
+              label: '删除',
+              icon: 'ri:delete-bin-line',
+              auth: 'notification.ui.manage.delete.button',
             },
           ]
 
@@ -179,8 +180,12 @@ const {
   }
 })
 
-const handleButtonMoreClick = () => {
-
+const handleButtonMoreClick = (item: ButtonMoreItem, row: NotificationListVO) => {
+  if (item.key === 'edit') {
+    handleEdit(row)
+  } else if (item.key === 'delete') {
+    handleDelete(row)
+  }
 }
 
 const goMyNotification = () => {
@@ -191,6 +196,15 @@ const dialogRef = ref<InstanceType<typeof NotificationDialog>>()
 
 const handleAdd = () => {
   dialogRef.value?.open()
+}
+
+const handleEdit = (row: NotificationListVO) => {
+  dialogRef.value?.open(row)
+}
+
+const handleDelete = (row: NotificationListVO) => {
+  // TODO: 实现删除功能
+  console.log('删除通知', row.id)
 }
 </script>
 
