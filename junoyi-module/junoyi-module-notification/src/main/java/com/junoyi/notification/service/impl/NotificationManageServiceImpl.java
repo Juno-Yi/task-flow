@@ -305,7 +305,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
                 List<SysUser> allUsers = sysUserMapper.selectList(
                         new LambdaQueryWrapper<SysUser>()
                                 .eq(SysUser::isDelFlag, false)
-                                .eq(SysUser::getStatus, 0)
+                                .eq(SysUser::getStatus, 1)
                                 .select(SysUser::getUserId)
                 );
                 allUsers.forEach(u -> userIdSet.add(u.getUserId()));
