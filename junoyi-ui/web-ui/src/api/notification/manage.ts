@@ -19,3 +19,13 @@ export function fetchAddNotification(data: Api.Notification.NotificationDTO) {
         data
     })
 }
+
+/**
+ * 修改通知
+ */
+export function  fetchUpdateNotification(data: Api.Notification.NotificationDTO){
+    return request.put<void>({
+        url: '/notification',
+        data
+    })
+}
