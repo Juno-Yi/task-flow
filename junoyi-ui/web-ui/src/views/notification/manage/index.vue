@@ -35,9 +35,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ElTag } from 'element-plus'
+import { ElTag, ElMessageBox, ElMessage } from 'element-plus'
 import { useTable } from '@/hooks/core/useTable'
-import { fetchGetNotificationList } from '@/api/notification/manage'
+import { fetchGetNotificationList, fetchPublishNotification } from '@/api/notification/manage'
 import { router } from "@/router"
 import NotificationDialog from './modules/notification-dialog.vue'
 import ArtButtonMore, {ButtonMoreItem} from "@/components/core/forms/art-button-more/index.vue";
@@ -88,8 +88,17 @@ const {
         label: '通知标题',
         align: 'left',
         headerAlign: 'center',
-        minWidth: 200,
+        minWidth: 180,
         showOverflowTooltip: true
+      },
+      {
+        prop: 'summary',
+        label: '通知概况',
+        align: 'left',
+        headerAlign: 'center',
+        minWidth: 220,
+        showOverflowTooltip: true,
+        formatter: (row: NotificationListVO) => row.summary || '-'
       },
       {
         prop: 'content',
@@ -155,19 +164,32 @@ const {
         headerAlign: 'center',
         fixed: 'right',
         formatter: (row: any) => {
-          const list: ButtonMoreItem[] = [
+          const list: ButtonMoreItem[] = []
+
+          // 草稿状态显示发布按钮
+          if (row.status === 0) {
+            list.push({
+              key: 'publish',
+              label: '发布',
+              icon: 'ri:send-plane-line',
+              auth: 'notification.ui.manage.publish.button'
+            })
+          }
+
+          list.push(
             {
-              key: 'view',
-              label: '查看详情',
-              icon: 'ri:eye-line'
+              key: 'edit',
+              label: '编辑',
+              icon: 'ri:edit-line',
+              auth: 'notification.ui.manage.edit.button'
             },
             {
-              key: 'archive',
-              label: '归档',
-              icon: 'ri:archive-line',
-              auth: 'project.ui.list.archive.button'
-            },
-          ]
+              key: 'delete',
+              label: '删除',
+              icon: 'ri:delete-bin-line',
+              auth: 'notification.ui.manage.delete.button',
+            }
+          )
 
           return h(ArtButtonMore, {
             list,
@@ -179,8 +201,14 @@ const {
   }
 })
 
-const handleButtonMoreClick = () => {
-
+const handleButtonMoreClick = (item: ButtonMoreItem, row: NotificationListVO) => {
+  if (item.key === 'publish') {
+    handlePublish(row)
+  } else if (item.key === 'edit') {
+    handleEdit(row)
+  } else if (item.key === 'delete') {
+    handleDelete(row)
+  }
 }
 
 const goMyNotification = () => {
@@ -191,6 +219,37 @@ const dialogRef = ref<InstanceType<typeof NotificationDialog>>()
 
 const handleAdd = () => {
   dialogRef.value?.open()
+}
+
+const handleEdit = (row: NotificationListVO) => {
+  dialogRef.value?.open(row)
+}
+
+const handlePublish = async (row: NotificationListVO) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要发布通知「${row.title}」吗？发布后将通知到目标用户。`,
+      '发布通知',
+      {
+        confirmButtonText: '确定发布',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    await fetchPublishNotification(row.id)
+    ElMessage.success('发布成功')
+    refreshData()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('发布通知失败', error)
+    }
+  }
+}
+
+const handleDelete = (row: NotificationListVO) => {
+  // TODO: 实现删除功能
+  console.log('删除通知', row.id)
 }
 </script>
 

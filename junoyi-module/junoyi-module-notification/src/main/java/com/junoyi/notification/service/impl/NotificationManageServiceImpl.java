@@ -10,6 +10,7 @@ import com.junoyi.notification.domain.dto.NotificationDTO;
 import com.junoyi.notification.domain.po.Notification;
 import com.junoyi.notification.domain.po.NotificationTarget;
 import com.junoyi.notification.domain.po.NotificationUserState;
+import com.junoyi.notification.domain.vo.NotificationDetailVO;
 import com.junoyi.notification.domain.vo.NotificationListVO;
 import com.junoyi.notification.mapper.NotificationMapper;
 import com.junoyi.notification.mapper.NotificationTargetMapper;
@@ -131,6 +132,84 @@ public class NotificationManageServiceImpl implements INotificationManageService
     }
 
     /**
+     * 获取通知详情
+     * @param id 通知ID
+     * @return 通知详情
+     */
+    @Override
+    public NotificationDetailVO getNotificationById(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("通知ID不能为空");
+        }
+
+        // 查询通知基本信息
+        Notification notification = notificationMapper.selectById(id);
+        if (notification == null) {
+            throw new IllegalArgumentException("通知不存在");
+        }
+
+        // 组装详情VO
+        NotificationDetailVO detailVO = new NotificationDetailVO();
+        detailVO.setId(notification.getId());
+        detailVO.setTitle(notification.getTitle());
+        detailVO.setContent(notification.getContent());
+        detailVO.setType(notification.getType());
+        detailVO.setStatus(notification.getStatus());
+        detailVO.setSenderId(notification.getSenderId());
+        detailVO.setPublishTime(notification.getPublishTime());
+        detailVO.setUpdateTime(notification.getUpdateTime());
+
+        // 查询字典翻译
+        List<SysDictDataVO> typeDict = sysDictApi.getDictDataByType("notification_type");
+        typeDict.stream()
+                .filter(d -> d.getDictValue().equals(String.valueOf(notification.getType())))
+                .findFirst()
+                .ifPresent(d -> {
+                    detailVO.setTypeLabel(d.getDictLabel());
+                    detailVO.setTypeType(d.getListClass());
+                });
+
+        List<SysDictDataVO> statusDict = sysDictApi.getDictDataByType("notification_status");
+        statusDict.stream()
+                .filter(d -> d.getDictValue().equals(String.valueOf(notification.getStatus())))
+                .findFirst()
+                .ifPresent(d -> {
+                    detailVO.setStatusLabel(d.getDictLabel());
+                    detailVO.setStatusType(d.getListClass());
+                });
+
+        // 查询发送者昵称
+        if (notification.getSenderId() != null) {
+            SysUser sender = sysUserMapper.selectById(notification.getSenderId());
+            if (sender != null) {
+                detailVO.setSenderNickName(sender.getNickName());
+            }
+        }
+
+        // 查询通知目标信息
+        List<NotificationTarget> targets = notificationTargetMapper.selectList(
+                new LambdaQueryWrapper<NotificationTarget>()
+                        .eq(NotificationTarget::getNotificationId, id)
+        );
+
+        if (!targets.isEmpty()) {
+            NotificationTarget firstTarget = targets.get(0);
+            detailVO.setTargetType(firstTarget.getTargetType());
+
+            // 如果不是全部用户，收集目标ID列表
+            if (!Integer.valueOf(0).equals(firstTarget.getTargetType())) {
+                List<Long> targetIds = targets.stream()
+                        .map(NotificationTarget::getTargetId)
+                        .filter(java.util.Objects::nonNull)
+                        .collect(Collectors.toList());
+                detailVO.setTargetIds(targetIds);
+            }
+        }
+
+        return detailVO;
+    }
+
+    /**
      * 添加通知（立即发布或存储草稿）
      * status: 0-草稿  1-已发布
      * targetType: 0-全部 1-部门 2-角色 3-指定用户 4-项目组
@@ -226,7 +305,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
                 List<SysUser> allUsers = sysUserMapper.selectList(
                         new LambdaQueryWrapper<SysUser>()
                                 .eq(SysUser::isDelFlag, false)
-                                .eq(SysUser::getStatus, 0)
+                                .eq(SysUser::getStatus, 1)
                                 .select(SysUser::getUserId)
                 );
                 allUsers.forEach(u -> userIdSet.add(u.getUserId()));
@@ -261,5 +340,184 @@ public class NotificationManageServiceImpl implements INotificationManageService
         }
 
         return new ArrayList<>(userIdSet);
+    }
+
+    /**
+     * 修改通知
+     * @param dto 通知DTO
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateNotification(NotificationDTO dto) {
+        if (dto == null || dto.getId() == null) {
+            throw new IllegalArgumentException("通知ID不能为空");
+        }
+        if (!StringUtils.hasText(dto.getTitle())) {
+            throw new IllegalArgumentException("通知标题不能为空");
+        }
+        if (dto.getType() == null) {
+            throw new IllegalArgumentException("通知类型不能为空");
+        }
+        if (dto.getTargetType() == null) {
+            throw new IllegalArgumentException("通知目标范围不能为空");
+        }
+        // 非全部时，目标ID列表不能为空
+        if (!Integer.valueOf(0).equals(dto.getTargetType())
+                && (dto.getTargetIds() == null || dto.getTargetIds().isEmpty())) {
+            throw new IllegalArgumentException("请选择通知目标");
+        }
+
+        // 查询原通知信息
+        Notification existingNotification = notificationMapper.selectById(dto.getId());
+        if (existingNotification == null) {
+            throw new IllegalArgumentException("通知不存在");
+        }
+
+        Integer oldStatus = existingNotification.getStatus();
+
+        // 更新通知主表
+        Notification notification = new Notification();
+        notification.setId(dto.getId());
+        notification.setTitle(dto.getTitle());
+        notification.setContent(dto.getContent());
+        notification.setType(dto.getType());
+        notification.setUpdateBy(SecurityUtils.getUserName());
+        notification.setUpdateTime(new Date());
+
+        // 根据状态判断：1-立即发布，0-存草稿
+        if (Integer.valueOf(1).equals(dto.getStatus())) {
+            notification.setStatus(1);
+            // 如果原来是草稿，现在发布，设置发布时间
+            if (!Integer.valueOf(1).equals(oldStatus)) {
+                notification.setPublishTime(new Date());
+            }
+        } else {
+            notification.setStatus(0);
+            // 如果从发布改为草稿，清空发布时间
+            if (Integer.valueOf(1).equals(oldStatus)) {
+                notification.setPublishTime(null);
+            }
+        }
+
+        notificationMapper.updateById(notification);
+
+        // 删除旧的通知目标关系
+        notificationTargetMapper.delete(
+                new LambdaQueryWrapper<NotificationTarget>()
+                        .eq(NotificationTarget::getNotificationId, dto.getId())
+        );
+
+        // 插入新的通知目标表
+        if (Integer.valueOf(0).equals(dto.getTargetType())) {
+            // 全部用户：插入一条 targetType=0, targetId=null 的记录
+            NotificationTarget target = new NotificationTarget();
+            target.setNotificationId(dto.getId());
+            target.setTargetType(0);
+            notificationTargetMapper.insert(target);
+        } else {
+            // 部门/角色/指定用户：每个目标ID插一条记录
+            for (Long targetId : dto.getTargetIds()) {
+                NotificationTarget target = new NotificationTarget();
+                target.setNotificationId(dto.getId());
+                target.setTargetType(dto.getTargetType());
+                target.setTargetId(targetId);
+                notificationTargetMapper.insert(target);
+            }
+        }
+
+        // 如果是已发布状态，重新生成用户通知状态
+        if (Integer.valueOf(1).equals(dto.getStatus())) {
+            // 删除旧的用户通知状态
+            notificationUserStateMapper.delete(
+                    new LambdaQueryWrapper<NotificationUserState>()
+                            .eq(NotificationUserState::getNotificationId, dto.getId())
+            );
+
+            // 解析目标用户并批量插入用户通知状态
+            List<Long> userIds = resolveTargetUserIds(dto.getTargetType(), dto.getTargetIds());
+            Date now = new Date();
+            for (Long userId : userIds) {
+                NotificationUserState userState = new NotificationUserState();
+                userState.setNotificationId(dto.getId());
+                userState.setUserId(userId);
+                userState.setIsRead(false);
+                userState.setIsDelete(false);
+                userState.setCreateTime(now);
+                notificationUserStateMapper.insert(userState);
+            }
+        } else if (Integer.valueOf(1).equals(oldStatus)) {
+            // 如果从发布改为草稿，删除所有用户通知状态
+            notificationUserStateMapper.delete(
+                    new LambdaQueryWrapper<NotificationUserState>()
+                            .eq(NotificationUserState::getNotificationId, dto.getId())
+            );
+        }
+    }
+
+    /**
+     * 发布通知（将草稿状态改为已发布）
+     * @param notificationId 通知ID
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void publishNotification(Long notificationId) {
+        if (notificationId == null) {
+            throw new IllegalArgumentException("通知ID不能为空");
+        }
+
+        // 查询通知
+        Notification notification = notificationMapper.selectById(notificationId);
+        if (notification == null) {
+            throw new IllegalArgumentException("通知不存在");
+        }
+
+        // 检查状态
+        if (Integer.valueOf(1).equals(notification.getStatus())) {
+            throw new IllegalArgumentException("通知已发布，无需重复操作");
+        }
+
+        // 更新通知状态为已发布
+        Notification updateNotification = new Notification();
+        updateNotification.setId(notificationId);
+        updateNotification.setStatus(1);
+        updateNotification.setPublishTime(new Date());
+        updateNotification.setUpdateBy(SecurityUtils.getUserName());
+        updateNotification.setUpdateTime(new Date());
+        notificationMapper.updateById(updateNotification);
+
+        // 查询通知目标信息
+        List<NotificationTarget> targets = notificationTargetMapper.selectList(
+                new LambdaQueryWrapper<NotificationTarget>()
+                        .eq(NotificationTarget::getNotificationId, notificationId)
+        );
+
+        if (targets.isEmpty()) {
+            throw new IllegalArgumentException("通知目标信息缺失");
+        }
+
+        // 解析目标类型和目标ID
+        NotificationTarget firstTarget = targets.get(0);
+        Integer targetType = firstTarget.getTargetType();
+        List<Long> targetIds = null;
+
+        if (!Integer.valueOf(0).equals(targetType)) {
+            targetIds = targets.stream()
+                    .map(NotificationTarget::getTargetId)
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+
+        // 解析目标用户并生成用户通知状态
+        List<Long> userIds = resolveTargetUserIds(targetType, targetIds);
+        Date now = new Date();
+        for (Long userId : userIds) {
+            NotificationUserState userState = new NotificationUserState();
+            userState.setNotificationId(notificationId);
+            userState.setUserId(userId);
+            userState.setIsRead(false);
+            userState.setIsDelete(false);
+            userState.setCreateTime(now);
+            notificationUserStateMapper.insert(userState);
+        }
     }
 }

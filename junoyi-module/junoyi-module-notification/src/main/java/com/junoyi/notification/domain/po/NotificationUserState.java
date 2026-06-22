@@ -12,7 +12,7 @@ import java.util.Date;
  * @author Fan
  */
 @Data
-@TableName("notification_user")
+@TableName("notification_user_state")
 public class NotificationUserState {
 
     /**

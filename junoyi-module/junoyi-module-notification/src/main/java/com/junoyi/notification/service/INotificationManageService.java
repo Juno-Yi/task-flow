@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.notification.domain.dto.NotificationDTO;
 import com.junoyi.notification.domain.po.Notification;
+import com.junoyi.notification.domain.vo.NotificationDetailVO;
 import com.junoyi.notification.domain.vo.NotificationListVO;
 
 /**
@@ -21,9 +22,28 @@ public interface INotificationManageService {
     PageResult<NotificationListVO> getNotificationList(Page<Notification> page);
 
     /**
+     * 获取通知详情
+     * @param id 通知ID
+     * @return 通知详情
+     */
+    NotificationDetailVO getNotificationById(Long id);
+
+    /**
      * 添加通知
      * @param dto 通知DTO
      */
     void addNotification(NotificationDTO dto);
+
+    /**
+     * 修改通知
+     * @param dto 通知DTO
+     */
+    void updateNotification(NotificationDTO dto);
+
+    /**
+     * 发布通知（将草稿状态改为已发布）
+     * @param notificationId 通知ID
+     */
+    void publishNotification(Long notificationId);
 
 }

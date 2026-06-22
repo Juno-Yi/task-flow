@@ -3,14 +3,15 @@ package com.junoyi.notification.domain.vo;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
- * 通知 VO 数据对象
+ * 通知详情 VO 数据对象
  *
  * @author Fan
  */
 @Data
-public class NotificationListVO {
+public class NotificationDetailVO {
 
     /**
      * 通知主键ID
@@ -18,7 +19,7 @@ public class NotificationListVO {
     private Long id;
 
     /**
-     * 通知标签
+     * 通知标题
      */
     private String title;
 
@@ -38,7 +39,7 @@ public class NotificationListVO {
     private Integer type;
 
     /**
-     *  通知类型标签（字典翻译）
+     * 通知类型标签（字典翻译）
      */
     private String typeLabel;
 
@@ -52,8 +53,14 @@ public class NotificationListVO {
      */
     private Integer status;
 
+    /**
+     * 状态标签
+     */
     private String statusLabel;
 
+    /**
+     * 状态类型
+     */
     private String statusType;
 
     /**
@@ -67,12 +74,23 @@ public class NotificationListVO {
     private String senderNickName;
 
     /**
+     * 目标范围类型（0-全部 1-部门 2-角色 3-指定用户）
+     */
+    private Integer targetType;
+
+    /**
+     * 目标ID列表
+     */
+    private List<Long> targetIds;
+
+    /**
      * 发布时间
      */
-    public Date publishTime;
+    private Date publishTime;
 
     /**
      * 更新时间
      */
-    public Date updateTime;
+    private Date updateTime;
 }
+

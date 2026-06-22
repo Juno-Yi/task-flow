@@ -1,8 +1,19 @@
 <template>
-  <ElDialog v-model="visible" title="发布通知" width="860px" @close="handleClose">
+  <ElDialog v-model="visible" :title="dialogTitle" width="860px" @close="handleClose">
     <ElForm ref="formRef" :model="form" :rules="rules" label-width="100px">
       <ElFormItem label="通知标题" prop="title">
         <ElInput v-model="form.title" placeholder="请输入通知标题" maxlength="100" show-word-limit />
+      </ElFormItem>
+
+      <ElFormItem label="通知概况" prop="summary">
+        <ElInput
+          v-model="form.summary"
+          type="textarea"
+          placeholder="请输入通知概况（简短描述，200字以内）"
+          maxlength="200"
+          show-word-limit
+          :rows="3"
+        />
       </ElFormItem>
 
       <ElFormItem label="通知内容" prop="content">
@@ -101,12 +112,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, nextTick } from 'vue'
+import { ref, reactive, nextTick, computed } from 'vue'
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
-import { fetchAddNotification } from '@/api/notification/manage'
+import { fetchAddNotification, fetchUpdateNotification, fetchGetNotificationById } from '@/api/notification/manage'
 import { fetchGetDictDataByType } from '@/api/system/dict'
 import { fetchGetDeptTree } from '@/api/system/department'
 import { fetchGetRoleOptions } from '@/api/system/role'
@@ -121,9 +132,14 @@ const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const editorRef = ref<HTMLElement>()
 const vditor = ref<Vditor>()
+const editMode = ref(false)
+const editId = ref<number>()
+
+const dialogTitle = computed(() => editMode.value ? '编辑通知' : '发布通知')
 
 interface FormData {
   title: string
+  summary: string
   content: string
   type: number | undefined
   targetType: number | undefined
@@ -132,6 +148,7 @@ interface FormData {
 
 const defaultForm = (): FormData => ({
   title: '',
+  summary: '',
   content: '',
   type: undefined,
   targetType: 0,
@@ -163,12 +180,36 @@ const userLoading = ref(false)
 /**
  * 打开弹窗
  */
-const open = async () => {
+const open = async (row?: Api.Notification.NotificationListVO) => {
   visible.value = true
-  Object.assign(form, defaultForm())
+  editMode.value = !!row
+  editId.value = row?.id
+
+  if (row) {
+    // 编辑模式：加载详情数据
+    const detail = await fetchGetNotificationById(row.id)
+    Object.assign(form, {
+      title: detail.title,
+      summary: detail.summary || '',
+      content: detail.content,
+      type: detail.type,
+      targetType: detail.targetType,
+      targetIds: detail.targetIds || []
+    })
+  } else {
+    // 新增模式：重置表单
+    Object.assign(form, defaultForm())
+  }
+
   await loadOptions()
   await nextTick()
   initEditor()
+
+  // 编辑模式下设置编辑器内容
+  if (row) {
+    await nextTick()
+    vditor.value?.setValue(form.content || '')
+  }
 }
 
 /**
@@ -256,15 +297,27 @@ const handleSubmit = async (status: number) => {
 
   submitting.value = true
   try {
-    await fetchAddNotification({
+    const dto: Api.Notification.NotificationDTO = {
       title: form.title,
+      summary: form.summary,
       content,
       type: form.type!,
       status,
       targetType: form.targetType!,
       targetIds: form.targetType === 0 ? undefined : form.targetIds
-    })
-    ElMessage.success(status === 1 ? '发布成功' : '已保存为草稿')
+    }
+
+    if (editMode.value && editId.value) {
+      // 编辑模式
+      dto.id = editId.value
+      await fetchUpdateNotification(dto)
+      ElMessage.success(status === 1 ? '修改并发布成功' : '修改并保存为草稿')
+    } else {
+      // 新增模式
+      await fetchAddNotification(dto)
+      ElMessage.success(status === 1 ? '发布成功' : '已保存为草稿')
+    }
+
     emit('success')
     handleClose()
   } finally {
@@ -277,6 +330,8 @@ const handleSaveDraft = () => handleSubmit(0)
 
 const handleClose = () => {
   visible.value = false
+  editMode.value = false
+  editId.value = undefined
   formRef.value?.resetFields()
   if (vditor.value) {
     vditor.value.destroy()

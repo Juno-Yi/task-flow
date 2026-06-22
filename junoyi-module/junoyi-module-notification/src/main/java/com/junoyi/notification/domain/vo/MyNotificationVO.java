@@ -5,20 +5,20 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * 通知 VO 数据对象
+ * 我的通知VO
  *
  * @author Fan
  */
 @Data
-public class NotificationListVO {
+public class MyNotificationVO {
 
     /**
-     * 通知主键ID
+     * 主键ID
      */
     private Long id;
 
     /**
-     * 通知标签
+     * 通知标题
      */
     private String title;
 
@@ -48,31 +48,13 @@ public class NotificationListVO {
     private String typeType;
 
     /**
-     * 通知状态
+     * 是否阅读
      */
-    private Integer status;
-
-    private String statusLabel;
-
-    private String statusType;
+    private Boolean read;
 
     /**
-     * 发送者ID
+     * 阅读时间
      */
-    private Long senderId;
+    private Date readTime;
 
-    /**
-     * 发送者昵称
-     */
-    private String senderNickName;
-
-    /**
-     * 发布时间
-     */
-    public Date publishTime;
-
-    /**
-     * 更新时间
-     */
-    public Date updateTime;
 }
