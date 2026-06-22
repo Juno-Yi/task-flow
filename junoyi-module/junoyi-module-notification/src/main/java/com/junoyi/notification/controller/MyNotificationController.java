@@ -11,6 +11,7 @@ import com.junoyi.notification.service.IMyNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,5 +49,18 @@ public class MyNotificationController extends BaseController {
         if (currentUserId == null || currentUserId == 0)
             return R.fail("非法请求");
         return R.ok(myNotificationService.getMyNotificationDetail(currentUserId, notificationId));
+    }
+
+    /**
+     * 全部标记为已读
+     */
+    @PostMapping("/mark-all-read")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<Integer> markAllAsRead(){
+        Long currentUserId = getUserId();
+        if (currentUserId == null || currentUserId == 0)
+            return R.fail("非法请求");
+        int count = myNotificationService.markAllAsRead(currentUserId);
+        return R.ok(count);
     }
 }

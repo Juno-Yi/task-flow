@@ -22,3 +22,12 @@ export function fetchGetMyNotificationDetail(id: number) {
         url: `/notification/my-notification/detail/${id}`
     })
 }
+
+/**
+ * 全部标记为已读
+ */
+export function fetchMarkAllAsRead() {
+    return request.post<number>({
+        url: '/notification/my-notification/mark-all-read'
+    })
+}

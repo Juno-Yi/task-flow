@@ -28,4 +28,11 @@ public interface IMyNotificationService {
      * @return 通知详情
      */
     MyNotificationDetailVO getMyNotificationDetail(Long userId, Long notificationId);
+
+    /**
+     * 全部标记为已读
+     * @param userId 用户ID
+     * @return 标记数量
+     */
+    int markAllAsRead(Long userId);
 }

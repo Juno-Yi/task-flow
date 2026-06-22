@@ -186,7 +186,11 @@
   import Vditor from 'vditor'
   import 'vditor/dist/index.css'
   import { useAutoLayoutHeight } from '@/hooks/core/useLayoutHeight'
-  import { fetchGetMyNotificationList, fetchGetMyNotificationDetail } from '@/api/notification/notice'
+  import {
+    fetchGetMyNotificationList,
+    fetchGetMyNotificationDetail,
+    fetchMarkAllAsRead
+  } from '@/api/notification/notice'
 
   defineOptions({ name: 'DashboardNotice' })
 
@@ -391,25 +395,28 @@
   /**
    * 全部标记为已读
    */
-  function handleReadAll() {
-    const now = new Date().toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    })
+  async function handleReadAll() {
+    try {
+      const count = await fetchMarkAllAsRead()
 
-    records.value.forEach((item) => {
-      if (!item.read) {
-        item.read = true
-        item.readTime = now
+      if (count > 0) {
+        // 更新本地列表中的已读状态
+        const now = new Date().toISOString()
+        records.value.forEach((item) => {
+          if (!item.read) {
+            item.read = true
+            item.readTime = now
+          }
+        })
+
+        ElMessage.success(`已将 ${count} 条通知标记为已读`)
+      } else {
+        ElMessage.info('没有未读通知')
       }
-    })
-
-    ElMessage.success('已全部标记为已读')
+    } catch (error: any) {
+      console.error('标记已读失败:', error)
+      ElMessage.error('标记已读失败')
+    }
   }
 
   /**

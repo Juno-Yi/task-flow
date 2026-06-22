@@ -219,4 +219,33 @@ public class MyNotificationServiceImpl implements IMyNotificationService {
 
         return vo;
     }
+
+    /**
+     * 全部标记为已读
+     */
+    @Override
+    public int markAllAsRead(Long userId) {
+        // 查询当前用户所有未读的通知状态
+        List<NotificationUserState> unreadStates = notificationUserStateMapper.selectList(
+                new LambdaQueryWrapper<NotificationUserState>()
+                        .eq(NotificationUserState::getUserId, userId)
+                        .eq(NotificationUserState::getIsRead, false)
+        );
+
+        if (unreadStates.isEmpty()) {
+            return 0;
+        }
+
+        // 批量更新为已读
+        Date now = new Date();
+        unreadStates.forEach(state -> {
+            state.setIsRead(true);
+            state.setReadTime(now);
+        });
+
+        // 批量更新数据库
+        unreadStates.forEach(state -> notificationUserStateMapper.updateById(state));
+
+        return unreadStates.size();
+    }
 }
