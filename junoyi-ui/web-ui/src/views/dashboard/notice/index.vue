@@ -188,10 +188,12 @@
     fetchGetMyNotificationDetail,
     fetchMarkAllAsRead
   } from '@/api/notification/notice'
+  import { useUserStore } from '@/store/modules/user'
 
   defineOptions({ name: 'DashboardNotice' })
 
   const { containerMinHeight } = useAutoLayoutHeight()
+  const userStore = useUserStore()
 
   interface NotificationItem {
     id: number
@@ -351,8 +353,14 @@
       detail.value = res
 
       // 更新列表中的已读状态
+      const wasUnread = !item.read
       item.read = res.read
       item.readTime = res.readTime
+
+      // 如果原来是未读，现在已读，更新未读数量
+      if (wasUnread && res.read) {
+        userStore.setUnreadNotificationCount(Math.max(0, userStore.unreadNotificationCount - 1))
+      }
 
       // 渲染 Markdown
       nextTick(() => {
@@ -405,6 +413,9 @@
             item.readTime = now
           }
         })
+
+        // 更新用户状态中的未读数量
+        userStore.setUnreadNotificationCount(Math.max(0, userStore.unreadNotificationCount - count))
 
         ElMessage.success(`已将 ${count} 条通知标记为已读`)
       } else {
