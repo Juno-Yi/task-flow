@@ -6,6 +6,7 @@ import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.notification.domain.vo.MyNotificationDetailVO;
+import com.junoyi.notification.domain.vo.MyNotificationUnreadCountVO;
 import com.junoyi.notification.domain.vo.MyNotificationVO;
 import com.junoyi.notification.service.IMyNotificationService;
 import lombok.RequiredArgsConstructor;
@@ -62,5 +63,21 @@ public class MyNotificationController extends BaseController {
             return R.fail("非法请求");
         int count = myNotificationService.markAllAsRead(currentUserId);
         return R.ok(count);
+    }
+
+    /**
+     * 获取用户未读数量
+     */
+    @GetMapping("/unread-count")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<MyNotificationUnreadCountVO> getUnreadCount(){
+        Long currentUserId = getUserId();
+        if (currentUserId == null || currentUserId == 0)
+            return R.fail("非法请求");
+
+        Long count = myNotificationService.getUnreadCount(currentUserId);
+        MyNotificationUnreadCountVO vo = new MyNotificationUnreadCountVO();
+        vo.setCount(count.intValue());
+        return R.ok(vo);
     }
 }

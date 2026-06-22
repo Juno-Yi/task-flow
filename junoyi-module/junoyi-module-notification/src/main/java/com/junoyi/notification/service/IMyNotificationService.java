@@ -35,4 +35,11 @@ public interface IMyNotificationService {
      * @return 标记数量
      */
     int markAllAsRead(Long userId);
+
+    /**
+     * 获取用户未读数量
+     * @param userId 用户ID
+     * @return 未读数量
+     */
+    Long getUnreadCount(Long userId);
 }
