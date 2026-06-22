@@ -417,19 +417,16 @@
   })
 
   /**
-   * 监听 detail 变化，重新渲染 Markdown
+   * 监听 detail 变化，重新渲染 Markdown（用于非点击触发的场景）
    */
   watch(
     () => detail.value?.content,
     (newContent) => {
       if (newContent) {
-        // 使用 nextTick 等待 DOM 更新，然后再等待一小段时间确保元素完全渲染
         nextTick(() => {
-          setTimeout(() => {
-            if (previewRef.value) {
-              renderMarkdown(newContent)
-            }
-          }, 50)
+          if (previewRef.value) {
+            renderMarkdown(newContent)
+          }
         })
       }
     }
