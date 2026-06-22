@@ -452,14 +452,17 @@
   function renderMarkdown(content: string) {
     if (!previewRef.value) return
 
+    // 清空之前的内容
+    previewRef.value.innerHTML = ''
+
     Vditor.preview(previewRef.value, content, {
       mode: 'light',
-      cdn: '/vditor',
       markdown: {
         toc: false,
       },
       hljs: {
-        style: 'github'
+        style: 'github',
+        enable: true
       }
     })
   }
