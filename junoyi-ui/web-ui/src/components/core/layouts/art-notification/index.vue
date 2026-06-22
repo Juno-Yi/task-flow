@@ -29,13 +29,14 @@
     </ul>
 
     <div class="w-full h-[calc(100%-95px)]">
-      <div class="h-[calc(100%-60px)] overflow-y-scroll scrollbar-thin">
+      <div class="h-[calc(100%-60px)] overflow-y-scroll scrollbar-thin" v-loading="loading">
         <!-- 通知 -->
         <ul v-show="barActiveIndex === 0">
           <li
             v-for="(item, index) in noticeList"
             :key="index"
             class="box-border flex-c px-3.5 py-3.5 c-p last:border-b-0 hover:bg-g-200/60"
+            @click="router.push('/dashboard/notice')"
           >
             <div
               class="size-9 leading-9 text-center rounded-lg flex-cc"
@@ -44,7 +45,10 @@
               <ArtSvgIcon class="text-lg !bg-transparent" :icon="getNoticeStyle(item.type).icon" />
             </div>
             <div class="w-[calc(100%-45px)] ml-3.5">
-              <h4 class="text-sm font-normal leading-5.5 text-g-900">{{ item.title }}</h4>
+              <div class="flex items-center justify-between">
+                <h4 class="flex-1 text-sm font-normal leading-5.5 text-g-900">{{ item.title }}</h4>
+                <span v-if="!item.read" class="ml-2 size-2 shrink-0 rounded-full bg-danger"></span>
+              </div>
               <p class="mt-1.5 text-xs text-g-500">{{ item.time }}</p>
             </div>
           </li>
@@ -103,26 +107,28 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, ref, watch, type Ref, type ComputedRef } from 'vue'
+  import { computed, ref, watch, type Ref, type ComputedRef, onMounted } from 'vue'
   import { useI18n } from 'vue-i18n'
-
-  // 导入头像图片
-  import avatar1 from '@/assets/images/avatar/avatar1.webp'
-  import avatar2 from '@/assets/images/avatar/avatar2.webp'
-  import avatar3 from '@/assets/images/avatar/avatar3.webp'
-  import avatar4 from '@/assets/images/avatar/avatar4.webp'
-  import avatar5 from '@/assets/images/avatar/avatar5.webp'
-  import avatar6 from '@/assets/images/avatar/avatar6.webp'
+  import { useRouter } from 'vue-router'
+  import { fetchGetMyNotificationList } from '@/api/notification/notice'
 
   defineOptions({ name: 'ArtNotification' })
 
   interface NoticeItem {
+    /** ID */
+    id: number
     /** 标题 */
     title: string
+    /** 摘要 */
+    summary: string
     /** 时间 */
     time: string
     /** 类型 */
-    type: NoticeType
+    type: string
+    /** 类型标签 */
+    typeLabel: string
+    /** 是否已读 */
+    read: boolean
   }
 
   interface MessageItem {
@@ -155,9 +161,8 @@
     iconClass: string
   }
 
-  type NoticeType = 'email' | 'message' | 'collection' | 'user' | 'notice'
-
   const { t } = useI18n()
+  const router = useRouter()
 
   const props = defineProps<{
     value: boolean
@@ -173,74 +178,55 @@
 
   const useNotificationData = () => {
     // 通知数据
-    const noticeList = ref<NoticeItem[]>([
-      {
-        title: '新增国际化',
-        time: '2024-6-13 0:10',
-        type: 'notice'
-      },
-      {
-        title: '冷月呆呆给你发了一条消息',
-        time: '2024-4-21 8:05',
-        type: 'message'
-      },
-      {
-        title: '小肥猪关注了你',
-        time: '2020-3-17 21:12',
-        type: 'collection'
-      },
-      {
-        title: '新增使用文档',
-        time: '2024-02-14 0:20',
-        type: 'notice'
-      },
-      {
-        title: '小肥猪给你发了一封邮件',
-        time: '2024-1-20 0:15',
-        type: 'email'
-      },
-      {
-        title: '菜单mock本地真实数据',
-        time: '2024-1-17 22:06',
-        type: 'notice'
-      }
-    ])
+    const noticeList = ref<NoticeItem[]>([])
+    const loading = ref(false)
 
-    // 消息数据
-    const msgList = ref<MessageItem[]>([
-      {
-        title: '池不胖 关注了你',
-        time: '2021-2-26 23:50',
-        avatar: avatar1
-      },
-      {
-        title: '唐不苦 关注了你',
-        time: '2021-2-21 8:05',
-        avatar: avatar2
-      },
-      {
-        title: '中小鱼 关注了你',
-        time: '2020-1-17 21:12',
-        avatar: avatar3
-      },
-      {
-        title: '何小荷 关注了你',
-        time: '2021-01-14 0:20',
-        avatar: avatar4
-      },
-      {
-        title: '誶誶淰 关注了你',
-        time: '2020-12-20 0:15',
-        avatar: avatar5
-      },
-      {
-        title: '冷月呆呆 关注了你',
-        time: '2020-12-17 22:06',
-        avatar: avatar6
+    // 加载通知列表
+    const loadNotifications = async () => {
+      try {
+        loading.value = true
+        const res = await fetchGetMyNotificationList(1, 10) // 只加载最新 10 条
+        noticeList.value = (res.list || []).map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          summary: item.summary || '点击查看详情',
+          time: formatTime(item.publishedAt),
+          type: getNoticeType(item.type),
+          typeLabel: item.typeLabel,
+          read: item.read
+        }))
+      } catch (error) {
+        console.error('[Notification] 加载通知列表失败:', error)
+      } finally {
+        loading.value = false
       }
-    ])
+    }
 
-    // 待办数据
+    // 格式化时间
+    const formatTime = (dateStr: string): string => {
+      if (!dateStr) return ''
+      if (dateStr.includes('T')) {
+        return dateStr.replace('T', ' ').substring(0, 16)
+      }
+      return dateStr.substring(0, 16)
+    }
+
+    // 根据类型获取通知样式类型
+    const getNoticeType = (type: number): string => {
+      // 根据后端的类型映射到前端样式类型
+      const typeMap: Record<number, string> = {
+        1: 'notice',   // 系统通知
+        2: 'email',    // 公告通知
+        3: 'message',  // 预警通知
+        4: 'collection' // 更新通知
+      }
+      return typeMap[type] || 'notice'
+    }
+
+    // 消息数据（暂时保留为空）
+    const msgList = ref<MessageItem[]>([])
+
+    // 待办数据（暂时保留为空）
     const pendingList = ref<PendingItem[]>([])
 
     // 标签栏数据
@@ -263,13 +249,15 @@
       noticeList,
       msgList,
       pendingList,
-      barList
+      barList,
+      loading,
+      loadNotifications
     }
   }
 
   // 样式管理
   const useNotificationStyles = () => {
-    const noticeStyleMap: Record<NoticeType, NoticeStyle> = {
+    const noticeStyleMap: Record<string, NoticeStyle> = {
       email: {
         icon: 'ri:mail-line',
         iconClass: 'bg-warning/12 text-warning'
@@ -282,17 +270,13 @@
         icon: 'ri:heart-3-line',
         iconClass: 'bg-danger/12 text-danger'
       },
-      user: {
-        icon: 'ri:volume-down-line',
-        iconClass: 'bg-info/12 text-info'
-      },
       notice: {
         icon: 'ri:notification-3-line',
         iconClass: 'bg-theme/12 text-theme'
       }
     }
 
-    const getNoticeStyle = (type: NoticeType): NoticeStyle => {
+    const getNoticeStyle = (type: string): NoticeStyle => {
       const defaultStyle: NoticeStyle = {
         icon: 'ri:arrow-right-circle-line',
         iconClass: 'bg-theme/12 text-theme'
@@ -375,17 +359,17 @@
   // 业务逻辑处理
   const useBusinessLogic = () => {
     const handleNoticeAll = () => {
-      // 处理查看全部通知
-      console.log('查看全部通知')
+      // 跳转到通知页面
+      router.push('/dashboard/notice')
     }
 
     const handleMsgAll = () => {
-      // 处理查看全部消息
+      // 处理查看全部消息（暂时不处理）
       console.log('查看全部消息')
     }
 
     const handlePendingAll = () => {
-      // 处理查看全部待办
+      // 处理查看全部待办（暂时不处理）
       console.log('查看全部待办')
     }
 
@@ -397,7 +381,7 @@
   }
 
   // 组合所有逻辑
-  const { noticeList, msgList, pendingList, barList } = useNotificationData()
+  const { noticeList, msgList, pendingList, barList, loading, loadNotifications } = useNotificationData()
   const { getNoticeStyle } = useNotificationStyles()
   const { showNotice } = useNotificationAnimation()
   const { handleNoticeAll, handleMsgAll, handlePendingAll } = useBusinessLogic()
@@ -408,13 +392,21 @@
     { handleNoticeAll, handleMsgAll, handlePendingAll }
   )
 
-  // 监听属性变化
+  // 监听属性变化，打开时加载数据
   watch(
     () => props.value,
     (newValue) => {
       showNotice(newValue)
+      if (newValue) {
+        loadNotifications()
+      }
     }
   )
+
+  // 组件挂载时加载数据
+  onMounted(() => {
+    loadNotifications()
+  })
 </script>
 
 <style scoped>
