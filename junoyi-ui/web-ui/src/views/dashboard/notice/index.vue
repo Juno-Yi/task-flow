@@ -77,12 +77,9 @@
             </div>
 
             <div class="mt-3 flex items-center justify-between gap-3">
-              <span
-                class="rounded-full px-2 py-1 text-[11px] font-medium"
-                :class="item.typeType"
-              >
+              <ElTag size="small" :type="item.typeType as any">
                 {{ item.typeLabel }}
-              </span>
+              </ElTag>
               <span class="shrink-0 text-xs text-g-500">{{
                 formatDateTime(item.publishedAt)
               }}</span>
