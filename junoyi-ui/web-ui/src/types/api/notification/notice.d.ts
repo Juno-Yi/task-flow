@@ -13,6 +13,7 @@ declare namespace Api.Notification {
         typeType: string
         read: boolean
         readTime: string
+        publishedBy: string
         publishedAt: string
     }
 }

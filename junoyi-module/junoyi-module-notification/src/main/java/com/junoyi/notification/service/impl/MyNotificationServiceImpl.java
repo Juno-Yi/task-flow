@@ -127,11 +127,14 @@ public class MyNotificationServiceImpl implements IMyNotificationService {
             // 设置发布者信息
             Long senderId = notification.getSenderId();
             if (senderId == null || senderId == 0) {
-                vo.setPublishedAt("系统");
+                vo.setPublishedBy("系统");
             } else {
                 SysUser sender = senderMap.get(senderId);
-                vo.setPublishedAt(sender != null ? sender.getNickName() : "系统");
+                vo.setPublishedBy(sender != null ? sender.getNickName() : "系统");
             }
+
+            // 设置发布时间
+            vo.setPublishedAt(notification.getPublishTime());
 
             // 字典翻译
             SysDictDataVO dictData = typeDictMap.get(String.valueOf(notification.getType()));

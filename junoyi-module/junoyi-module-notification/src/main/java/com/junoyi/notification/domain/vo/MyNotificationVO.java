@@ -58,8 +58,13 @@ public class MyNotificationVO {
     private Date readTime;
 
     /**
-     * 谁发布的
+     * 谁发布的（发布者昵称或"系统"）
      */
-    private String publishedAt;
+    private String publishedBy;
+
+    /**
+     * 发布时间
+     */
+    private Date publishedAt;
 
 }
