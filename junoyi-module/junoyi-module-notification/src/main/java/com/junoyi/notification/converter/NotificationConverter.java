@@ -27,6 +27,7 @@ public final class NotificationConverter {
         NotificationListVO vo = new NotificationListVO();
         vo.setId(notification.getId());
         vo.setTitle(notification.getTitle());
+        vo.setSummary(notification.getSummary());
         vo.setContent(notification.getContent());
         vo.setType(notification.getType());
         vo.setStatus(notification.getStatus());

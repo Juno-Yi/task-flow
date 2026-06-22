@@ -96,6 +96,7 @@ public class MyNotificationServiceImpl implements IMyNotificationService {
             MyNotificationVO vo = new MyNotificationVO();
             vo.setId(notification.getId());
             vo.setTitle(notification.getTitle());
+            vo.setSummary(notification.getSummary());
             vo.setContent(notification.getContent());
             vo.setType(notification.getType());
             vo.setRead(userState.getIsRead());
