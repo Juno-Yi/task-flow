@@ -80,6 +80,8 @@ export const SETTING_DEFAULT_CONFIG = {
   containerWidth: ContainerWidthEnum.FULL,
   /** 节日日期 */
   festivalDate: '',
+  /** 是否显示水印 */
+  watermarkVisible: false,
 }
 
 /**
