@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.notification.domain.po.Notification;
 import com.junoyi.notification.domain.po.NotificationUserState;
+import com.junoyi.notification.domain.vo.MyNotificationDetailVO;
 import com.junoyi.notification.domain.vo.MyNotificationVO;
 import com.junoyi.notification.mapper.NotificationMapper;
 import com.junoyi.notification.mapper.NotificationTargetMapper;
@@ -119,7 +120,7 @@ public class MyNotificationServiceImpl implements IMyNotificationService {
             vo.setId(notification.getId());
             vo.setTitle(notification.getTitle());
             vo.setSummary(notification.getSummary());
-            vo.setContent(notification.getContent());
+            // 不设置 content，列表不需要内容详情
             vo.setType(notification.getType());
             vo.setRead(userState.getIsRead());
             vo.setReadTime(userState.getReadTime());
@@ -147,5 +148,75 @@ public class MyNotificationServiceImpl implements IMyNotificationService {
         }
 
         return PageResult.of(voList, userStateResult.getTotal(), (int) page.getCurrent(), (int) page.getSize());
+    }
+
+    /**
+     * 获取我的通知详情（同时标记为已读）
+     */
+    @Override
+    public MyNotificationDetailVO getMyNotificationDetail(Long userId, Long notificationId) {
+        // 查询通知基本信息
+        Notification notification = notificationMapper.selectById(notificationId);
+        if (notification == null) {
+            throw new IllegalArgumentException("通知不存在");
+        }
+
+        // 查询用户阅读状态
+        NotificationUserState userState = notificationUserStateMapper.selectOne(
+                new LambdaQueryWrapper<NotificationUserState>()
+                        .eq(NotificationUserState::getUserId, userId)
+                        .eq(NotificationUserState::getNotificationId, notificationId)
+        );
+
+        if (userState == null) {
+            throw new IllegalArgumentException("无权查看该通知");
+        }
+
+        // 标记为已读（如果未读）
+        if (!userState.getIsRead()) {
+            userState.setIsRead(true);
+            userState.setReadTime(new Date());
+            notificationUserStateMapper.updateById(userState);
+        }
+
+        // 组装详情 VO
+        MyNotificationDetailVO vo = new MyNotificationDetailVO();
+        vo.setId(notification.getId());
+        vo.setTitle(notification.getTitle());
+        vo.setSummary(notification.getSummary());
+        vo.setContent(notification.getContent());
+        vo.setType(notification.getType());
+        vo.setRead(userState.getIsRead());
+        vo.setReadTime(userState.getReadTime());
+
+        // 设置发布者信息
+        Long senderId = notification.getSenderId();
+        if (senderId == null || senderId == 0) {
+            vo.setPublishedBy("系统");
+        } else {
+            SysUser sender = sysUserMapper.selectOne(
+                    new LambdaQueryWrapper<SysUser>()
+                            .eq(SysUser::getUserId, senderId)
+                            .select(SysUser::getUserId, SysUser::getNickName)
+            );
+            vo.setPublishedBy(sender != null ? sender.getNickName() : "系统");
+        }
+
+        // 设置发布时间
+        vo.setPublishedAt(notification.getPublishTime());
+
+        // 字典翻译
+        List<SysDictDataVO> typeDict = sysDictApi.getDictDataByType("notification_type");
+        SysDictDataVO dictData = typeDict.stream()
+                .filter(d -> d.getDictValue().equals(String.valueOf(notification.getType())))
+                .findFirst()
+                .orElse(null);
+
+        if (dictData != null) {
+            vo.setTypeLabel(dictData.getDictLabel());
+            vo.setTypeType(dictData.getListClass());
+        }
+
+        return vo;
     }
 }

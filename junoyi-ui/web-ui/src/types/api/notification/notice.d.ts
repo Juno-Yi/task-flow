@@ -1,9 +1,25 @@
 declare namespace Api.Notification {
 
     /**
-     * 我的通知VO
+     * 我的通知列表项VO
      */
     interface MyNotification {
+        id: number
+        title: string
+        summary: string
+        type: number
+        typeLabel: string
+        typeType: string
+        read: boolean
+        readTime: string
+        publishedBy: string
+        publishedAt: string
+    }
+
+    /**
+     * 我的通知详情VO
+     */
+    interface MyNotificationDetail {
         id: number
         title: string
         summary: string

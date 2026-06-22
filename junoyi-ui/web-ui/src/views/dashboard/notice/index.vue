@@ -108,7 +108,7 @@
       </ElScrollbar>
     </aside>
 
-    <section class="flex min-h-0 flex-1 flex-col">
+    <section class="flex min-h-0 flex-1 flex-col" v-loading="detailLoading">
       <template v-if="detail">
         <div class="border-b-d px-6 pb-5 pt-5 max-md:px-4">
           <div class="flex flex-wrap items-start justify-between gap-4">
@@ -124,17 +124,6 @@
                 </div>
               </div>
             </div>
-
-            <ElSpace wrap>
-              <ElButton
-                v-if="!detail.read"
-                type="primary"
-                plain
-                @click="markAsRead(detail)"
-              >
-                标记已读
-              </ElButton>
-            </ElSpace>
           </div>
 
           <div class="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
@@ -197,7 +186,7 @@
   import Vditor from 'vditor'
   import 'vditor/dist/index.css'
   import { useAutoLayoutHeight } from '@/hooks/core/useLayoutHeight'
-  import { fetchGetMyNotificationList } from '@/api/notification/notice'
+  import { fetchGetMyNotificationList, fetchGetMyNotificationDetail } from '@/api/notification/notice'
 
   defineOptions({ name: 'DashboardNotice' })
 
@@ -207,7 +196,6 @@
     id: number
     title: string
     summary: string
-    content: string
     type: number
     typeLabel: string
     typeType: string
@@ -217,11 +205,15 @@
     publishedAt: string
   }
 
+  interface NotificationDetail extends NotificationItem {
+    content: string
+  }
+
   const searchQuery = ref('')
   const onlyUnread = ref(false)
   const loading = ref(false)
   const activeId = ref<number>()
-  const detail = ref<NotificationItem>()
+  const detail = ref<NotificationDetail>()
   const previewRef = ref<HTMLDivElement>()
   const scrollbarRef = ref<any>()
 
@@ -230,6 +222,7 @@
   const pageSize = ref(20)
   const hasMore = ref(true)
   const loadingMore = ref(false)
+  const detailLoading = ref(false)
 
   const totalCount = computed(() => records.value.length)
   const unreadCount = computed(() => records.value.filter((item) => !item.read).length)
@@ -345,30 +338,33 @@
   /**
    * 打开消息详情
    */
-  function openDetail(item: NotificationItem) {
+  async function openDetail(item: NotificationItem) {
     activeId.value = item.id
-    detail.value = item
+    detail.value = undefined
 
-    // 自动标记为已读
-    if (!item.read) {
-      item.read = true
-      item.readTime = new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
+    try {
+      detailLoading.value = true
+
+      // 调用详情接口（会自动标记为已读）
+      const res = await fetchGetMyNotificationDetail(item.id)
+      detail.value = res
+
+      // 更新列表中的已读状态
+      item.read = res.read
+      item.readTime = res.readTime
+
+      // 渲染 Markdown
+      nextTick(() => {
+        if (previewRef.value && res.content) {
+          renderMarkdown(res.content)
+        }
       })
+    } catch (error: any) {
+      console.error('获取通知详情失败:', error)
+      ElMessage.error('获取通知详情失败')
+    } finally {
+      detailLoading.value = false
     }
-
-    // 确保 DOM 更新后再渲染 Markdown
-    nextTick(() => {
-      if (previewRef.value && item.content) {
-        renderMarkdown(item.content)
-      }
-    })
   }
 
   /**
@@ -390,24 +386,6 @@
         enable: true
       }
     })
-  }
-
-  /**
-   * 标记单条消息为已读
-   */
-  function markAsRead(item: NotificationItem) {
-    if (!item.read) {
-      item.read = true
-      item.readTime = new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      })
-    }
   }
 
   /**

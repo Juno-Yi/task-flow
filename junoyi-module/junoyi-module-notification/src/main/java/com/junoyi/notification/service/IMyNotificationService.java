@@ -3,6 +3,7 @@ package com.junoyi.notification.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.notification.domain.po.Notification;
+import com.junoyi.notification.domain.vo.MyNotificationDetailVO;
 import com.junoyi.notification.domain.vo.MyNotificationVO;
 
 /**
@@ -19,4 +20,12 @@ public interface IMyNotificationService {
      * @return 我的通知列表（分页）
      */
     PageResult<MyNotificationVO> getMyNotificationList(Long userId, Page<Notification> page);
+
+    /**
+     * 获取我的通知详情（同时标记为已读）
+     * @param userId 用户ID
+     * @param notificationId 通知ID
+     * @return 通知详情
+     */
+    MyNotificationDetailVO getMyNotificationDetail(Long userId, Long notificationId);
 }

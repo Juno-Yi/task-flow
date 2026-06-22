@@ -13,3 +13,12 @@ export function fetchGetMyNotificationList(pageNum = 1, pageSize = 100) {
         }
     })
 }
+
+/**
+ * 获取我的通知详情（同时标记为已读）
+ */
+export function fetchGetMyNotificationDetail(id: number) {
+    return request.get<Api.Notification.MyNotificationDetail>({
+        url: `/notification/my-notification/detail/${id}`
+    })
+}
