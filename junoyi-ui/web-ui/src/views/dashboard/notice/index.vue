@@ -234,7 +234,7 @@
   const loading = ref(false)
   const activeId = ref<number>()
   const detail = ref<NotificationItem>()
-  const previewRef = ref<HTMLElement>()
+  const previewRef = ref<HTMLDivElement>()
 
   // Mock 数据 - 改为 Markdown 格式
   const mockData: NotificationItem[] = [
@@ -420,6 +420,21 @@
   })
 
   /**
+   * 监听 detail 变化，重新渲染 Markdown
+   */
+  watch(
+    () => detail.value?.content,
+    (newContent) => {
+      if (newContent && previewRef.value) {
+        // 使用 setTimeout 确保 DOM 更新完成
+        setTimeout(() => {
+          renderMarkdown(newContent)
+        }, 100)
+      }
+    }
+  )
+
+  /**
    * 打开消息详情
    */
   function openDetail(item: NotificationItem) {
@@ -439,18 +454,19 @@
         hour12: false
       })
     }
-
-    // 渲染 Markdown 内容
-    nextTick(() => {
-      renderMarkdown(item.content)
-    })
+    // watch 会自动触发 Markdown 渲染
   }
 
   /**
    * 渲染 Markdown 内容
    */
   function renderMarkdown(content: string) {
-    if (!previewRef.value) return
+    if (!previewRef.value) {
+      console.warn('previewRef is not available')
+      return
+    }
+
+    console.log('Rendering markdown:', content.substring(0, 50))
 
     // 清空之前的内容
     previewRef.value.innerHTML = ''
