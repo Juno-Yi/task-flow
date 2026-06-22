@@ -56,45 +56,34 @@
             v-for="item in filteredRecords"
             :key="item.id"
             type="button"
-            class="relative mb-2 w-full appearance-none art-surface-muted p-3 text-left tad-200 c-p hover:bg-active-color/30"
+            class="relative mb-2 w-full appearance-none art-surface-muted p-4 text-left tad-200 c-p hover:bg-active-color/30"
             :class="item.id === activeId ? '!border-[var(--default-border)] !bg-active-color' : ''"
             @click="openDetail(item)"
           >
-            <div class="flex items-start gap-3">
-              <div
-                class="flex size-11 shrink-0 items-center justify-center rounded-custom-sm"
-                :class="getTypeClass(item.type)"
+            <div class="flex items-start gap-2">
+              <div class="line-clamp-1 flex-1 text-sm font-semibold leading-6 text-g-900">
+                {{ item.title }}
+              </div>
+              <span
+                v-if="!item.isRead"
+                class="mt-1 size-2 shrink-0 rounded-full bg-danger"
+              ></span>
+            </div>
+
+            <div class="mt-2 line-clamp-2 text-xs leading-5 text-g-500">
+              {{ item.summary || '点击查看完整消息内容' }}
+            </div>
+
+            <div class="mt-3 flex items-center justify-between gap-3">
+              <span
+                class="rounded-full px-2 py-1 text-[11px] font-medium"
+                :class="getTypeSoftClass(item.type)"
               >
-                <ArtSvgIcon :icon="getTypeIcon(item.type)" class="text-lg" />
-              </div>
-
-              <div class="min-w-0 flex-1">
-                <div class="flex items-start gap-2">
-                  <div class="line-clamp-1 flex-1 text-sm font-semibold leading-6 text-g-900">
-                    {{ item.title }}
-                  </div>
-                  <span
-                    v-if="!item.isRead"
-                    class="mt-2 size-2 shrink-0 rounded-full bg-danger"
-                  ></span>
-                </div>
-
-                <div class="mt-1 line-clamp-2 text-xs leading-5 text-g-500">
-                  {{ item.summary || '点击查看完整消息内容' }}
-                </div>
-
-                <div class="mt-3 flex items-center justify-between gap-3">
-                  <span
-                    class="rounded-full px-2 py-1 text-[11px] font-medium"
-                    :class="getTypeSoftClass(item.type)"
-                  >
-                    {{ getTypeText(item.type) }}
-                  </span>
-                  <span class="shrink-0 text-xs text-g-500">{{
-                    formatDateTime(item.publishedAt)
-                  }}</span>
-                </div>
-              </div>
+                {{ getTypeText(item.type) }}
+              </span>
+              <span class="shrink-0 text-xs text-g-500">{{
+                formatDateTime(item.publishedAt)
+              }}</span>
             </div>
           </button>
         </div>
@@ -114,12 +103,6 @@
           <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="min-w-0">
               <div class="flex items-center gap-3">
-                <div
-                  class="flex size-12 shrink-0 items-center justify-center rounded-custom-sm"
-                  :class="getTypeClass(detail.type)"
-                >
-                  <ArtSvgIcon :icon="getTypeIcon(detail.type)" class="text-xl" />
-                </div>
                 <div class="min-w-0">
                   <div class="line-clamp-2 text-xl font-semibold text-g-900 max-md:text-lg">
                     {{ detail.title }}
@@ -184,12 +167,6 @@
               </ElTag>
             </div>
 
-            <div
-              v-if="detail.summary"
-              class="mb-5 art-surface-muted px-4 py-3 text-sm leading-6 text-g-600"
-            >
-              {{ detail.summary }}
-            </div>
 
             <!-- Markdown 渲染器 -->
             <div ref="previewRef" class="art-surface-sm px-5 py-5"></div>
