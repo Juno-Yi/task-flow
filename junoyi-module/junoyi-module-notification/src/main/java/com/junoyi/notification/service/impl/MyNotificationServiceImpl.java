@@ -12,7 +12,9 @@ import com.junoyi.notification.mapper.NotificationTargetMapper;
 import com.junoyi.notification.mapper.NotificationUserStateMapper;
 import com.junoyi.notification.service.IMyNotificationService;
 import com.junoyi.system.api.SysDictApi;
+import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.SysDictDataVO;
+import com.junoyi.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,7 @@ public class MyNotificationServiceImpl implements IMyNotificationService {
     private final NotificationTargetMapper notificationTargetMapper;
     private final NotificationUserStateMapper notificationUserStateMapper;
     private final SysDictApi sysDictApi;
+    private final SysUserMapper sysUserMapper;
 
     /**
      * 获取我的通知列表（分页）
@@ -85,6 +88,25 @@ public class MyNotificationServiceImpl implements IMyNotificationService {
         Map<String, SysDictDataVO> typeDictMap = typeDict.stream()
                 .collect(Collectors.toMap(SysDictDataVO::getDictValue, d -> d, (v1, v2) -> v1));
 
+        // 获取所有发布者ID
+        Set<Long> senderIds = notifications.stream()
+                .map(Notification::getSenderId)
+                .filter(Objects::nonNull)
+                .filter(id -> id > 0)
+                .collect(Collectors.toSet());
+
+        // 批量查询发布者信息
+        Map<Long, SysUser> senderMap = new HashMap<>();
+        if (!senderIds.isEmpty()) {
+            List<SysUser> senders = sysUserMapper.selectList(
+                    new LambdaQueryWrapper<SysUser>()
+                            .in(SysUser::getUserId, senderIds)
+                            .select(SysUser::getUserId, SysUser::getNickName)
+            );
+            senderMap = senders.stream()
+                    .collect(Collectors.toMap(SysUser::getUserId, s -> s, (v1, v2) -> v1));
+        }
+
         // 组装VO
         List<MyNotificationVO> voList = new ArrayList<>();
         for (NotificationUserState userState : userStates) {
@@ -101,6 +123,15 @@ public class MyNotificationServiceImpl implements IMyNotificationService {
             vo.setType(notification.getType());
             vo.setRead(userState.getIsRead());
             vo.setReadTime(userState.getReadTime());
+
+            // 设置发布者信息
+            Long senderId = notification.getSenderId();
+            if (senderId == null || senderId == 0) {
+                vo.setPublishedAt("系统");
+            } else {
+                SysUser sender = senderMap.get(senderId);
+                vo.setPublishedAt(sender != null ? sender.getNickName() : "系统");
+            }
 
             // 字典翻译
             SysDictDataVO dictData = typeDictMap.get(String.valueOf(notification.getType()));

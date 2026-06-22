@@ -57,4 +57,9 @@ public class MyNotificationVO {
      */
     private Date readTime;
 
+    /**
+     * 谁发布的
+     */
+    private String publishedAt;
+
 }
