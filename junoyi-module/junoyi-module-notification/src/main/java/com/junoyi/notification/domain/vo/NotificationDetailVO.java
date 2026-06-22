@@ -24,6 +24,11 @@ public class NotificationDetailVO {
     private String title;
 
     /**
+     * 通知概况
+     */
+    private String summary;
+
+    /**
      * 通知内容
      */
     private String content;

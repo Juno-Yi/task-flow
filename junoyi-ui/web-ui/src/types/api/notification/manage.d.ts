@@ -6,6 +6,7 @@ declare namespace Api.Notification {
     interface NotificationListVO {
         id: number
         title: string
+        summary?: string
         content: string
         type: number
         typeLabel: string
@@ -25,6 +26,7 @@ declare namespace Api.Notification {
     interface NotificationDetailVO {
         id: number
         title: string
+        summary?: string
         content: string
         type: number
         typeLabel: string
@@ -48,6 +50,8 @@ declare namespace Api.Notification {
         id?: number
         /** 通知标题 */
         title: string
+        /** 通知概况 */
+        summary?: string
         /** 通知内容 */
         content?: string
         /** 通知类型 */

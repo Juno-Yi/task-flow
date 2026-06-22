@@ -5,6 +5,17 @@
         <ElInput v-model="form.title" placeholder="请输入通知标题" maxlength="100" show-word-limit />
       </ElFormItem>
 
+      <ElFormItem label="通知概况" prop="summary">
+        <ElInput
+          v-model="form.summary"
+          type="textarea"
+          placeholder="请输入通知概况（简短描述，200字以内）"
+          maxlength="200"
+          show-word-limit
+          :rows="3"
+        />
+      </ElFormItem>
+
       <ElFormItem label="通知内容" prop="content">
         <div class="w-full rounded-lg border border-gray-200 bg-white p-3">
           <div class="mb-3 text-sm font-medium text-gray-700">Markdown 文档</div>
@@ -128,6 +139,7 @@ const dialogTitle = computed(() => editMode.value ? '编辑通知' : '发布通�
 
 interface FormData {
   title: string
+  summary: string
   content: string
   type: number | undefined
   targetType: number | undefined
@@ -136,6 +148,7 @@ interface FormData {
 
 const defaultForm = (): FormData => ({
   title: '',
+  summary: '',
   content: '',
   type: undefined,
   targetType: 0,
@@ -177,6 +190,7 @@ const open = async (row?: Api.Notification.NotificationListVO) => {
     const detail = await fetchGetNotificationById(row.id)
     Object.assign(form, {
       title: detail.title,
+      summary: detail.summary || '',
       content: detail.content,
       type: detail.type,
       targetType: detail.targetType,
@@ -285,6 +299,7 @@ const handleSubmit = async (status: number) => {
   try {
     const dto: Api.Notification.NotificationDTO = {
       title: form.title,
+      summary: form.summary,
       content,
       type: form.type!,
       status,

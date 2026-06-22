@@ -88,8 +88,17 @@ const {
         label: '通知标题',
         align: 'left',
         headerAlign: 'center',
-        minWidth: 200,
+        minWidth: 180,
         showOverflowTooltip: true
+      },
+      {
+        prop: 'summary',
+        label: '通知概况',
+        align: 'left',
+        headerAlign: 'center',
+        minWidth: 220,
+        showOverflowTooltip: true,
+        formatter: (row: NotificationListVO) => row.summary || '-'
       },
       {
         prop: 'content',
