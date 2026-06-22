@@ -48,55 +48,52 @@
       </div>
 
       <ElScrollbar
+        ref="scrollbarRef"
         v-loading="loading"
         class="min-h-0 flex-1 [&_.el-scrollbar__wrap]:overflow-x-hidden [&_.el-scrollbar__view]:min-h-full"
+        @scroll="handleScroll"
       >
         <div v-if="filteredRecords.length" class="p-3">
           <button
             v-for="item in filteredRecords"
             :key="item.id"
             type="button"
-            class="relative mb-2 w-full appearance-none art-surface-muted p-3 text-left tad-200 c-p hover:bg-active-color/30"
+            class="relative mb-2 w-full appearance-none art-surface-muted p-4 text-left tad-200 c-p hover:bg-active-color/30"
             :class="item.id === activeId ? '!border-[var(--default-border)] !bg-active-color' : ''"
             @click="openDetail(item)"
           >
-            <div class="flex items-start gap-3">
-              <div
-                class="flex size-11 shrink-0 items-center justify-center rounded-custom-sm"
-                :class="getTypeClass(item.type)"
-              >
-                <ArtSvgIcon :icon="getTypeIcon(item.type)" class="text-lg" />
+            <div class="flex items-start gap-2">
+              <div class="line-clamp-1 flex-1 text-sm font-semibold leading-6 text-g-900">
+                {{ item.title }}
               </div>
+              <span
+                v-if="!item.read"
+                class="mt-1 size-2 shrink-0 rounded-full bg-danger"
+              ></span>
+            </div>
 
-              <div class="min-w-0 flex-1">
-                <div class="flex items-start gap-2">
-                  <div class="line-clamp-1 flex-1 text-sm font-semibold leading-6 text-g-900">
-                    {{ item.title }}
-                  </div>
-                  <span
-                    v-if="!item.isRead"
-                    class="mt-2 size-2 shrink-0 rounded-full bg-danger"
-                  ></span>
-                </div>
+            <div class="mt-2 line-clamp-2 text-xs leading-5 text-g-500">
+              {{ item.summary || '点击查看完整消息内容' }}
+            </div>
 
-                <div class="mt-1 line-clamp-2 text-xs leading-5 text-g-500">
-                  {{ item.summary || '点击查看完整消息内容' }}
-                </div>
-
-                <div class="mt-3 flex items-center justify-between gap-3">
-                  <span
-                    class="rounded-full px-2 py-1 text-[11px] font-medium"
-                    :class="getTypeSoftClass(item.type)"
-                  >
-                    {{ getTypeText(item.type) }}
-                  </span>
-                  <span class="shrink-0 text-xs text-g-500">{{
-                    formatDateTime(item.publishedAt)
-                  }}</span>
-                </div>
-              </div>
+            <div class="mt-3 flex items-center justify-between gap-3">
+              <ElTag size="small" :type="item.typeType as any">
+                {{ item.typeLabel }}
+              </ElTag>
+              <span class="shrink-0 text-xs text-g-500">{{
+                formatDateTime(item.publishedAt)
+              }}</span>
             </div>
           </button>
+
+          <!-- 加载更多提示 -->
+          <div v-if="loadingMore" class="py-4 text-center text-sm text-g-500">
+            <ElIcon class="is-loading mr-2"><Loading /></ElIcon>
+            加载中...
+          </div>
+          <div v-else-if="!hasMore && records.length > 0" class="py-4 text-center text-xs text-g-400">
+            没有更多了
+          </div>
         </div>
 
         <div v-else class="flex min-h-full items-center justify-center p-6">
@@ -108,18 +105,12 @@
       </ElScrollbar>
     </aside>
 
-    <section class="flex min-h-0 flex-1 flex-col">
+    <section class="flex min-h-0 flex-1 flex-col" v-loading="detailLoading">
       <template v-if="detail">
         <div class="border-b-d px-6 pb-5 pt-5 max-md:px-4">
           <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="min-w-0">
               <div class="flex items-center gap-3">
-                <div
-                  class="flex size-12 shrink-0 items-center justify-center rounded-custom-sm"
-                  :class="getTypeClass(detail.type)"
-                >
-                  <ArtSvgIcon :icon="getTypeIcon(detail.type)" class="text-xl" />
-                </div>
                 <div class="min-w-0">
                   <div class="line-clamp-2 text-xl font-semibold text-g-900 max-md:text-lg">
                     {{ detail.title }}
@@ -130,37 +121,26 @@
                 </div>
               </div>
             </div>
-
-            <ElSpace wrap>
-              <ElButton
-                v-if="!detail.isRead"
-                type="primary"
-                plain
-                @click="markAsRead(detail)"
-              >
-                标记已读
-              </ElButton>
-            </ElSpace>
           </div>
 
           <div class="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
             <div class="art-surface-muted p-3">
               <div class="text-xs text-g-500">消息类型</div>
               <div class="mt-2 flex items-center gap-2 text-sm font-medium text-g-900">
-                <span class="size-2 rounded-full" :class="getTypeDotClass(detail.type)"></span>
-                {{ getTypeText(detail.type) }}
+                <span class="size-2 rounded-full bg-theme"></span>
+                {{ detail.typeLabel }}
               </div>
             </div>
             <div class="art-surface-muted p-3">
               <div class="text-xs text-g-500">阅读状态</div>
               <div class="mt-2 text-sm font-medium text-g-900">
-                {{ detail.isRead ? '已读' : '未读' }}
+                {{ detail.read ? '已读' : '未读' }}
               </div>
             </div>
             <div class="art-surface-muted p-3">
               <div class="text-xs text-g-500">发送人</div>
               <div class="mt-2 text-sm font-medium text-g-900">
-                {{ detail.createdBy || '系统' }}
+                {{ detail.publishedBy || '系统' }}
               </div>
             </div>
             <div class="art-surface-muted p-3">
@@ -175,20 +155,13 @@
         <ElScrollbar class="min-h-0 flex-1">
           <div class="px-6 py-5 max-md:px-4">
             <div class="mb-4 flex flex-wrap gap-2">
-              <ElTag :type="getTypeTagType(detail.type)">{{ getTypeText(detail.type) }}</ElTag>
-              <ElTag :type="detail.isRead ? 'info' : 'danger'">
-                {{ detail.isRead ? '已读' : '未读' }}
+              <ElTag :type="detail.typeType as any">{{ detail.typeLabel }}</ElTag>
+              <ElTag :type="detail.read ? 'info' : 'danger'">
+                {{ detail.read ? '已读' : '未读' }}
               </ElTag>
-              <ElTag v-if="detail.readAt" type="info">
-                阅读于：{{ formatDateTime(detail.readAt) }}
+              <ElTag v-if="detail.readTime" type="info">
+                阅读于：{{ formatDateTime(detail.readTime) }}
               </ElTag>
-            </div>
-
-            <div
-              v-if="detail.summary"
-              class="mb-5 art-surface-muted px-4 py-3 text-sm leading-6 text-g-600"
-            >
-              {{ detail.summary }}
             </div>
 
             <!-- Markdown 渲染器 -->
@@ -206,187 +179,54 @@
 
 
 <script setup lang="ts">
-  import { Search } from '@element-plus/icons-vue'
+  import { Search, Loading } from '@element-plus/icons-vue'
   import Vditor from 'vditor'
   import 'vditor/dist/index.css'
   import { useAutoLayoutHeight } from '@/hooks/core/useLayoutHeight'
+  import {
+    fetchGetMyNotificationList,
+    fetchGetMyNotificationDetail,
+    fetchMarkAllAsRead
+  } from '@/api/notification/notice'
 
   defineOptions({ name: 'DashboardNotice' })
 
   const { containerMinHeight } = useAutoLayoutHeight()
 
-  type NotificationType = 'SYSTEM' | 'ANNOUNCEMENT' | 'ALERT' | 'UPDATE'
-
   interface NotificationItem {
     id: number
     title: string
     summary: string
-    content: string
-    type: NotificationType
-    isRead: boolean
+    type: number
+    typeLabel: string
+    typeType: string
+    read: boolean
+    readTime: string
+    publishedBy: string
     publishedAt: string
-    readAt?: string
-    createdBy: string
+  }
+
+  interface NotificationDetail extends NotificationItem {
+    content: string
   }
 
   const searchQuery = ref('')
   const onlyUnread = ref(false)
   const loading = ref(false)
   const activeId = ref<number>()
-  const detail = ref<NotificationItem>()
+  const detail = ref<NotificationDetail>()
   const previewRef = ref<HTMLDivElement>()
+  const scrollbarRef = ref<any>()
 
-  // Mock 数据 - 改为 Markdown 格式
-  const mockData: NotificationItem[] = [
-    {
-      id: 1,
-      title: '系统维护通知',
-      summary: '系统将于今晚22:00-24:00进行例行维护，届时服务将暂时不可用',
-      content: `## 系统维护通知
+  const records = ref<NotificationItem[]>([])
+  const currentPage = ref(1)
+  const pageSize = ref(20)
+  const hasMore = ref(true)
+  const loadingMore = ref(false)
+  const detailLoading = ref(false)
 
-尊敬的用户：
-
-为了给您提供更好的服务体验，我们将于**今晚22:00-24:00**进行系统例行维护。
-
-### 维护内容
-
-- 服务器性能优化
-- 数据库索引重建
-- 安全补丁更新
-
-维护期间系统将暂时不可用，给您带来的不便敬请谅解。`,
-      type: 'SYSTEM',
-      isRead: false,
-      publishedAt: '2024-01-15 14:30:00',
-      createdBy: '系统管理员'
-    },
-    {
-      id: 2,
-      title: '新功能上线公告',
-      summary: '任务流程管理新增自动化审批功能，提升工作效率',
-      content: `## 新功能上线公告
-
-我们很高兴地宣布，任务流程管理模块已上线全新的**自动化审批功能**！
-
-### 主要特性
-
-- 智能审批规则配置
-- 多级审批流程支持
-- 审批进度实时追踪
-- 消息通知及时推送
-
-欢迎体验使用，如有任何问题请联系技术支持团队。`,
-      type: 'ANNOUNCEMENT',
-      isRead: true,
-      publishedAt: '2024-01-14 10:00:00',
-      readAt: '2024-01-14 11:23:00',
-      createdBy: '产品团队'
-    },
-    {
-      id: 3,
-      title: '存储空间预警',
-      summary: '您的存储空间使用率已达85%，请及时清理或扩容',
-      content: `## 存储空间预警
-
-您好，检测到您的存储空间使用情况如下：
-
-| 项目 | 已使用 | 总容量 | 使用率 |
-|------|--------|--------|--------|
-| 文件存储 | 42.5 GB | 50 GB | 85% |
-
-建议您：
-
-1. 清理不需要的文件
-2. 归档历史数据
-3. 联系管理员扩容`,
-      type: 'ALERT',
-      isRead: false,
-      publishedAt: '2024-01-15 09:15:00',
-      createdBy: '监控系统'
-    },
-    {
-      id: 4,
-      title: '版本更新提醒',
-      summary: 'v2.5.0 版本已发布，包含多项性能优化和bug修复',
-      content: `## 版本更新 v2.5.0
-
-### 新增功能
-
-- 支持批量操作任务
-- 新增数据导出功能
-- 优化移动端适配
-
-### 性能优化
-
-- 列表加载速度提升40%
-- 内存占用减少30%
-
-### Bug修复
-
-- 修复文件上传偶现失败问题
-- 修复时间选择器显示异常`,
-      type: 'UPDATE',
-      isRead: true,
-      publishedAt: '2024-01-13 16:00:00',
-      readAt: '2024-01-13 16:45:00',
-      createdBy: '开发团队'
-    },
-    {
-      id: 5,
-      title: '安全提醒',
-      summary: '检测到您的密码已超过90天未更改，建议定期更新密码',
-      content: `## 安全提醒
-
-为了保障您的账号安全，我们建议您定期更新密码。
-
-### 安全建议
-
-- 密码长度至少8位
-- 包含大小写字母、数字和特殊符号
-- 不要使用常见密码
-- 不要在多个网站使用相同密码
-- 定期更换密码（建议90天）
-
-您可以在**个人中心 > 安全设置**中修改密码。`,
-      type: 'SYSTEM',
-      isRead: false,
-      publishedAt: '2024-01-12 08:00:00',
-      createdBy: '安全中心'
-    },
-    {
-      id: 6,
-      title: '活动通知',
-      summary: '春节假期服务安排及优惠活动通知',
-      content: `## 春节假期服务安排
-
-尊敬的用户，春节将至，特此通知假期服务安排：
-
-### 假期时间
-
-2024年2月10日至2月17日
-
-### 服务安排
-
-- 系统正常运行，7x24小时可用
-- 在线客服工作时间：10:00-18:00
-- 紧急技术支持保持在线
-
-### 优惠活动
-
-春节期间购买年度套餐享**8折优惠**，详情请咨询客服。`,
-      type: 'ANNOUNCEMENT',
-      isRead: true,
-      publishedAt: '2024-01-10 14:00:00',
-      readAt: '2024-01-10 15:20:00',
-      createdBy: '运营团队'
-    }
-  ]
-
-  const records = ref<NotificationItem[]>([...mockData])
-
-
-  const totalCount = computed(() => mockData.length)
-  const unreadCount = computed(() => records.value.filter((item) => !item.isRead).length)
+  const totalCount = computed(() => records.value.length)
+  const unreadCount = computed(() => records.value.filter((item) => !item.read).length)
 
   /**
    * 根据搜索关键词和筛选条件过滤消息列表
@@ -396,14 +236,14 @@
 
     // 筛选未读
     if (onlyUnread.value) {
-      filtered = filtered.filter((item) => !item.isRead)
+      filtered = filtered.filter((item) => !item.read)
     }
 
     // 搜索关键词
     const keyword = searchQuery.value.trim().toLowerCase()
     if (keyword) {
       filtered = filtered.filter((item) => {
-        return [item.title, item.summary || '', getTypeText(item.type)].some((field) =>
+        return [item.title, item.summary || '', item.typeLabel].some((field) =>
           String(field).toLowerCase().includes(keyword)
         )
       })
@@ -412,8 +252,72 @@
     return filtered
   })
 
+  /**
+   * 加载通知列表
+   */
+  async function loadNotifications(isLoadMore = false) {
+    if (loadingMore.value || (!hasMore.value && isLoadMore)) {
+      return
+    }
+
+    try {
+      if (isLoadMore) {
+        loadingMore.value = true
+      } else {
+        loading.value = true
+      }
+
+      const res = await fetchGetMyNotificationList(currentPage.value, pageSize.value)
+      const newList = res.list || []
+
+      if (isLoadMore) {
+        records.value = [...records.value, ...newList]
+      } else {
+        records.value = newList
+      }
+
+      // 判断是否还有更多数据
+      hasMore.value = newList.length >= pageSize.value
+
+      if (hasMore.value) {
+        currentPage.value++
+      }
+    } catch (error) {
+      console.error('加载通知列表失败:', error)
+      ElMessage.error('加载通知列表失败')
+    } finally {
+      loading.value = false
+      loadingMore.value = false
+    }
+  }
+
+  /**
+   * 滚动监听
+   */
+  function handleScroll({ scrollTop }: { scrollTop: number, scrollLeft: number }) {
+    const wrapElement = scrollbarRef.value?.wrapRef as HTMLElement
+    if (!wrapElement) return
+
+    const scrollHeight = wrapElement.scrollHeight
+    const clientHeight = wrapElement.clientHeight
+    const threshold = 50 // 距离底部50px时开始加载
+
+    if (scrollTop + clientHeight >= scrollHeight - threshold) {
+      handleScrollToBottom()
+    }
+  }
+
+  /**
+   * 滚动到底部加载更多
+   */
+  function handleScrollToBottom() {
+    if (!loading.value && hasMore.value && !loadingMore.value) {
+      loadNotifications(true)
+    }
+  }
+
   onMounted(() => {
-    // 不自动选中第一条消息，保持空状态
+    loadNotifications()
   })
 
   /**
@@ -435,30 +339,33 @@
   /**
    * 打开消息详情
    */
-  function openDetail(item: NotificationItem) {
+  async function openDetail(item: NotificationItem) {
     activeId.value = item.id
-    detail.value = item
+    detail.value = undefined
 
-    // 自动标记为已读
-    if (!item.isRead) {
-      item.isRead = true
-      item.readAt = new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
+    try {
+      detailLoading.value = true
+
+      // 调用详情接口（会自动标记为已读）
+      const res = await fetchGetMyNotificationDetail(item.id)
+      detail.value = res
+
+      // 更新列表中的已读状态
+      item.read = res.read
+      item.readTime = res.readTime
+
+      // 渲染 Markdown
+      nextTick(() => {
+        if (previewRef.value && res.content) {
+          renderMarkdown(res.content)
+        }
       })
+    } catch (error: any) {
+      console.error('获取通知详情失败:', error)
+      ElMessage.error('获取通知详情失败')
+    } finally {
+      detailLoading.value = false
     }
-
-    // 确保 DOM 更新后再渲染 Markdown
-    nextTick(() => {
-      if (previewRef.value && item.content) {
-        renderMarkdown(item.content)
-      }
-    })
   }
 
   /**
@@ -483,45 +390,30 @@
   }
 
   /**
-   * 标记单条消息为已读
-   */
-  function markAsRead(item: NotificationItem) {
-    if (!item.isRead) {
-      item.isRead = true
-      item.readAt = new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      })
-    }
-  }
-
-  /**
    * 全部标记为已读
    */
-  function handleReadAll() {
-    const now = new Date().toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    })
+  async function handleReadAll() {
+    try {
+      const count = await fetchMarkAllAsRead()
 
-    records.value.forEach((item) => {
-      if (!item.isRead) {
-        item.isRead = true
-        item.readAt = now
+      if (count > 0) {
+        // 更新本地列表中的已读状态
+        const now = new Date().toISOString()
+        records.value.forEach((item) => {
+          if (!item.read) {
+            item.read = true
+            item.readTime = now
+          }
+        })
+
+        ElMessage.success(`已将 ${count} 条通知标记为已读`)
+      } else {
+        ElMessage.info('没有未读通知')
       }
-    })
-
-    ElMessage.success('已全部标记为已读')
+    } catch (error: any) {
+      console.error('标记已读失败:', error)
+      ElMessage.error('标记已读失败')
+    }
   }
 
   /**
@@ -544,94 +436,6 @@
       return dateStr.replace('T', ' ').substring(0, 19)
     }
     return dateStr
-  }
-
-  /**
-   * 获取消息类型文案
-   */
-  function getTypeText(type: NotificationType) {
-    return (
-      {
-        SYSTEM: '系统通知',
-        ANNOUNCEMENT: '公告通知',
-        ALERT: '预警通知',
-        UPDATE: '更新通知'
-      }[type] || type
-    )
-  }
-
-  /**
-   * 获取消息类型图标
-   */
-  function getTypeIcon(type: NotificationType) {
-    return (
-      {
-        SYSTEM: 'ri:notification-3-line',
-        ANNOUNCEMENT: 'ri:megaphone-line',
-        ALERT: 'ri:alarm-warning-line',
-        UPDATE: 'ri:rocket-line'
-      }[type] || 'ri:notification-3-line'
-    )
-  }
-
-  /**
-   * 获取消息列表项的类型主样式
-   */
-  function getTypeClass(type: NotificationType) {
-    return (
-      {
-        SYSTEM: 'bg-theme/12 text-theme',
-        ANNOUNCEMENT: 'bg-success/12 text-success',
-        ALERT: 'bg-danger/12 text-danger',
-        UPDATE: 'bg-warning/12 text-warning'
-      }[type] || 'bg-theme/12 text-theme'
-    )
-  }
-
-  /**
-   * 获取消息详情区的类型浅色样式
-   */
-  function getTypeSoftClass(type: NotificationType) {
-    return (
-      {
-        SYSTEM: 'bg-theme/10 text-theme',
-        ANNOUNCEMENT: 'bg-success/10 text-success',
-        ALERT: 'bg-danger/10 text-danger',
-        UPDATE: 'bg-warning/10 text-warning'
-      }[type] || 'bg-theme/10 text-theme'
-    )
-  }
-
-  /**
-   * 获取未读圆点的类型颜色样式
-   */
-  function getTypeDotClass(type: NotificationType) {
-    return (
-      {
-        SYSTEM: 'bg-theme',
-        ANNOUNCEMENT: 'bg-success',
-        ALERT: 'bg-danger',
-        UPDATE: 'bg-warning'
-      }[type] || 'bg-theme'
-    )
-  }
-
-  /**
-   * 获取消息类型对应的标签颜色
-   */
-  function getTypeTagType(
-    type: NotificationType
-  ): 'primary' | 'success' | 'warning' | 'danger' {
-    switch (type) {
-      case 'ANNOUNCEMENT':
-        return 'success'
-      case 'ALERT':
-        return 'danger'
-      case 'UPDATE':
-        return 'warning'
-      default:
-        return 'primary'
-    }
   }
 </script>
 

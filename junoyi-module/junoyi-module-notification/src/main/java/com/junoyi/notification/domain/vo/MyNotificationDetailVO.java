@@ -5,12 +5,12 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * 我的通知VO
+ * 我的通知详情VO
  *
  * @author Fan
  */
 @Data
-public class MyNotificationVO {
+public class MyNotificationDetailVO {
 
     /**
      * 主键ID
@@ -26,6 +26,11 @@ public class MyNotificationVO {
      * 通知概况
      */
     private String summary;
+
+    /**
+     * 通知内容
+     */
+    private String content;
 
     /**
      * 通知类型
@@ -63,3 +68,4 @@ public class MyNotificationVO {
     private Date publishedAt;
 
 }
+
