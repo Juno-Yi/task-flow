@@ -413,10 +413,7 @@
   })
 
   onMounted(() => {
-    // 默认选中第一条消息
-    if (records.value.length > 0) {
-      openDetail(records.value[0])
-    }
+    // 不自动选中第一条消息，保持空状态
   })
 
   /**
@@ -425,11 +422,15 @@
   watch(
     () => detail.value?.content,
     (newContent) => {
-      if (newContent && previewRef.value) {
-        // 使用 setTimeout 确保 DOM 更新完成
-        setTimeout(() => {
-          renderMarkdown(newContent)
-        }, 100)
+      if (newContent) {
+        // 使用 nextTick 等待 DOM 更新，然后再等待一小段时间确保元素完全渲染
+        nextTick(() => {
+          setTimeout(() => {
+            if (previewRef.value) {
+              renderMarkdown(newContent)
+            }
+          }, 50)
+        })
       }
     }
   )
@@ -454,19 +455,20 @@
         hour12: false
       })
     }
-    // watch 会自动触发 Markdown 渲染
+
+    // 确保 DOM 更新后再渲染 Markdown
+    nextTick(() => {
+      if (previewRef.value && item.content) {
+        renderMarkdown(item.content)
+      }
+    })
   }
 
   /**
    * 渲染 Markdown 内容
    */
   function renderMarkdown(content: string) {
-    if (!previewRef.value) {
-      console.warn('previewRef is not available')
-      return
-    }
-
-    console.log('Rendering markdown:', content.substring(0, 50))
+    if (!previewRef.value) return
 
     // 清空之前的内容
     previewRef.value.innerHTML = ''
@@ -531,13 +533,9 @@
   function handleFilterChange() {
     searchQuery.value = ''
 
-    // 重新选中第一条
-    if (filteredRecords.value.length > 0) {
-      openDetail(filteredRecords.value[0])
-    } else {
-      detail.value = undefined
-      activeId.value = undefined
-    }
+    // 切换筛选时清空选中状态
+    detail.value = undefined
+    activeId.value = undefined
   }
 
   /**
