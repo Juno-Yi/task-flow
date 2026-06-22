@@ -379,6 +379,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
         Notification notification = new Notification();
         notification.setId(dto.getId());
         notification.setTitle(dto.getTitle());
+        notification.setSummary(dto.getSummary());
         notification.setContent(dto.getContent());
         notification.setType(dto.getType());
         notification.setUpdateBy(SecurityUtils.getUserName());
