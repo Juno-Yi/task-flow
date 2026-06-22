@@ -93,7 +93,7 @@ const {
       },
       {
         prop: 'summary',
-        label: '通知概况',
+        label: '通知摘要',
         align: 'left',
         headerAlign: 'center',
         minWidth: 220,

@@ -152,6 +152,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
         NotificationDetailVO detailVO = new NotificationDetailVO();
         detailVO.setId(notification.getId());
         detailVO.setTitle(notification.getTitle());
+        detailVO.setSummary(notification.getSummary());
         detailVO.setContent(notification.getContent());
         detailVO.setType(notification.getType());
         detailVO.setStatus(notification.getStatus());
@@ -239,6 +240,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
         // 插入通知主表
         Notification notification = new Notification();
         notification.setTitle(dto.getTitle());
+        notification.setSummary(dto.getSummary());
         notification.setContent(dto.getContent());
         notification.setType(dto.getType());
         notification.setSenderId(SecurityUtils.getUserId());
@@ -379,6 +381,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
         Notification notification = new Notification();
         notification.setId(dto.getId());
         notification.setTitle(dto.getTitle());
+        notification.setSummary(dto.getSummary());
         notification.setContent(dto.getContent());
         notification.setType(dto.getType());
         notification.setUpdateBy(SecurityUtils.getUserName());
