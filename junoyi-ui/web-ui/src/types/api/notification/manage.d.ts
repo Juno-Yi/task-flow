@@ -63,4 +63,12 @@ declare namespace Api.Notification {
         /** 目标ID列表（部门ID/角色ID/用户ID），全部时可不传 */
         targetIds?: number[]
     }
+
+    /**
+     * 通知下拉列表 VO
+     */
+    interface NotificationOptionVO {
+        id: number
+        title: string
+    }
 }

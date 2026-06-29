@@ -11,6 +11,15 @@ export function fetchGetNotificationList(){
 }
 
 /**
+ * 获取通知下拉列表
+ */
+export function fetchGetNotificationOptions(){
+    return request.get<Api.Notification.NotificationOptionVO[]>({
+        url: '/notification/options'
+    })
+}
+
+/**
  * 获取通知详情
  */
 export function fetchGetNotificationById(id: number) {
