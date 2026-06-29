@@ -6,6 +6,9 @@ import com.junoyi.notification.domain.dto.NotificationDTO;
 import com.junoyi.notification.domain.po.Notification;
 import com.junoyi.notification.domain.vo.NotificationDetailVO;
 import com.junoyi.notification.domain.vo.NotificationListVO;
+import com.junoyi.notification.domain.vo.NotificationOptionVO;
+
+import java.util.List;
 
 /**
  * 通知管理业务接口
@@ -20,6 +23,12 @@ public interface INotificationManageService {
      * @return 通知列表（分页）
      */
     PageResult<NotificationListVO> getNotificationList(Page<Notification> page);
+
+    /**
+     * 获取通知下拉列表
+     * @return 通知下拉列表
+     */
+    List<NotificationOptionVO> getNotificationOptions();
 
     /**
      * 获取通知详情
