@@ -104,6 +104,7 @@ public class NotificationPublishLogServiceImpl implements INotificationPublishLo
                     Notification notification = notificationMap.get(log.getNotificationId());
                     if (notification != null) {
                         vo.setNotificationTitle(notification.getTitle());
+                        vo.setNotificationSummary(notification.getSummary());
                     }
 
                     // 设置发布者昵称
