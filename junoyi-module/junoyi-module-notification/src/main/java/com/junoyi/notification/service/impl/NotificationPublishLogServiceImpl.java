@@ -122,4 +122,13 @@ public class NotificationPublishLogServiceImpl implements INotificationPublishLo
 
         return PageResult.of(voList, result.getTotal(), (int) page.getCurrent(), (int) page.getSize());
     }
+
+    /**
+     * 记录通知发布
+     * @param notificationPublishLog 通知发布记录
+     */
+    @Override
+    public void recordNotificationPublishLog(NotificationPublishLog notificationPublishLog) {
+        notificationPublishLogMapper.insert(notificationPublishLog);
+    }
 }

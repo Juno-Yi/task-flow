@@ -20,4 +20,10 @@ public interface INotificationPublishLogService {
      * @return 返回列表
      */
     PageResult<NotificationPublishLogVO> getList(NotificationPublishLogQueryDTO queryDTO, Page<NotificationPublishLog> page);
+
+    /**
+     * 记录通知发布
+     * @param notificationPublishLog 通知发布记录
+     */
+    void recordNotificationPublishLog(NotificationPublishLog notificationPublishLog);
 }
