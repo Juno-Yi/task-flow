@@ -81,10 +81,6 @@ const {
 } = useTable({
   core: {
     apiFn: fetchGetNotificationPublishLogList,
-    apiParams: {
-      current: 1,
-      size: 20
-    },
     columnsFactory: () => [
       {
         prop: 'id',

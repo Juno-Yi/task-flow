@@ -17,6 +17,7 @@ public final class NotificationPublishLogConverter {
      */
     public static NotificationPublishLogVO toVO(NotificationPublishLog po){
         NotificationPublishLogVO notificationPublishLogVO = new NotificationPublishLogVO();
+        notificationPublishLogVO.setId(po.getId());
         notificationPublishLogVO.setNotificationId(po.getNotificationId());
         notificationPublishLogVO.setNotificationId(po.getNotificationId());
         notificationPublishLogVO.setPublishUserId(po.getPublishUserId());
