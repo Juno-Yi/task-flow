@@ -100,7 +100,7 @@ public class NotificationPublishLogServiceImpl implements INotificationPublishLo
                 .map(log -> {
                     NotificationPublishLogVO vo = NotificationPublishLogConverter.toVO(log);
 
-                    // 设置通知标题
+                    // 设置通知标题和摘要
                     Notification notification = notificationMap.get(log.getNotificationId());
                     if (notification != null) {
                         vo.setNotificationTitle(notification.getTitle());
