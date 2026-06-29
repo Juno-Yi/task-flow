@@ -14,7 +14,7 @@ import com.junoyi.notification.domain.po.NotificationUserState;
 import com.junoyi.notification.domain.vo.NotificationDetailVO;
 import com.junoyi.notification.domain.vo.NotificationListVO;
 import com.junoyi.notification.domain.vo.NotificationOptionVO;
-import com.junoyi.notification.event.NotificationPublishEvent;
+import com.junoyi.notification.event.NotificationPublishLogEvent;
 import com.junoyi.notification.mapper.NotificationMapper;
 import com.junoyi.notification.mapper.NotificationTargetMapper;
 import com.junoyi.notification.mapper.NotificationUserStateMapper;
@@ -315,7 +315,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
             }
 
             // 触发通知发布记录事件
-            EventBus.get().callEvent(new NotificationPublishEvent(notification.getId(), SecurityUtils.getUserId()));
+            EventBus.get().callEvent(new NotificationPublishLogEvent(notification.getId(), SecurityUtils.getUserId()));
         }
     }
 
@@ -478,7 +478,7 @@ public class NotificationManageServiceImpl implements INotificationManageService
             }
 
             // 触发通知发布记录事件
-            EventBus.get().callEvent(new NotificationPublishEvent(notification.getId(), SecurityUtils.getUserId()));
+            EventBus.get().callEvent(new NotificationPublishLogEvent(notification.getId(), SecurityUtils.getUserId()));
         } else if (Integer.valueOf(1).equals(oldStatus)) {
             // 如果从发布改为草稿，删除所有用户通知状态
             notificationUserStateMapper.delete(
@@ -555,6 +555,6 @@ public class NotificationManageServiceImpl implements INotificationManageService
         }
 
         // 触发通知发布记录事件
-        EventBus.get().callEvent(new NotificationPublishEvent(notification.getId(), SecurityUtils.getUserId()));
+        EventBus.get().callEvent(new NotificationPublishLogEvent(notification.getId(), SecurityUtils.getUserId()));
     }
 }

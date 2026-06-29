@@ -4,15 +4,15 @@ import com.junoyi.framework.event.domain.BaseEvent;
 import lombok.Getter;
 
 /**
- * 消息通知发布事件
+ * 消息通知发布日志事件
  * <li>
- * 当消息通知发布时候，将触发该事件
+ * 当消息通知发布时候，将触发该事件，记录日志
  * </li>
  *
  * @author Fan
  */
 @Getter
-public class NotificationPublishEvent extends BaseEvent {
+public class NotificationPublishLogEvent extends BaseEvent {
 
     /**
      * 通知ID
@@ -29,7 +29,7 @@ public class NotificationPublishEvent extends BaseEvent {
      * @param notificationId 通知ID
      * @param publishUserId 发布通知的用户ID
      */
-    public NotificationPublishEvent(Long notificationId, Long publishUserId){
+    public NotificationPublishLogEvent(Long notificationId, Long publishUserId){
         this.notificationId = notificationId;
         this.publishUserId = publishUserId;
     }

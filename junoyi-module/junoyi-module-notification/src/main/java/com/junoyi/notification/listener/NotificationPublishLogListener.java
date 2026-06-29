@@ -7,20 +7,20 @@ import com.junoyi.framework.event.enums.EventPriority;
 import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
 import com.junoyi.notification.domain.po.NotificationPublishLog;
-import com.junoyi.notification.event.NotificationPublishEvent;
+import com.junoyi.notification.event.NotificationPublishLogEvent;
 import com.junoyi.notification.service.INotificationPublishLogService;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 通知发布时间监听器
+ * 通知发布日志事件监听器
  *
  * @author Fan
  */
 @EventListener
 @RequiredArgsConstructor
-public class NotificationPublishListener {
+public class NotificationPublishLogListener {
 
-    private final JunoYiLog log = JunoYiLogFactory.getLogger(NotificationPublishListener.class);
+    private final JunoYiLog log = JunoYiLogFactory.getLogger(NotificationPublishLogListener.class);
 
     private final INotificationPublishLogService notificationPublishLogService;
 
@@ -29,7 +29,7 @@ public class NotificationPublishListener {
      * @param event 通知发布时间
      */
     @EventHandler(priority = EventPriority.NORMAL, async = true)
-    public void onNotificationPublishEvent(NotificationPublishEvent event){
+    public void onNotificationPublishEvent(NotificationPublishLogEvent event){
         try {
             NotificationPublishLog notificationPublishLog = new NotificationPublishLog();
             notificationPublishLog.setNotificationId(event.getNotificationId());
