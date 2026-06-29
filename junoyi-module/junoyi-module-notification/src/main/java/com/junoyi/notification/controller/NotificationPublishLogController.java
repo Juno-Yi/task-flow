@@ -35,9 +35,8 @@ public class NotificationPublishLogController extends BaseController {
             value = "notification.ui.publish-log.view"
     )
     public R<PageResult<NotificationPublishLogVO>> getList(NotificationPublishLogQueryDTO queryDTO){
-        return R.ok();
+        return R.ok(notificationPublishLogService.getList(queryDTO,buildPage()));
     }
-
 
 
 }
