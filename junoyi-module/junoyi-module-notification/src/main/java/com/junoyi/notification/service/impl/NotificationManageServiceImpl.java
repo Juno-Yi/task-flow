@@ -12,6 +12,7 @@ import com.junoyi.notification.domain.po.NotificationTarget;
 import com.junoyi.notification.domain.po.NotificationUserState;
 import com.junoyi.notification.domain.vo.NotificationDetailVO;
 import com.junoyi.notification.domain.vo.NotificationListVO;
+import com.junoyi.notification.domain.vo.NotificationOptionVO;
 import com.junoyi.notification.mapper.NotificationMapper;
 import com.junoyi.notification.mapper.NotificationTargetMapper;
 import com.junoyi.notification.mapper.NotificationUserStateMapper;
@@ -129,6 +130,28 @@ public class NotificationManageServiceImpl implements INotificationManageService
         List<SysDictDataVO> dictList = sysDictApi.getDictDataByType(dictType);
         return dictList.stream()
                 .collect(Collectors.toMap(SysDictDataVO::getDictValue, dict -> dict, (v1, v2) -> v1));
+    }
+
+    /**
+     * 获取通知下拉列表
+     * @return 通知下拉列表
+     */
+    @Override
+    public List<NotificationOptionVO> getNotificationOptions() {
+        // 仅查询下拉所需字段，按发布时间倒序（未发布的排在后面）
+        LambdaQueryWrapper<Notification> wrapper = new LambdaQueryWrapper<Notification>()
+                .select(Notification::getId, Notification::getTitle)
+                .orderByDesc(Notification::getPublishTime)
+                .orderByDesc(Notification::getId);
+
+        return notificationMapper.selectList(wrapper).stream()
+                .map(notification -> {
+                    NotificationOptionVO vo = new NotificationOptionVO();
+                    vo.setId(notification.getId());
+                    vo.setTitle(notification.getTitle());
+                    return vo;
+                })
+                .collect(Collectors.toList());
     }
 
     /**

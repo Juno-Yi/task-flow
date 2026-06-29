@@ -9,9 +9,12 @@ import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.notification.domain.dto.NotificationDTO;
 import com.junoyi.notification.domain.vo.NotificationDetailVO;
 import com.junoyi.notification.domain.vo.NotificationListVO;
+import com.junoyi.notification.domain.vo.NotificationOptionVO;
 import com.junoyi.notification.service.INotificationManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 通知管理控制器
@@ -35,6 +38,15 @@ public class NotificationManageController extends BaseController {
     )
     public R<PageResult<NotificationListVO>> getList(){
         return R.ok(notificationManagerService.getNotificationList(buildPage()));
+    }
+
+    /**
+     * 获取通知下拉列表
+     */
+    @GetMapping("/options")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    public R<List<NotificationOptionVO>> getOptions(){
+        return R.ok(notificationManagerService.getNotificationOptions());
     }
 
     /**
