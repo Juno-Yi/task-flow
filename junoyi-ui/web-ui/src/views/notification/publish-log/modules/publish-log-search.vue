@@ -12,6 +12,7 @@
 
 <script setup lang="ts">
 import { fetchGetUserOptions } from '@/api/system/user'
+import { fetchGetNotificationOptions } from '@/api/notification/manage'
 
 interface Props {
   modelValue: Record<string, any>
@@ -33,11 +34,15 @@ const formData = computed({
   set: val => emit('update:modelValue', val)
 })
 
-const notificationOptions = ref([
-  { label: '系统维护通知', value: 1 },
-  { label: '版本更新通知', value: 2 },
-  { label: '重要公告', value: 3 }
-])
+const notificationOptions = ref<{ label: string; value: number }[]>([])
+
+const loadNotificationOptions = async () => {
+  const res = await fetchGetNotificationOptions()
+  notificationOptions.value = (res || []).map((item: Api.Notification.NotificationOptionVO) => ({
+    label: item.title,
+    value: item.id
+  }))
+}
 
 const userOptions = ref<{ label: string; value: number }[]>([])
 const userLoading = ref(false)
@@ -62,6 +67,7 @@ const handleUserRemoteSearch = (keyword: string) => {
 }
 
 onMounted(() => {
+  loadNotificationOptions()
   loadUserOptions()
 })
 
