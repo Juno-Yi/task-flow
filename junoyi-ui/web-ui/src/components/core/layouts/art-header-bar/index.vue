@@ -105,14 +105,18 @@
         </ElDropdown>
 
         <!-- 通知按钮 -->
-        <ArtIconButton
+        <ElBadge
           v-if="shouldShowNotification"
-          icon="ri:notification-2-line"
-          class="notice-button relative"
-          @click="visibleNotice"
+          :value="unreadCount"
+          :max="99"
+          :hidden="unreadCount === 0"
         >
-          <div class="absolute top-2 right-2 size-1.5 !bg-danger rounded-full"></div>
-        </ArtIconButton>
+          <ArtIconButton
+            icon="ri:notification-2-line"
+            class="notice-button"
+            @click="visibleNotice"
+          />
+        </ElBadge>
 
         <!-- 聊天按钮 -->
         <ArtIconButton
@@ -191,6 +195,9 @@
   const settingStore = useSettingStore()
   const userStore = useUserStore()
   const menuStore = useMenuStore()
+
+  // 未读通知数量
+  const unreadCount = computed(() => userStore.unreadNotificationCount)
 
   // 顶部栏功能配置
   const {

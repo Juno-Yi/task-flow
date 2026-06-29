@@ -31,3 +31,12 @@ export function fetchMarkAllAsRead() {
         url: '/notification/my-notification/mark-all-read'
     })
 }
+
+/**
+ * 获取用户未读通知数量
+ */
+export function fetchMyNotificationUnreadCount(){
+    return request.get<Api.Notification.MyNotificationUnreadCountVO>({
+        url: '/notification/my-notification/unread-count'
+    })
+}

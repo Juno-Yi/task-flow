@@ -1,5 +1,6 @@
 import { nextTick } from 'vue'
 import { useSettingStore } from '@/store/modules/setting'
+import { useUserStore } from '@/store/modules/user'
 import { Router } from 'vue-router'
 import NProgress from 'nprogress'
 import { useCommon } from '@/hooks/core/useCommon'
@@ -29,6 +30,12 @@ export function setupAfterEachGuard(router: Router) {
         loadingService.hideLoading()
         resetPendingLoading()
       })
+    }
+
+    // 获取未读通知数量
+    const userStore = useUserStore()
+    if (userStore.isLogin) {
+      userStore.fetchUnreadNotificationCount()
     }
   })
 }

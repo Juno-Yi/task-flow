@@ -43,6 +43,7 @@ import { resetRouterState } from '@/router/guards/beforeEach'
 import { useMenuStore } from './menu'
 import { StorageConfig } from '@/utils/storage/storage-config'
 import { fetchLogout } from '@/api/auth'
+import { fetchMyNotificationUnreadCount } from '@/api/notification/notice'
 
 /**
  * 用户状态管理
@@ -67,6 +68,8 @@ export const useUserStore = defineStore(
     const accessToken = ref('')
     // 刷新令牌
     const refreshToken = ref('')
+    // 未读通知数量
+    const unreadNotificationCount = ref(0)
 
     // 计算属性：获取用户信息
     const getUserInfo = computed(() => info.value)
@@ -137,6 +140,26 @@ export const useUserStore = defineStore(
     }
 
     /**
+     * 获取未读通知数量
+     */
+    const fetchUnreadNotificationCount = async () => {
+      try {
+        const res = await fetchMyNotificationUnreadCount()
+        unreadNotificationCount.value = res.count || 0
+      } catch (error) {
+        console.error('[User] 获取未读通知数量失败:', error)
+      }
+    }
+
+    /**
+     * 设置未读通知数量
+     * @param count 未读数量
+     */
+    const setUnreadNotificationCount = (count: number) => {
+      unreadNotificationCount.value = count
+    }
+
+    /**
      * 退出登录
      * 清空所有用户相关状态并跳转到登录页
      * 如果是同一账号重新登录，保留工作台标签页
@@ -170,6 +193,8 @@ export const useUserStore = defineStore(
       accessToken.value = ''
       // 清空刷新令牌
       refreshToken.value = ''
+      // 清空未读通知数量
+      unreadNotificationCount.value = 0
       // 注意：不清空工作台标签页，等下次登录时根据用户判断
       // 移除iframe路由缓存
       sessionStorage.removeItem('iframeRoutes')
@@ -223,6 +248,7 @@ export const useUserStore = defineStore(
       searchHistory,
       accessToken,
       refreshToken,
+      unreadNotificationCount,
       getUserInfo,
       getSettingState,
       getWorktabState,
@@ -233,6 +259,8 @@ export const useUserStore = defineStore(
       setLockStatus,
       setLockPassword,
       setToken,
+      fetchUnreadNotificationCount,
+      setUnreadNotificationCount,
       logOut,
       checkAndClearWorktabs
     }

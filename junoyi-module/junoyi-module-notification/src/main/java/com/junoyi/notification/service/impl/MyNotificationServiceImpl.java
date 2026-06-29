@@ -248,4 +248,16 @@ public class MyNotificationServiceImpl implements IMyNotificationService {
 
         return unreadStates.size();
     }
+
+    /**
+     * 获取用户未读数量
+     */
+    @Override
+    public Long getUnreadCount(Long userId) {
+        return notificationUserStateMapper.selectCount(
+                new LambdaQueryWrapper<NotificationUserState>()
+                        .eq(NotificationUserState::getUserId, userId)
+                        .eq(NotificationUserState::getIsRead, false)
+        );
+    }
 }

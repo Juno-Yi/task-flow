@@ -32,4 +32,11 @@ declare namespace Api.Notification {
         publishedBy: string
         publishedAt: string
     }
+
+    /**
+     * 用户未读通知数量
+     */
+    interface MyNotificationUnreadCountVO {
+        count: number
+    }
 }
